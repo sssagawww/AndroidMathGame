@@ -53,7 +53,7 @@ public class Player2 extends B2DSprite {
             setDir(LEFT);
             velx = -1;
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+        if (Gdx.input.justTouched()) {
             setDir(UP);
             vely = 1;
         }

@@ -1,5 +1,5 @@
 package com.mygdx.game.inputs;
-
+//------------------not used----------------------------
 public class GameKeys {
     public static boolean[] keys;
     public static boolean[] pkeys;
