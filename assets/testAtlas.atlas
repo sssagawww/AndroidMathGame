@@ -1,0 +1,42 @@
+
+testAtlas.png
+size: 1024, 512
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+GUI_img
+  rotate: false
+  xy: 2, 2
+  size: 768, 352
+  split: 0, 0, 0, 0
+  pad: 0, 0, 0, 0
+  orig: 768, 352
+  offset: 0, 0
+  index: -1
+background
+rotate: false
+  xy: 34, 34
+  size: 96, 96
+  split: 0, 0, 0, 0
+  pad: 0, 0, 0, 0
+  orig: 768, 352
+  offset: 0, 0
+  index: -1
+background2
+rotate: false
+  xy: 226, 34
+  size: 96, 96
+  split: 0, 0, 0, 0
+  pad: 0, 0, 0, 0
+  orig: 768, 352
+  offset: 0, 0
+  index: -1
+status
+rotate: false
+  xy: 482, 172
+  size: 32, 12
+  split: 0, 0, 0, 0
+  pad: 0, 0, 0, 0
+  orig: 768, 352
+  offset: 0, 0
+  index: -1
