@@ -41,7 +41,7 @@ public class Player2 extends B2DSprite {
         checkController();
     }
 
-    //новый метод с анимацией гнома для клавиатуры
+    //новый метод с анимацией гнома для клавиатуры (наверное, не самый оптимальный способ)
     private void check() {
         velx = 0;
         vely = 0;
@@ -105,6 +105,7 @@ public class Player2 extends B2DSprite {
         body.setLinearVelocity(velx * speed, vely * speed);
     }
 
+    //для андроида
     private void checkController() {
         velx = 0;
         vely = 0;
@@ -190,104 +191,6 @@ public class Player2 extends B2DSprite {
             setAnimation(sprites, 1 / 6f);
         }
         body.setLinearVelocity(velx * speed, vely * speed);
-    }
-
-    // для клавиатуры
-    private void checkUserInput() {
-        velx = 0;
-        vely = 0;
-        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-            setDir(RIGHT);
-            velx = 1;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            setDir(LEFT);
-            velx = -1;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-            setDir(UP);
-            vely = 1;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-            setDir(DOWN);
-            vely = -1;
-        }
-        body.setLinearVelocity(velx * speed, vely * speed);
-
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ANY_KEY)) {
-            checkAnim();
-            System.out.println(dir + " direction");
-        } else {
-            if (!move) {
-                System.out.println("MOVE TRUE");
-                setDir(IDLE);
-                checkAnim();
-                move = false;
-            }
-        }
-    }
-
-    // для андроида
-    private void checkControllerInput() {
-        velx = 0;
-        vely = 0;
-        if (controller.isRightPressed()) {
-            setDir(RIGHT);
-            velx = 1;
-        }
-        if (controller.isLeftPressed()) {
-            setDir(LEFT);
-            velx = -1;
-        }
-        if (controller.isUpPressed()) {
-            setDir(UP);
-            vely = 1;
-        }
-        if (controller.isDownPressed()) {
-            setDir(DOWN);
-            vely = -1;
-        }
-        if (controller.isUpRightPressed()) {
-            velx = 1;
-            vely = 1;
-        }
-        if (controller.isUpLeftPressed()) {
-            velx = -1;
-            vely = 1;
-        }
-        if (controller.isDownRightPressed()) {
-            velx = 1;
-            vely = -1;
-        }
-        if (controller.isDownLeftPressed()) {
-            vely = -1;
-            velx = -1;
-        }
-        body.setLinearVelocity(velx * speed, vely * speed);
-    }
-
-    //не используется, т.к криво работает
-    private void checkAnim() {
-        switch (dir) {
-            case RIGHT:
-                sprites = TextureRegion.split(tex, 80, 86)[3];
-                break;
-            case LEFT:
-                sprites = TextureRegion.split(tex, 80, 86)[1];
-                break;
-            case UP:
-                sprites = TextureRegion.split(tex, 80, 88)[2];
-                break;
-            case DOWN:
-                sprites = TextureRegion.split(tex, 80, 88)[0];
-                break;
-            case IDLE:
-                sprites = TextureRegion.split(tex2, 110, 130)[0];
-                break;
-            default:
-                return;
-        }
-        setAnimation(sprites, 1 / 12f);
     }
 
     public void setDir(int dir) {
