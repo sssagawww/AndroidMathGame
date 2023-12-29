@@ -19,8 +19,7 @@ public class DialogBox extends Table {
 
     private enum STATE {
         ANIMATING,
-        IDLE,
-        ;
+        IDLE
     }
 
     public DialogBox(Skin skin) {
@@ -55,6 +54,7 @@ public class DialogBox extends Table {
         this.textLabel.setText(text);
     }
 
+    //анимация вывода текста по буквам
     @Override
     public void act(float delta) {
         if (state == STATE.ANIMATING) {

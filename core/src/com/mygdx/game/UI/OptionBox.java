@@ -20,14 +20,15 @@ public class OptionBox extends Table {
 
     private Table uiTable;
 
-    public OptionBox(Skin skin){
+    public OptionBox(Skin skin) {
         super(skin);
         this.setBackground("optionbox");
         uiTable = new Table();
         this.add(uiTable).pad(10f);
     }
 
-    public void addOption(String option){
+    //добавляет вариант ответа
+    public void addOption(String option) {
         BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
         Label.LabelStyle lstyle = new Label.LabelStyle(font, Color.BLACK);
         Label optionLabel = new Label(option, lstyle);
@@ -44,9 +45,10 @@ public class OptionBox extends Table {
         arrowsVisibility();
     }
 
+    //делает видимой стрелку, если она на каком-то варианте ответа
     private void arrowsVisibility() {
-        for(int i = 0; i < arrows.size(); i++){
-            if(i == selectedIndex){
+        for (int i = 0; i < arrows.size(); i++) {
+            if (i == selectedIndex) {
                 arrows.get(i).setVisible(true);
             } else {
                 arrows.get(i).setVisible(false);
@@ -54,27 +56,28 @@ public class OptionBox extends Table {
         }
     }
 
-    public void moveDown(){
+    //move - двигает стрелку
+    public void moveDown() {
         selectedIndex++;
-        if (selectedIndex >= options.size()){
-            selectedIndex = options.size()-1;
+        if (selectedIndex >= options.size()) {
+            selectedIndex = options.size() - 1;
         }
         arrowsVisibility();
     }
 
-    public void moveUp(){
+    public void moveUp() {
         selectedIndex--;
-        if (selectedIndex < 0){
+        if (selectedIndex < 0) {
             selectedIndex = 0;
         }
         arrowsVisibility();
     }
 
-    public int getID(){
+    public int getID() {
         return selectedIndex;
     }
 
-    public void clearChoices(){
+    public void clearChoices() {
         uiTable.clearChildren();
         arrows.clear();
         options.clear();

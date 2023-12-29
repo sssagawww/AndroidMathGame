@@ -5,37 +5,19 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.mygdx.game.Dialog.Dialog;
-import com.mygdx.game.Dialog.DialogController;
-import com.mygdx.game.Dialog.DialogNode;
-import com.mygdx.game.Dialog.OptionBoxController;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.UI.*;
-import com.mygdx.game.battle.Battle;
-import com.mygdx.game.battle.events.BattleEvent;
-import com.mygdx.game.battle.render_controller.BattleRenderer;
-import com.mygdx.game.battle.render_controller.BattleScreenController;
-import com.mygdx.game.entities.Boss;
 import com.mygdx.game.handlers.GameStateManager;
-import com.mygdx.game.handlers.MyContactListener;
-
-import java.util.ArrayDeque;
-import java.util.Queue;
-
-import static com.mygdx.game.handlers.B2DVars.PPM;
+import static com.mygdx.game.MyGdxGame.V_HEIGHT;
+import static com.mygdx.game.MyGdxGame.V_WIDTH;
 import static com.mygdx.game.handlers.GameStateManager.*;
 
 public class Menu2 extends GameState{
@@ -51,7 +33,7 @@ public class Menu2 extends GameState{
     private Table root;
     private Stage uiStage;
     private MenuOptionBox optionBox;
-    private MenuBtn2 btn;
+    //private MenuBtn2 btn;
     private BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
     // END UI
     public Menu2(GameStateManager gsm) {
@@ -59,7 +41,7 @@ public class Menu2 extends GameState{
         game = gsm.game();
         play = gsm.getPlay();
         multiplexer = new InputMultiplexer();
-        cam.setBounds(0, 4864, 0, 2688);
+        cam.setBounds(0, V_WIDTH, 0, V_HEIGHT); //? //4864 2688
 
         init();
         createLayers();
@@ -76,7 +58,7 @@ public class Menu2 extends GameState{
 
     private void init(){
         uiStage = new Stage(new ScreenViewport());
-        uiStage.getViewport().update(1215, 675, true);
+        uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
 
         root = new Table();
         root.setFillParent(true);
@@ -102,6 +84,7 @@ public class Menu2 extends GameState{
 
     @Override
     public void handleInput() {
+
     }
 
     @Override

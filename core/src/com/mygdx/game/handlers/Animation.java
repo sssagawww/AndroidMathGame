@@ -1,6 +1,5 @@
 package com.mygdx.game.handlers;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class Animation {
@@ -10,15 +9,13 @@ public class Animation {
     private int currentFrame;
     private int timesPlayed;
 
-    public Animation(){
+    public Animation() {}
 
+    public Animation(TextureRegion[] frames) {
+        this(frames, 1 / 12);
     }
 
-    public Animation(TextureRegion[] frames){
-        this(frames, 1/12);
-    }
-
-    public Animation(TextureRegion[] frames, float delay){
+    public Animation(TextureRegion[] frames, float delay) {
         setFrames(frames, delay);
     }
 
@@ -30,12 +27,12 @@ public class Animation {
         timesPlayed = 0;
     }
 
-    public void update(float dt){
+    public void update(float dt) {
         if (delay <= 0) {
             return;
         }
-        time+=dt;
-        while (time >= delay){
+        time += dt;
+        while (time >= delay) {
             step();
         }
     }
@@ -49,6 +46,7 @@ public class Animation {
         }
     }
 
+    //reverse step
     /*private void unStep() {
         System.out.println("unstep");
         time -= delay;
@@ -59,10 +57,11 @@ public class Animation {
         }
     }*/
 
-    public TextureRegion getFrames() {
+    public TextureRegion getFrame() {
         return frames[currentFrame];
     }
-    public int getTimesPlayed(){
+
+    public int getTimesPlayed() {
         return timesPlayed;
     }
 }

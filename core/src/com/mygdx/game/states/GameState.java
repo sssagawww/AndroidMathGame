@@ -12,14 +12,12 @@ public abstract class GameState {
     protected MyGdxGame game;
     protected SpriteBatch sb;
     protected BoundedCamera cam;
-    protected OrthographicCamera hudCam;
 
     public GameState(GameStateManager gsm) {
         this.gsm = gsm;
         game = gsm.game();
         sb = game.getSb();
         cam = game.getCam();
-        hudCam = game.getHudcam();
     }
     public abstract void handleInput();
     public abstract void update(float dt);

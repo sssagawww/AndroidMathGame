@@ -2,7 +2,6 @@ package com.mygdx.game.battle.events;
 
 import com.badlogic.gdx.math.Interpolation;
 import com.mygdx.game.UI.HP_Bar;
-import com.mygdx.game.UI.PlayerStatusBox;
 import com.mygdx.game.UI.StatusBox;
 import com.mygdx.game.battle.ENTITY_LIST;
 

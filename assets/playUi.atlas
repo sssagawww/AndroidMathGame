@@ -1,0 +1,69 @@
+
+playUi.png
+size: 74, 38
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+downBtn
+  rotate: false
+  xy: 20, 2
+  size: 14, 16
+  orig: 16, 16
+  offset: 1, 0
+  index: -1
+downLeftBtn
+  rotate: false
+  xy: 49, 20
+  size: 11, 16
+  orig: 16, 16
+  offset: 4, 0
+  index: -1
+downRightBtn
+  rotate: false
+  xy: 49, 2
+  size: 11, 16
+  orig: 16, 16
+  offset: 1, 0
+  index: -1
+interactBtn
+  rotate: false
+  xy: 62, 20
+  size: 10, 16
+  orig: 16, 16
+  offset: 3, 0
+  index: -1
+leftBtn
+  rotate: false
+  xy: 2, 2
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+rightBtn
+  rotate: false
+  xy: 2, 20
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+upBtn
+  rotate: false
+  xy: 20, 20
+  size: 14, 16
+  orig: 16, 16
+  offset: 1, 0
+  index: -1
+upLeftBtn
+  rotate: false
+  xy: 36, 2
+  size: 11, 16
+  orig: 16, 16
+  offset: 4, 0
+  index: -1
+upRightBtn
+  rotate: false
+  xy: 36, 20
+  size: 11, 16
+  orig: 16, 16
+  offset: 1, 0
+  index: -1

@@ -15,14 +15,12 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.mygdx.game.Dialog.*;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.UI.*;
 import com.mygdx.game.battle.Battle;
 import com.mygdx.game.battle.ENTITY_LIST;
 import com.mygdx.game.battle.events.BattleEvent;
 import com.mygdx.game.battle.events.BattleEventPlayer;
-import com.mygdx.game.battle.render_controller.BattleRenderer;
 import com.mygdx.game.battle.render_controller.BattleScreenController;
 import com.mygdx.game.entities.BattleEntity;
 import com.mygdx.game.entities.Boss;
@@ -32,6 +30,8 @@ import com.mygdx.game.handlers.MyContactListener;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
+import static com.mygdx.game.MyGdxGame.V_HEIGHT;
+import static com.mygdx.game.MyGdxGame.V_WIDTH;
 import static com.mygdx.game.handlers.B2DVars.*;
 
 public class BattleState2 extends GameState implements BattleEventPlayer {
@@ -59,7 +59,6 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
     private BattleEvent currentEvent;
     private Queue<BattleEvent> queue = new ArrayDeque<BattleEvent>();
     private Battle battle;
-    private BattleRenderer battleRenderer;
     private Boss boss;
     private Texture tex;
     private Texture texEnemy;
@@ -71,7 +70,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
         cl = new MyContactListener(gsm);
         world.setContactListener(cl);
         game = gsm.game();
-        multiplexer = new InputMultiplexer(); //не нужен(?)
+        multiplexer = new InputMultiplexer(); //не нужен(?), пока нет процессов, обработчиков событий
 
         music = Gdx.audio.newMusic(Gdx.files.internal("battleTheme.mp3"));
         music.setVolume(0.9f);
@@ -163,7 +162,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
 
     private void initUI() {
         uiStage = new Stage(new ScreenViewport());
-        uiStage.getViewport().update(1215, 672, true);
+        uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
 
         dialogRoot = new Table();
         dialogRoot.setFillParent(true);
@@ -232,9 +231,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
     }
 
     @Override
-    public void dispose() {
-
-    }
+    public void dispose() {}
 
     @Override
     public DialogBox getDialogBox() {

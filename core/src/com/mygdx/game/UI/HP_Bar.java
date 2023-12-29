@@ -38,7 +38,8 @@ public class HP_Bar extends Widget {
 
         float hpWidth = hpAmount * (hp_bar.getMinWidth()-padLeft-padRight);
 
-        Drawable hpColor = null;
+        //проверяет какой цвет хп рисовать
+        Drawable hpColor;
         if(hpAmount <= 0.2){
             hpColor = red;
         } else if (hpAmount <= 0.5) {
@@ -47,12 +48,10 @@ public class HP_Bar extends Widget {
             hpColor = green;
         }
 
+        //супер выравнивание объектов
         hp_left.draw(batch, this.getX(), this.getY(), hp_left.getMinWidth()*4, hp_left.getMinHeight()*4);
-
         background_hpbar.draw(batch, this.getX()+hp_left.getMinWidth()*4+padLeft, this.getY()+padBottom, hp_bar.getMinWidth()*4-padRight-padLeft*4, hp_bar.getMinHeight()*4-padTop-padBottom*4);
-
         hpColor.draw(batch, this.getX()+hp_left.getMinWidth()*4+padLeft, this.getY()+padBottom, hpWidth*4, (hp_bar.getMinHeight()-padTop-padBottom)*4);
-
         hp_bar.draw(batch, this.getX()+hp_left.getMinWidth()*4, this.getY(), hp_bar.getMinWidth()*4, hp_bar.getMinHeight()*4);
 
         /*hp_left.draw(batch, this.getX(), this.getY(), hp_left.getMinWidth(), hp_left.getMinHeight());
@@ -76,6 +75,6 @@ public class HP_Bar extends Widget {
 
     public void displayHPLeft(float hp) {
         this.hpAmount = hp;
-        hpAmount = MathUtils.clamp(hpAmount, 0f, 1f);
+        hpAmount = MathUtils.clamp(hpAmount, 0f, 1f); //clamp - значение не выйдет за пределы
     }
 }

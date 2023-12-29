@@ -7,7 +7,6 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
-import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
@@ -22,27 +21,24 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.Dialog.*;
 import com.mygdx.game.Dialog.Dialog;
 import com.mygdx.game.MyGdxGame;
+import com.mygdx.game.UI.Controller;
 import com.mygdx.game.UI.DialogBox;
 import com.mygdx.game.UI.OptionBox;
 import com.mygdx.game.data.DataStorage;
 import com.mygdx.game.data.SaveLoad;
 import com.mygdx.game.entities.Boss;
-import com.mygdx.game.entities.Player;
 import com.mygdx.game.entities.Player2;
-import com.mygdx.game.handlers.B2DVars;
 import com.mygdx.game.handlers.BoundedCamera;
 import com.mygdx.game.handlers.MyContactListener;
 import com.mygdx.game.handlers.GameStateManager;
 
-import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
-
+import static com.mygdx.game.MyGdxGame.V_HEIGHT;
+import static com.mygdx.game.MyGdxGame.V_WIDTH;
 import static com.mygdx.game.handlers.B2DVars.*;
 import static com.mygdx.game.handlers.GameStateManager.BATTLE;
 import static com.mygdx.game.handlers.GameStateManager.MENU;
 
-public class Play extends GameState{ //implements StateMethods
+public class Play extends GameState {
     private MyGdxGame game;
     private boolean debug = false;
     private World world;
@@ -57,6 +53,7 @@ public class Play extends GameState{ //implements StateMethods
     private int tileMapWidth;
     private int tileMapHeight;
     private Stage uiStage;
+    private Stage controllerStage;
     private Table dialogRoot;
     private DialogBox dialogueBox;
     private OptionBox optionBox;
@@ -67,9 +64,11 @@ public class Play extends GameState{ //implements StateMethods
     private DialogController dcontroller;
     private Music music;
     public SaveLoad saveLoad;
-    public boolean canDraw = false;
+    public boolean canDraw;
     public boolean savePlay;
     public BodyDef bdef;
+    private Controller controller;
+    private boolean isStopped;
 
     public Play(GameStateManager gsm) {
         super(gsm);
@@ -77,26 +76,27 @@ public class Play extends GameState{ //implements StateMethods
         b2dr = new Box2DDebugRenderer();
         game = gsm.game();
         multiplexer = new InputMultiplexer();
-        cl = new MyContactListener(gsm);
+        cl = new MyContactListener(gsm); //детектит коллизию
         world.setContactListener(cl);
         music = Gdx.audio.newMusic(Gdx.files.internal("song.wav"));
         saveLoad = new SaveLoad(this);
-
         savePlay = game.save;
+        skin_this = game.getSkin();
 
         //initUI();
+        initController();
         createPlayer();
         createTiles();
         createNPC();
-        //createMusic();
+        //createMusic(); //отключено, чтобы не мешало при дебаггинге
 
         initFight();
-        /*была часть из initUI()*/
 
         cam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
-        b2dCam = new BoundedCamera();
-        b2dCam.setToOrtho(false, MyGdxGame.V_WIDTH / PPM, MyGdxGame.V_HEIGHT / PPM); // /2?
+        b2dCam = new BoundedCamera(); //рисует дебаг коллизию?
+        b2dCam.setToOrtho(false, V_WIDTH / PPM, V_HEIGHT / PPM); // /2?
         b2dCam.setBounds(0, (tileMapWidth * tileSize) / PPM, 0, (tileMapHeight * tileSize) / PPM);
+        System.out.println("V_HEIGHT: " + MyGdxGame.V_HEIGHT + " player: " + player.getPosition().x + " " + player.getPosition().y);
     }
 
     @Override
@@ -108,23 +108,38 @@ public class Play extends GameState{ //implements StateMethods
     public void update(float dt) {
         handleInput();
         world.step(dt, 6, 2);
+        controllerStage.act(dt);
         player.update(dt);
         boss.update(dt);
         player.updatePL();
 
-        if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
+        //нужно обновление размера экрана, и тогда будет resize всех компонентов
+
+        //если этот state был выгружен, то при запуске все процессы должны возобновиться (удаляются ли они в multiplexer при выгрузке или просто останавливаются?)
+        if (isStopped) {
+            isStopped = false;
+            multiplexer.addProcessor(controllerStage);
+            Gdx.input.setInputProcessor(multiplexer);
+        }
+
+        if (controller.isMenuPressed()) {
             gsm.setState(MENU);
         }
+
+        //сохраняет по кнопке позицию
         if (Gdx.input.isKeyPressed(Input.Keys.R)) {
             //savePlay = true;
             saveLoad.save();
             System.out.println("player pos x-y " + player.getPosition().x + " " + player.getPosition().y);
         }
+
+        //может начать бой
         if (canDraw) {
             uiStage.act(dt);
-            if(Gdx.input.isKeyPressed(Input.Keys.X) && dialogueBox.isFinished()){
+            if (controller.isInteractPressed() && dialogueBox.isFinished()) {
                 gsm.setState(BATTLE);
                 music.dispose();
+                isStopped = true;
                 canDraw = false;
             }
         }
@@ -133,9 +148,9 @@ public class Play extends GameState{ //implements StateMethods
 
     @Override
     public void render() {
-        Gdx.gl20.glClearColor(0,0,0,1);
+        Gdx.gl20.glClearColor(0, 0, 0, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        cam.setPosition(player.getPosition().x * PPM + MyGdxGame.V_WIDTH /35, player.getPosition().y * PPM + MyGdxGame.V_HEIGHT /35);
+        cam.setPosition(player.getPosition().x * PPM + V_WIDTH / 35, player.getPosition().y * PPM + V_HEIGHT / 35);
         //cam.position.set(player.getPosition().x * PPM / 2, player.getPosition().y * PPM / 2, 0);
         cam.update();
 
@@ -144,24 +159,25 @@ public class Play extends GameState{ //implements StateMethods
         tmr.render();
 
         //draw player and npc
-        sb.setProjectionMatrix(cam.combined);
+        sb.setProjectionMatrix(cam.combined); //https://stackoverflow.com/questions/33703663/understanding-the-libgdx-projection-matrix - объяснение
         player.render(sb);
         boss.render(sb);
 
         //draw box?     ---need fix?---
         if (debug) {
-            b2dCam.setPosition(player.getPosition().x * PPM + MyGdxGame.V_WIDTH /35, player.getPosition().y * PPM + MyGdxGame.V_HEIGHT /35);
+            b2dCam.position.set(player.getPosition().x, player.getPosition().y, 0);
             b2dCam.update();
             b2dr.render(world, b2dCam.combined);
         }
-        if(canDraw) {
+
+        //draw initFight() if battle begin
+        if (canDraw) {
             uiStage.draw();
         }
+
+        controllerStage.draw();
     }
 
-    @Override
-    public void dispose() {
-    }
     private void createPlayer() {
         bdef = new BodyDef();
         PolygonShape ps = new PolygonShape();
@@ -170,8 +186,8 @@ public class Play extends GameState{ //implements StateMethods
         saveLoad.load();
         DataStorage ds = saveLoad.getDs();
 
-        if(savePlay){
-            bdef.position.set(ds.playerPosX);
+        if (savePlay) {
+            bdef.position.set(ds.playerPos);
             System.out.println("load position");
         } else {
             bdef.position.set(607f / PPM, 337f / PPM);
@@ -196,6 +212,7 @@ public class Play extends GameState{ //implements StateMethods
         body.createFixture(fdef).setUserData("foot");*/
 
         player = new Player2(body);
+        player.setPlay(this);
         body.setUserData(player);
     }
 
@@ -213,7 +230,7 @@ public class Play extends GameState{ //implements StateMethods
         //layer = (TiledMapTileLayer) tiledMap.getLayers().get("grass");
     }
 
-    private void createLayer(TiledMapTileLayer layer, short bits){
+    private void createLayer(TiledMapTileLayer layer, short bits) {
         BodyDef bdef = new BodyDef();
         FixtureDef fdef = new FixtureDef();
 
@@ -233,9 +250,9 @@ public class Play extends GameState{ //implements StateMethods
                         (row + 0.4f) * tileSize / 2.5f);
                 ChainShape cs = new ChainShape();
                 Vector2[] v = new Vector2[3];
-                v[0] = new Vector2(-tileSize / 6 , -tileSize /6);
-                v[1] = new Vector2(-tileSize / 6 , tileSize / 6);
-                v[2] = new Vector2( tileSize / 6 , tileSize / 6);
+                v[0] = new Vector2(-tileSize / 6, -tileSize / 6);
+                v[1] = new Vector2(-tileSize / 6, tileSize / 6);
+                v[2] = new Vector2(tileSize / 6, tileSize / 6);
                 cs.createChain(v);
                 fdef.friction = 0;
                 fdef.shape = cs;
@@ -250,9 +267,9 @@ public class Play extends GameState{ //implements StateMethods
 
     private void createNPC() {
         MapLayer mlayer = tiledMap.getLayers().get("npcLayer");
-        if(mlayer == null) return;
+        if (mlayer == null) return;
 
-        for(MapObject mo : mlayer.getObjects()) {
+        for (MapObject mo : mlayer.getObjects()) {
             BodyDef bdef = new BodyDef();
             bdef.type = BodyDef.BodyType.StaticBody;
             float x = (float) mo.getProperties().get("x") / PPM * 4;
@@ -275,17 +292,17 @@ public class Play extends GameState{ //implements StateMethods
         }
     }
 
-    private void createMusic(){
+    private void createMusic() {
         music.setVolume(0.9f);
         music.setLooping(true);
         music.play();
         //music.dispose();
     }
 
-    private void initFight(){
+    private void initFight() {
         skin_this = game.getSkin();
         uiStage = new Stage(new ScreenViewport());
-        uiStage.getViewport().update(1215, 675, true);
+        uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
 
         dialogRoot = new Table();
         dialogRoot.setFillParent(true);
@@ -316,10 +333,27 @@ public class Play extends GameState{ //implements StateMethods
         dcontroller.startDialog(dialog);
     }
 
-    private void initUI(){
+    private void initController() {
+        controllerStage = new Stage(new ScreenViewport());
+        controllerStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+
+        controller = new Controller(skin_this);
+        controller.setVisible(true);
+
+        Table controllerRoot = new Table();
+        controllerRoot.setFillParent(true);
+        controllerRoot.add(controller).expand().align(Align.bottomLeft);
+        controllerStage.addActor(controllerRoot);
+
+        multiplexer.addProcessor(controllerStage);
+        Gdx.input.setInputProcessor(multiplexer);
+    }
+
+    //был тестовый метод, чтобы понять работает ли диалог, можно использовать в других местах
+    private void initUI() {
         skin_this = game.getSkin();
         uiStage = new Stage(new ScreenViewport());
-        uiStage.getViewport().update(1215, 675, true);
+        uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
 
         dialogRoot = new Table();
         dialogRoot.setFillParent(true);
@@ -371,7 +405,16 @@ public class Play extends GameState{ //implements StateMethods
         dcontroller.startDialog(dialog);
     }
 
+    @Override
+    public void dispose() {
+
+    }
+
     public Player2 getPlayer() {
         return player;
+    }
+
+    public Controller getController() {
+        return controller;
     }
 }

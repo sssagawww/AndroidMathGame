@@ -17,6 +17,7 @@ public class SkinManager {
         TextureAtlas uiAtlas2 = assetManager.get("testAtlas2.atlas");
         TextureAtlas uiAtlas3 = assetManager.get("uipack.atlas");
 
+        //ninePatch - растягиваемая картинка
         NinePatch dialog = new NinePatch(uiAtlas.findRegion("background"), 10, 10, 5, 5);//dialoguebox
         skin.add("GUI_img", dialog);
         NinePatch dialog2 = new NinePatch(uiAtlas2.findRegion("back"), 10, 10, 5, 5);

@@ -6,8 +6,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.mygdx.game.MyGdxGame;
-import com.mygdx.game.handlers.B2DVars;
-import com.mygdx.game.inputs.MyInputProcessor;
+import com.mygdx.game.UI.Controller;
+import com.mygdx.game.states.Play;
 
 import static com.mygdx.game.handlers.B2DVars.*;
 import static com.mygdx.game.handlers.B2DVars.PlayerAnim.*;
@@ -18,7 +18,9 @@ public class Player2 extends B2DSprite {
     private Texture tex2;
     private int dir = IDLE;
     private boolean move = false;
-    private MyInputProcessor mip;
+    private Play play;
+    private Controller controller;
+    private boolean canCheck = false;
 
     public Player2(Body body) {
         super(body);
@@ -27,14 +29,13 @@ public class Player2 extends B2DSprite {
         sprites = TextureRegion.split(tex, 80, 88)[0];
         speed = 40f;
         setAnimation(sprites, 1 / 12f);
-        mip = new MyInputProcessor();
     }
 
     public void updatePL() {
         x = body.getPosition().x * PPM;
         y = body.getPosition().y * PPM;
 
-        checkUserInput();
+        if (canCheck) checkControllerInput();
     }
 
     /*private void loadAnim(int array){
@@ -42,6 +43,7 @@ public class Player2 extends B2DSprite {
         sprites[array] = TextureRegion.split(tex, 120, 140)[array];
     }*/
 
+    // для клавиатуры
     private void checkUserInput() {
         velx = 0;
         vely = 0;
@@ -53,7 +55,7 @@ public class Player2 extends B2DSprite {
             setDir(LEFT);
             velx = -1;
         }
-        if (Gdx.input.justTouched()) {
+        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
             setDir(UP);
             vely = 1;
         }
@@ -63,25 +65,61 @@ public class Player2 extends B2DSprite {
         }
         body.setLinearVelocity(velx * speed, vely * speed);
 
-        if(Gdx.input.isKeyJustPressed(Input.Keys.ANY_KEY)){
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ANY_KEY)) {
             checkAnim();
-            System.out.println(dir);
+            System.out.println(dir + " direction");
         } else {
-            if(move) {
-                System.out.println("TRUE");
+            if (move) {
+                System.out.println("MOVE TRUE");
                 setDir(IDLE);
                 checkAnim();
                 move = false;
             }
         }
-
-        /*if(mip.keyUp(Input.Keys.A) && mip.keyUp(Input.Keys.D) && mip.keyUp(Input.Keys.S) && mip.keyUp(Input.Keys.W)){
-            move = true;
-        }*/
     }
 
-    private void checkAnim(){
-        switch (dir){
+    // для андроида
+    private void checkControllerInput() {
+        velx = 0;
+        vely = 0;
+        if (controller.isRightPressed()) {
+            setDir(RIGHT);
+            velx = 1;
+        }
+        if (controller.isLeftPressed()) {
+            setDir(LEFT);
+            velx = -1;
+        }
+        if (controller.isUpPressed()) {
+            setDir(UP);
+            vely = 1;
+        }
+        if (controller.isDownPressed()) {
+            setDir(DOWN);
+            vely = -1;
+        }
+        if (controller.isUpRightPressed()) {
+            velx = 1;
+            vely = 1;
+        }
+        if (controller.isUpLeftPressed()) {
+            velx = -1;
+            vely = 1;
+        }
+        if (controller.isDownRightPressed()) {
+            velx = 1;
+            vely = -1;
+        }
+        if (controller.isDownLeftPressed()) {
+            vely = -1;
+            velx = -1;
+        }
+        body.setLinearVelocity(velx * speed, vely * speed);
+    }
+
+    //переделать!
+    private void checkAnim() {
+        switch (dir) {
             case RIGHT:
                 sprites = TextureRegion.split(tex, 80, 86)[3];
                 break;
@@ -100,15 +138,21 @@ public class Player2 extends B2DSprite {
             default:
                 return;
         }
-        setAnimation(sprites, 1/12f);
+        setAnimation(sprites, 1 / 12f);
     }
 
-    public void setDir(int dir){
+    public void setDir(int dir) {
         this.dir = dir;
     }
 
-    public void setMove(boolean move){
+    public void setMove(boolean move) {
         this.move = move;
+    }
+
+    public void setPlay(Play play) {
+        this.play = play;
+        controller = play.getController();
+        canCheck = true;
     }
 }
 

@@ -2,8 +2,6 @@ package com.mygdx.game.handlers;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
 
-import static com.mygdx.game.handlers.B2DVars.PPM;
-
 public class BoundedCamera extends OrthographicCamera {
     private float xmin;
     private float xmax;

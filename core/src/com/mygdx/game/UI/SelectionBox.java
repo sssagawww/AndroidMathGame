@@ -24,7 +24,7 @@ public class SelectionBox extends Table {
         this.uiTable = new Table();
         this.add(uiTable).pad(5f);
 
-        BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
+        BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt")); //шрифт
         Label.LabelStyle lstyle = new Label.LabelStyle(font, Color.BLACK);
 
         labels[0] = new Label("-", lstyle);
@@ -53,6 +53,7 @@ public class SelectionBox extends Table {
         setSelection(0);
     }
 
+    //move двигают стрелку в разные стороны
     public void moveUp() {
         if (selectedIndex == 0) {
             return;
@@ -66,7 +67,6 @@ public class SelectionBox extends Table {
         }
         if (selectedIndex == 3) {
             setSelection(1);
-            return;
         }
     }
 
@@ -77,13 +77,6 @@ public class SelectionBox extends Table {
         }
         if (selectedIndex == 1) {
             setSelection(3);
-            return;
-        }
-        if (selectedIndex == 2) {
-            return;
-        }
-        if (selectedIndex == 3) {
-            return;
         }
     }
 
@@ -100,7 +93,6 @@ public class SelectionBox extends Table {
         }
         if (selectedIndex == 3) {
             setSelection(2);
-            return;
         }
     }
 
@@ -114,13 +106,10 @@ public class SelectionBox extends Table {
         }
         if (selectedIndex == 2) {
             setSelection(3);
-            return;
-        }
-        if (selectedIndex == 3) {
-            return;
         }
     }
 
+    //делает видимой стрелку, если она на каком-то варианте ответа
     private void setSelection(int index) {
         selectedIndex = index;
         for (int i = 0; i < labels.length; i++) {

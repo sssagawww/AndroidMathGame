@@ -17,7 +17,7 @@ public class SaveLoad {
             ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(new File("save.dat")));
 
             DataStorage ds = new DataStorage();
-            ds.playerPosX = play.getPlayer().getPosition();
+            ds.playerPos = play.getPlayer().getPosition();
             //ds.save = play.savePlay;
 
             oos.writeObject(ds);
@@ -34,7 +34,7 @@ public class SaveLoad {
             //play.bdef.position.set(ds.playerPosX); <--- уже есть в play.createPlayer()
             //play.savePlay = ds.save;
             this_ds = ds;
-            System.out.println(ds.playerPosX + " save = "  + play.savePlay);
+            System.out.println(ds.playerPos + " save = "  + play.savePlay);
 
         } catch (Exception e) {
             System.out.println("can't load");
