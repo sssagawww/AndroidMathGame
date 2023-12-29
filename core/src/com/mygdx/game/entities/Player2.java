@@ -20,7 +20,6 @@ public class Player2 extends B2DSprite {
     private boolean move = false;
     private Play play;
     private Controller controller;
-    private boolean canCheck = false;
     private int countIdle = 0;
     private int countMove = 1;
 
@@ -37,7 +36,6 @@ public class Player2 extends B2DSprite {
         x = body.getPosition().x * PPM;
         y = body.getPosition().y * PPM;
 
-        //if (canCheck) checkControllerInput();
         checkController();
     }
 
@@ -204,7 +202,6 @@ public class Player2 extends B2DSprite {
     public void setPlay(Play play) {
         this.play = play;
         controller = play.getController();
-        canCheck = true;
     }
 }
 
