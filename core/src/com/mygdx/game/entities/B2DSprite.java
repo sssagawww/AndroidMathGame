@@ -32,11 +32,11 @@ public class B2DSprite {
     public void update(float dt){
         animation.update(dt);
     }
-    public void render(SpriteBatch sb){
+    public void render(SpriteBatch sb, float pWidth, float pHeight){
         sb.begin();
         sb.draw(animation.getFrame(),
                 body.getPosition().x * PPM - width / 2,
-                body.getPosition().y * PPM - height / 2);//size 91 96 //??
+                body.getPosition().y * PPM - height / 2, pWidth, pHeight); //сет величины текстурки
         sb.end();
     }
     public Body getBody(){

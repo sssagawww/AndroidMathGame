@@ -149,7 +149,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
         tmr.setView(cam);
         tmr.render();
         //draw enemy
-        boss.render(sb);
+        boss.render(sb, 200, 200);
 
         /*sb.begin();
         battleRenderer.render(sb);
