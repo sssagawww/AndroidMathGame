@@ -133,7 +133,7 @@ public class Play extends GameState {
             System.out.println("player pos x-y " + player.getPosition().x + " " + player.getPosition().y);
         }
 
-        //может начать бой
+        //можно начать бой
         if (canDraw) {
             uiStage.act(dt);
             if (controller.isInteractPressed() && dialogueBox.isFinished()) {
