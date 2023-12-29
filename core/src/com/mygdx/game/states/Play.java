@@ -88,7 +88,7 @@ public class Play extends GameState {
         createPlayer();
         createTiles();
         createNPC();
-        createMusic(); //отключено, чтобы не мешало при дебаггинге
+        //createMusic(); //отключено, чтобы не мешало при дебаггинге
 
         initFight();
 
