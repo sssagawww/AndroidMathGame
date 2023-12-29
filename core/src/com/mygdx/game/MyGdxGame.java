@@ -22,6 +22,7 @@ public class MyGdxGame implements ApplicationListener {
     private AssetManager assetManager;
     private BoundedCamera cam;
     private GameStateManager gsm;
+
     //public static final float STEP = 1 / 60f;
     //private float accum;
     public static Content res;
