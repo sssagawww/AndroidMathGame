@@ -15,8 +15,8 @@ import com.mygdx.game.handlers.*;
 public class MyGdxGame implements ApplicationListener {
     private static int width;
     private static int height;
-    public static int V_WIDTH =1216;
-    public static int V_HEIGHT =672;
+    public static int V_WIDTH = 1216;
+    public static int V_HEIGHT = 672;
     //public static final int SCALE = 2;
     private SpriteBatch sb;
     private AssetManager assetManager;
@@ -32,7 +32,7 @@ public class MyGdxGame implements ApplicationListener {
 
     public void create() {
         //Gdx.input.setInputProcessor(new MyInputProcessor());
-        if(Gdx.app.getType() == Application.ApplicationType.Android){
+        if (Gdx.app.getType() == Application.ApplicationType.Android) {
             V_WIDTH = width;
             V_HEIGHT = height;
         }
@@ -87,7 +87,8 @@ public class MyGdxGame implements ApplicationListener {
         MyGdxGame.height = height;
     }
 
-    public void update() {}
+    public void update() {
+    }
 
     @Override
     public void dispose() {
@@ -100,10 +101,12 @@ public class MyGdxGame implements ApplicationListener {
     }
 
     @Override
-    public void pause() {}
+    public void pause() {
+    }
 
     @Override
-    public void resume() {}
+    public void resume() {
+    }
 
     public Skin getSkin() {
         return skin;
