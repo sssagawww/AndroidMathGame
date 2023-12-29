@@ -100,9 +100,7 @@ public class Play extends GameState {
     }
 
     @Override
-    public void handleInput() {
-
-    }
+    public void handleInput() {}
 
     @Override
     public void update(float dt) {
@@ -230,6 +228,7 @@ public class Play extends GameState {
         //layer = (TiledMapTileLayer) tiledMap.getLayers().get("grass");
     }
 
+    //слои на карте (создаются в Tiled)
     private void createLayer(TiledMapTileLayer layer, short bits) {
         BodyDef bdef = new BodyDef();
         FixtureDef fdef = new FixtureDef();
@@ -406,9 +405,7 @@ public class Play extends GameState {
     }
 
     @Override
-    public void dispose() {
-
-    }
+    public void dispose() {}
 
     public Player2 getPlayer() {
         return player;
