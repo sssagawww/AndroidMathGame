@@ -32,3 +32,17 @@ status
   orig: 256, 32
   offset: 0, 0
   index: -1
+menuBtn_up
+  rotate: false
+  xy: 374, 196
+  size: 44, 28
+  orig: 256, 32
+  offset: 0, 0
+  index: -1
+menuBtn_down
+  rotate: false
+  xy: 422, 196
+  size: 44, 28
+  orig: 256, 32
+  offset: 0, 0
+  index: -1

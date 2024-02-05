@@ -1,5 +1,6 @@
 package com.mygdx.game.Dialog;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.mygdx.game.UI.DialogBox;
@@ -55,6 +56,17 @@ public class DialogController extends InputAdapter{
         if (dialogBox.isFinished() && dialogGo != null) {
             if(dialogGo.getType() == DialogNode.NODE_TYPE.MULTIPLE_CHOICE){
                 optionBox.setVisible(true);
+            }
+        }
+
+        if (dialogGo != null && Gdx.input.justTouched() && dialogBox.isFinished()){
+            if(dialogGo.getType() == DialogNode.NODE_TYPE.END){
+                dialogGo = null;
+                dialogBox.setVisible(false);
+            } else if (dialogGo.getType() == DialogNode.NODE_TYPE.LINEAR) {
+                progress(0);
+            } else if (dialogGo.getType() == DialogNode.NODE_TYPE.MULTIPLE_CHOICE) {
+                progress(optionBox.getID());
             }
         }
     }

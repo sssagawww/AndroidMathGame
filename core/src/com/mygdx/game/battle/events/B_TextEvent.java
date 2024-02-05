@@ -40,7 +40,7 @@ public class B_TextEvent extends BattleEvent{
     public void update(float dt) {
         if(dialogBox.isFinished()){
             if(waitInput){
-                if (Gdx.input.isKeyJustPressed(Input.Keys.X)) {
+                if (Gdx.input.justTouched()) {
                     finished = true;
                 }
             } else {

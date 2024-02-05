@@ -26,6 +26,10 @@ public class SkinManager {
         skin.add("optionbox", option);
         NinePatch status = new NinePatch(uiAtlas.findRegion("background"),5, 4, 2, 2);
         skin.add("status", status);
+        NinePatch menuBtn_up = new NinePatch(uiAtlas2.findRegion("menuBtn_up"),10, 10, 10, 10);
+        skin.add("menuBtn_up", menuBtn_up);
+        NinePatch menuBtn_down = new NinePatch(uiAtlas2.findRegion("menuBtn_down"),10, 10, 10, 10);
+        skin.add("menuBtn_down", menuBtn_down);
 
         NinePatch battleinfobox = new NinePatch(uiAtlas3.findRegion("battleinfobox"),14, 14, 5, 8);
         battleinfobox.setPadLeft((int)battleinfobox.getTopHeight());

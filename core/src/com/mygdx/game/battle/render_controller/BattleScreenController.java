@@ -1,5 +1,6 @@
 package com.mygdx.game.battle.render_controller;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.mygdx.game.UI.Controller;
@@ -44,6 +45,19 @@ public class BattleScreenController extends InputAdapter {
             optionBox.addOption("Нет");
             optionBox.setVisible(true);
         }
+
+        checkTouch();
+        /*if (selectionBox.isVisible()) {
+            if (Gdx.input.justTouched()) {
+                int selection = selectionBox.getSelection();
+                if (battle.getPlayer().getSteps(selection) == null) {
+                    queue.add(new B_TextEvent("Всё :0", 0.5f));
+                } else {
+                    battle.progress(selectionBox.getSelection());
+                    endTurn();
+                }
+            }
+        }*/
     }
 
     @Override
@@ -63,10 +77,10 @@ public class BattleScreenController extends InputAdapter {
                 }
             }
         }*/
-        if(selectionBox.isVisible()) {
+        if (selectionBox.isVisible()) {
             if (keycode == Input.Keys.X) {
                 int selection = selectionBox.getSelection();
-                if (battle.getPlayer().getSteps(selection) == null){
+                if (battle.getPlayer().getSteps(selection) == null) {
                     queue.add(new B_TextEvent("Всё :0", 0.5f));
                 } else {
                     battle.progress(selectionBox.getSelection());
@@ -122,5 +136,19 @@ public class BattleScreenController extends InputAdapter {
 
     public STATE getState() {
         return state;
+    }
+
+    private void checkTouch() {
+        if (Gdx.input.justTouched()) {
+            if (selectionBox.isVisible()) {
+                int selection = selectionBox.getSelection();
+                if (battle.getPlayer().getSteps(selection) == null) {
+                    queue.add(new B_TextEvent("Всё :0", 0.5f));
+                } else {
+                    battle.progress(selectionBox.getSelection());
+                    endTurn();
+                }
+            }
+        }
     }
 }
