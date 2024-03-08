@@ -46,3 +46,10 @@ menuBtn_down
   orig: 256, 32
   offset: 0, 0
   index: -1
+next_btn
+  rotate: false
+  xy: 506, 212
+  size: 8, 12
+  orig: 256, 32
+  offset: 0, 0
+  index: -1

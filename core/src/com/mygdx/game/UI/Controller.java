@@ -150,7 +150,7 @@ public class Controller extends Table {
         });
 
         //кнопки взаимодействия
-        Image interactImg = new Image(new Texture("interactBtn.png"));
+        /*Image interactImg = new Image(new Texture("interactBtn.png"));
         interactImg.setScale(7, 7);
         interactImg.addListener(new InputListener() {
             @Override
@@ -163,7 +163,7 @@ public class Controller extends Table {
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 interactPressed = false;
             }
-        });
+        });*/
 
         Image menuImg = new Image(new Texture("menuBtn.png"));
         menuImg.setScale(5, 5);
@@ -194,7 +194,7 @@ public class Controller extends Table {
         uiTable.add(downImg);
         uiTable.add(downRightImg);
 
-        uiTableRight.add(interactImg);
+        //uiTableRight.add(interactImg);
         uiTableTop.add(menuImg);
     }
 

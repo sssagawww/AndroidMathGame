@@ -7,6 +7,7 @@ import com.mygdx.game.UI.Controller;
 import com.mygdx.game.UI.DialogBox;
 import com.mygdx.game.UI.OptionBox;
 import com.mygdx.game.UI.SelectionBox;
+import com.mygdx.game.UI.SelectionBtnBox;
 import com.mygdx.game.battle.Battle;
 import com.mygdx.game.battle.events.B_TextEvent;
 import com.mygdx.game.battle.events.BattleEvent;
@@ -18,7 +19,7 @@ public class BattleScreenController extends InputAdapter {
     private Battle battle;
     private DialogBox dialogBox;
     private OptionBox optionBox;
-    private SelectionBox selectionBox;
+    private SelectionBtnBox selectionBox;
     private Queue<BattleEvent> queue;
 
     public enum STATE {
@@ -30,7 +31,7 @@ public class BattleScreenController extends InputAdapter {
 
     private STATE state = STATE.DEACTIVATED;
 
-    public BattleScreenController(Battle battle, Queue queue, DialogBox dialogBox, OptionBox optionBox, SelectionBox selectionBox) {
+    public BattleScreenController(Battle battle, Queue queue, DialogBox dialogBox, OptionBox optionBox, SelectionBtnBox selectionBox) {
         this.battle = battle;
         this.dialogBox = dialogBox;
         this.optionBox = optionBox;
@@ -77,7 +78,7 @@ public class BattleScreenController extends InputAdapter {
                 }
             }
         }*/
-        if (selectionBox.isVisible()) {
+        /*if (selectionBox.isVisible()) {
             if (keycode == Input.Keys.X) {
                 int selection = selectionBox.getSelection();
                 if (battle.getPlayer().getSteps(selection) == null) {
@@ -99,7 +100,7 @@ public class BattleScreenController extends InputAdapter {
                 selectionBox.moveRight();
                 return true;
             }
-        }
+        }*/
         return false;
     }
 
@@ -139,15 +140,15 @@ public class BattleScreenController extends InputAdapter {
     }
 
     private void checkTouch() {
-        if (Gdx.input.justTouched()) {
-            if (selectionBox.isVisible()) {
-                int selection = selectionBox.getSelection();
-                if (battle.getPlayer().getSteps(selection) == null) {
-                    queue.add(new B_TextEvent("Всё :0", 0.5f));
-                } else {
-                    battle.progress(selectionBox.getSelection());
-                    endTurn();
-                }
+        dialogBox.setPressed(false);
+        if (selectionBox.isPressed() && selectionBox.isVisible()) {
+            int selection = selectionBox.getSelectedIndex();
+            if (battle.getPlayer().getSteps(selection) == null) {
+                queue.add(new B_TextEvent("Всё :0", 0.5f));
+            } else {
+                dialogBox.setPressed(true);
+                battle.progress(selection);
+                endTurn();
             }
         }
     }

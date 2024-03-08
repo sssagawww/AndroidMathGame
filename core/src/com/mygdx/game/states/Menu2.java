@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
@@ -37,21 +38,25 @@ public class Menu2 extends GameState {
     private MenuOptionBox optionBox;
     //private MenuBtn2 btn;
     private BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
+    private GlyphLayout layout;
     /*private MenuBtn btn;
     private MenuBtn btn2;
     private MenuBtn btn3;*/
     private MenuBtnBox btnBox;
-
     // END UI
+
     public Menu2(GameStateManager gsm) {
         super(gsm);
         game = gsm.game();
         play = gsm.getPlay();
         multiplexer = new InputMultiplexer();
-        cam.setBounds(0, V_WIDTH, 0, V_HEIGHT); //? //4864 2688
+
+        font.setColor(Color.BLACK);
+        layout = new GlyphLayout(font, "MathGame");
 
         init();
         createLayers();
+        cam.setBounds(0, V_WIDTH, 0, V_HEIGHT); //? //4864 2688
     }
 
 
@@ -65,27 +70,6 @@ public class Menu2 extends GameState {
         uiStage.act(dt);
 
         checkBtns();
-
-        /*if(btn.isPressed()){
-            gsm.setState(NEW_GAME);
-        }
-        if(btn2.isPressed()){
-            System.exit(0);
-        }*/
-        /*if (Gdx.input.isKeyPressed(Input.Keys.Q)){
-            optionBox.moveUp();
-        } else if (Gdx.input.isKeyPressed(Input.Keys.E)) {
-            optionBox.moveDown();
-        } else if (Gdx.input.justTouched()) {
-            if (optionBox.getIndex() == 0) {
-                gsm.setState(NEW_GAME);
-            } else if (optionBox.getIndex() == 2) {
-                System.exit(0);
-            } else if (optionBox.getIndex() == 1) {
-                game.save = true;
-                gsm.setState(NEW_GAME);
-            }
-        }*/
     }
 
     @Override
@@ -102,8 +86,8 @@ public class Menu2 extends GameState {
 
         sb.begin();
         font.getData().setScale(2);
-        font.setColor(Color.BLACK);
-        font.draw(sb, "MathGame", 415, 435);
+        layout.setText(font, "MathGame");
+        font.draw(sb, layout, V_WIDTH/2f-layout.width/2, V_HEIGHT/2f+layout.height);
         sb.end();
 
         uiStage.draw();
@@ -111,7 +95,8 @@ public class Menu2 extends GameState {
 
     private void createLayers() {
         tiledMap = new TmxMapLoader().load("sprites/mystic_woods_free_2.1/menu.tmx");
-        tmr = new OrthogonalTiledMapRenderer(tiledMap, 3.82f); // !!!
+        //tmr = new OrthogonalTiledMapRenderer(tiledMap, 3.82f); // !!!
+        tmr = new OrthogonalTiledMapRenderer(tiledMap,V_WIDTH/(tiledMap.getProperties().get("width",Integer.class)*16f));
         tileSize = (int) tiledMap.getProperties().get("tilewidth");
 
         tileMapWidth = (int) tiledMap.getProperties().get("width");

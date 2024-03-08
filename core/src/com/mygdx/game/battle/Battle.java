@@ -1,6 +1,6 @@
 package com.mygdx.game.battle;
 
-import com.mygdx.game.UI.SelectionBox;
+import com.mygdx.game.UI.SelectionBtnBox;
 import com.mygdx.game.battle.events.B_TextEvent;
 import com.mygdx.game.battle.events.BattleEvent;
 import com.mygdx.game.battle.events.BattleEventPlayer;
@@ -96,7 +96,7 @@ public class Battle implements BattleEventQueue {
         }
     }
 
-    public void playAnswers(StepsDetails steps, SelectionBox selectionBox){
+    public void playAnswers(StepsDetails steps, SelectionBtnBox selectionBox){
         System.out.println(currentAnswer + " currentAnswer");
         for (int i = 0; i <= 3; i++) {
             String label = "---";

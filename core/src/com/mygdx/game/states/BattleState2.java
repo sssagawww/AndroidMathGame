@@ -51,6 +51,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
     private Table selectionRoot;
     private Table statusBoxRoot;
     private SelectionBox selectionBox;
+    private SelectionBtnBox selectionBtnBox;
     private StatusBox statusBox;
     private PlayerStatusBox playerStatus;
     // END UI
@@ -91,7 +92,9 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
         createLayers();
         createEnemy();
 
-        bcontroller = new BattleScreenController(battle, queue, dialogBox, optionBox, selectionBox);
+        bcontroller = new BattleScreenController(battle, queue, dialogBox, optionBox, selectionBtnBox);
+        multiplexer.addProcessor(bcontroller);
+        Gdx.input.setInputProcessor(multiplexer);
 
         battle.beginBattle();
     }
@@ -135,11 +138,12 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
 
         uiStage.act(dt);
         boss.update(dt);
+        bcontroller.update(dt);
     }
 
     @Override
     public void render() { // fix update cam (F11)
-        Gdx.input.setInputProcessor(bcontroller);
+        //Gdx.input.setInputProcessor(bcontroller);
         Gdx.gl20.glClearColor(0,0,0,1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
         cam.setPosition(0, 0);
@@ -182,8 +186,11 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
         optionBox = new OptionBox(game.getSkin());
         optionBox.setVisible(false);
 
-        selectionBox = new SelectionBox(game.getSkin());
-        selectionBox.setVisible(false);
+        /*selectionBox = new SelectionBox(game.getSkin());
+        selectionBox.setVisible(false);*/
+
+        selectionBtnBox = new SelectionBtnBox(game.getSkin());
+        selectionBtnBox.setVisible(false);
 
         playerStatus = new PlayerStatusBox(game.getSkin());
         playerStatus.setText(battle.getPlayer().getName());
@@ -201,10 +208,13 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
                 .space(8f)
                 .row();
 
-        selectionRoot.add(selectionBox).expand().align(Align.bottom).pad(5f);
+        //selectionRoot.add(selectionBox).expand().align(Align.bottom).pad(5f);
+        selectionRoot.add(selectionBtnBox).expand().align(Align.bottom).pad(5f);
         dialogRoot.add(dialogTable).expand().align(Align.top);
         statusBoxRoot.add(statusBox).expand().align(Align.topLeft).pad(10f);
         statusBoxRoot.add(playerStatus).expand().align(Align.topRight).pad(10f);
+
+        multiplexer.addProcessor(uiStage);
     }
 
     private void createLayers() {

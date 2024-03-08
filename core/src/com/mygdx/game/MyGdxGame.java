@@ -34,9 +34,12 @@ public class MyGdxGame implements ApplicationListener {
     public void create() {
         //Gdx.input.setInputProcessor(new MyInputProcessor());
         if (Gdx.app.getType() == Application.ApplicationType.Android) {
-            V_WIDTH = width;
-            V_HEIGHT = height;
+            V_WIDTH = width; //Gdx.graphics.getWidth();
+            V_HEIGHT = height; //Gdx.graphics.getHeight();
         }
+
+        //V_WIDTH = (int) ((Gdx.graphics.getWidth()/1216f)*1216);
+        //V_HEIGHT = (int) ((Gdx.graphics.getHeight()/672f)*672);
 
         res = new Content();
         res.loadTexture("gnomikStep.png", "gnomik");
@@ -56,9 +59,9 @@ public class MyGdxGame implements ApplicationListener {
         sb = new SpriteBatch();
         cam = new BoundedCamera();
         cam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
-        gsm = new GameStateManager(this);
         stepDatabase = new StepDatabase();
         exampleDatabase = new ExampleDatabase();
+        gsm = new GameStateManager(this);
     }
 
     @Override

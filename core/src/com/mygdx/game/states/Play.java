@@ -134,7 +134,7 @@ public class Play extends GameState {
         //можно начать бой
         if (canDraw) {
             uiStage.act(dt);
-            if (controller.isInteractPressed() && dialogueBox.isFinished()) {
+            if (dialogueBox.isPressed() && dialogueBox.isFinished()) {
                 gsm.setState(BATTLE);
                 music.dispose();
                 isStopped = true;
@@ -322,6 +322,7 @@ public class Play extends GameState {
         dialogRoot.add(dialogTable).expand().align(Align.bottom).pad(15f);
 
         dcontroller = new DialogController(dialogueBox, optionBox);
+        multiplexer.addProcessor(uiStage); //не нагружает ли большое кол-во процессов программу?
         multiplexer.addProcessor(dcontroller);
         Gdx.input.setInputProcessor(multiplexer);
 

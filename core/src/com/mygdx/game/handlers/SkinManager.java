@@ -30,6 +30,8 @@ public class SkinManager {
         skin.add("menuBtn_up", menuBtn_up);
         NinePatch menuBtn_down = new NinePatch(uiAtlas2.findRegion("menuBtn_down"),10, 10, 10, 10);
         skin.add("menuBtn_down", menuBtn_down);
+        /*NinePatch next_btn = new NinePatch(uiAtlas2.findRegion("next_btn"),10, 10, 1, 1);
+        skin.add("next_btn", next_btn);*/
 
         NinePatch battleinfobox = new NinePatch(uiAtlas3.findRegion("battleinfobox"),14, 14, 5, 8);
         battleinfobox.setPadLeft((int)battleinfobox.getTopHeight());
@@ -43,6 +45,7 @@ public class SkinManager {
         skin.add("background_hpbar", uiAtlas3.findRegion("background_hpbar"), TextureRegion.class);
 
         skin.add("arrow", uiAtlas3.findRegion("arrow"), TextureRegion.class);
+        skin.add("next_btn", uiAtlas2.findRegion("next_btn"), TextureRegion.class);
         BitmapFont font = assetManager.get("mcRus.fnt", BitmapFont.class);
         skin.add("font", font);
 
