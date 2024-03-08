@@ -3,6 +3,7 @@ package com.mygdx.game.states;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.maps.MapLayer;
@@ -24,8 +25,6 @@ import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.UI.Controller;
 import com.mygdx.game.UI.DialogBox;
 import com.mygdx.game.UI.OptionBox;
-import com.mygdx.game.data.DataStorage;
-import com.mygdx.game.data.SaveLoad;
 import com.mygdx.game.entities.Boss;
 import com.mygdx.game.entities.Player2;
 import com.mygdx.game.handlers.BoundedCamera;
@@ -63,12 +62,15 @@ public class Play extends GameState {
     private Dialog dialog;
     private DialogController dcontroller;
     private Music music;
-    public SaveLoad saveLoad;
+    private Preferences prefs;
     public boolean canDraw;
     public boolean savePlay;
     public BodyDef bdef;
     private Controller controller;
     private boolean isStopped;
+    private static final String PREF_NAME = "position";
+    private static final String PREF_X = "x";
+    private static final String PREF_Y = "y";
 
     public Play(GameStateManager gsm) {
         super(gsm);
@@ -79,7 +81,7 @@ public class Play extends GameState {
         cl = new MyContactListener(gsm); //детектит коллизию
         world.setContactListener(cl);
         music = Gdx.audio.newMusic(Gdx.files.internal("song.wav"));
-        saveLoad = new SaveLoad(this);
+        prefs = Gdx.app.getPreferences(PREF_NAME);
         savePlay = game.save;
         skin_this = game.getSkin();
 
@@ -122,13 +124,6 @@ public class Play extends GameState {
 
         if (controller.isMenuPressed()) {
             gsm.setState(MENU);
-        }
-
-        //сохраняет по кнопке позицию
-        if (Gdx.input.isKeyPressed(Input.Keys.R)) {
-            //savePlay = true;
-            saveLoad.save();
-            System.out.println("player pos x-y " + player.getPosition().x + " " + player.getPosition().y);
         }
 
         //можно начать бой
@@ -181,12 +176,9 @@ public class Play extends GameState {
         PolygonShape ps = new PolygonShape();
         FixtureDef fdef = new FixtureDef();
 
-        saveLoad.load();
-        DataStorage ds = saveLoad.getDs();
-
         if (savePlay) {
-            bdef.position.set(ds.playerPos);
-            System.out.println("load position");
+            bdef.position.x = prefs.getFloat(PREF_X, 607f / PPM);
+            bdef.position.y = prefs.getFloat(PREF_Y, 337f / PPM);
         } else {
             bdef.position.set(607f / PPM, 337f / PPM);
         }
@@ -407,6 +399,11 @@ public class Play extends GameState {
 
     @Override
     public void dispose() {}
+
+    public void savePosition(){
+        prefs.putFloat(PREF_X, player.getPosition().x).flush();
+        prefs.putFloat(PREF_Y, player.getPosition().y).flush();
+    }
 
     public Player2 getPlayer() {
         return player;

@@ -18,6 +18,7 @@ public class MenuBtnBox extends Table {
         MENU_TO_PLAY,
         EXIT,
         SAVE,
+        SAVE_GAME,
         NON
     }
 

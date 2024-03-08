@@ -113,7 +113,8 @@ public class Menu2 extends GameState {
 
         btnBox = new MenuBtnBox(game.getSkin());
         btnBox.addBtn("Начать", MenuBtnBox.MENU_STATE.MENU_TO_PLAY);
-        btnBox.addBtn("Продолжить", MenuBtnBox.MENU_STATE.SAVE);
+        btnBox.addBtn("Продолжить", MenuBtnBox.MENU_STATE.SAVE_GAME);
+        btnBox.addBtn("Сохранить", MenuBtnBox.MENU_STATE.SAVE);
         btnBox.addBtn("Выйти", MenuBtnBox.MENU_STATE.EXIT);
 
         Table table = new Table();
@@ -131,11 +132,15 @@ public class Menu2 extends GameState {
                 gsm.setState(NEW_GAME);
                 break;
             case EXIT:
-                System.exit(0);
+                Gdx.app.exit();
+                System.exit(0); // <--- очень резко закрывает, будто вылет
                 break;
-            case SAVE:
+            case SAVE_GAME:
                 game.save = true;
                 gsm.setState(NEW_GAME);
+                break;
+            case SAVE:
+                play.savePosition();
         }
     }
 
