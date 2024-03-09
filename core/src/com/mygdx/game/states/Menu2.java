@@ -33,7 +33,6 @@ public class Menu2 extends GameState {
     // UI
     private Table root;
     private Stage uiStage;
-    private MenuOptionBox optionBox;
     //private MenuBtn2 btn;
     private BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
     private GlyphLayout layout;

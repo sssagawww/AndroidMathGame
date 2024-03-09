@@ -29,7 +29,7 @@ public class Controller extends Table {
         // --сделать атлас текстур и использовать его вместо нескольких картинок, как в других классах
 
         // Кнопки перемещения
-        Image upImg = new Image(new Texture("upBtn.png"));
+        Image upImg = new Image(new Texture("controller/upBtn.png"));
         upImg.setScale(7, 7);
         upImg.addListener(new InputListener() {
             @Override
@@ -44,7 +44,7 @@ public class Controller extends Table {
             }
         });
 
-        Image downImg = new Image(new Texture("downBtn.png"));
+        Image downImg = new Image(new Texture("controller/downBtn.png"));
         downImg.setScale(7, 7);
         downImg.addListener(new InputListener() {
             @Override
@@ -59,7 +59,7 @@ public class Controller extends Table {
             }
         });
 
-        Image rightImg = new Image(new Texture("rightBtn.png"));
+        Image rightImg = new Image(new Texture("controller/rightBtn.png"));
         rightImg.setScale(7, 7);
         rightImg.addListener(new InputListener() {
             @Override
@@ -74,7 +74,7 @@ public class Controller extends Table {
             }
         });
 
-        Image leftImg = new Image(new Texture("leftBtn.png"));
+        Image leftImg = new Image(new Texture("controller/leftBtn.png"));
         leftImg.setScale(7, 7);
         leftImg.addListener(new InputListener() {
             @Override
@@ -89,7 +89,7 @@ public class Controller extends Table {
             }
         });
 
-        Image upRightImg = new Image(new Texture("upRightBtn.png"));
+        Image upRightImg = new Image(new Texture("controller/upRightBtn.png"));
         upRightImg.setScale(7, 7);
         upRightImg.addListener(new InputListener() {
             @Override
@@ -104,7 +104,7 @@ public class Controller extends Table {
             }
         });
 
-        Image upLeftImg = new Image(new Texture("upLeftBtn.png"));
+        Image upLeftImg = new Image(new Texture("controller/upLeftBtn.png"));
         upLeftImg.setScale(7, 7);
         upLeftImg.addListener(new InputListener() {
             @Override
@@ -119,7 +119,7 @@ public class Controller extends Table {
             }
         });
 
-        Image downRightImg = new Image(new Texture("downRightBtn.png"));
+        Image downRightImg = new Image(new Texture("controller/downRightBtn.png"));
         downRightImg.setScale(7, 7);
         downRightImg.addListener(new InputListener() {
             @Override
@@ -134,7 +134,7 @@ public class Controller extends Table {
             }
         });
 
-        Image downLeftImg = new Image(new Texture("downLeftBtn.png"));
+        Image downLeftImg = new Image(new Texture("controller/downLeftBtn.png"));
         downLeftImg.setScale(7, 7);
         downLeftImg.addListener(new InputListener() {
             @Override
@@ -165,7 +165,7 @@ public class Controller extends Table {
             }
         });*/
 
-        Image menuImg = new Image(new Texture("menuBtn.png"));
+        Image menuImg = new Image(new Texture("controller/menuBtn.png"));
         menuImg.setScale(5, 5);
         menuImg.addListener(new InputListener() {
             @Override

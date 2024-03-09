@@ -42,16 +42,17 @@ public class MyGdxGame implements ApplicationListener {
         //V_HEIGHT = (int) ((Gdx.graphics.getHeight()/672f)*672);
 
         res = new Content();
-        res.loadTexture("gnomikStep.png", "gnomik");
-        res.loadTexture("gnomik.png", "gnomikFull");
-        res.loadTexture("idleGnomik.png", "gnomikrow");
+        res.loadTexture("entitySprites/gnomikStep.png", "gnomik");
+        res.loadTexture("entitySprites/gnomik.png", "gnomikFull");
+        res.loadTexture("entitySprites/idleGnomik.png", "gnomikrow");
         res.loadTexture("allBtn.png", "btn");
-        res.loadTexture("enemySprite2.2.png", "enemy");
+        res.loadTexture("entitySprites/enemy2.png", "enemy");
+        res.loadTexture("entitySprites/bombGuy.png", "npc");
 
         assetManager = new AssetManager();
-        assetManager.load("testAtlas.atlas", TextureAtlas.class);
-        assetManager.load("testAtlas2.atlas", TextureAtlas.class);
-        assetManager.load("uipack.atlas", TextureAtlas.class);
+        assetManager.load("UI/testAtlas.atlas", TextureAtlas.class);
+        assetManager.load("UI/testAtlas2.atlas", TextureAtlas.class);
+        assetManager.load("UI/uipack.atlas", TextureAtlas.class);
         assetManager.load("mcRus.fnt", BitmapFont.class);
         assetManager.finishLoading();
         skin = SkinManager.generateSkin(assetManager);

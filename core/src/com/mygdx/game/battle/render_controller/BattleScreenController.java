@@ -1,17 +1,12 @@
 package com.mygdx.game.battle.render_controller;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
-import com.mygdx.game.UI.Controller;
 import com.mygdx.game.UI.DialogBox;
 import com.mygdx.game.UI.OptionBox;
-import com.mygdx.game.UI.SelectionBox;
 import com.mygdx.game.UI.SelectionBtnBox;
 import com.mygdx.game.battle.Battle;
 import com.mygdx.game.battle.events.B_TextEvent;
 import com.mygdx.game.battle.events.BattleEvent;
-import com.mygdx.game.battle.steps.StepsDetails;
 
 import java.util.Queue;
 

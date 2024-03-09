@@ -50,7 +50,6 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
     private OptionBox optionBox;
     private Table selectionRoot;
     private Table statusBoxRoot;
-    private SelectionBox selectionBox;
     private SelectionBtnBox selectionBtnBox;
     private StatusBox statusBox;
     private PlayerStatusBox playerStatus;
@@ -73,10 +72,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
         game = gsm.game();
         multiplexer = new InputMultiplexer(); //не нужен(?), пока нет процессов, обработчиков событий
 
-        music = Gdx.audio.newMusic(Gdx.files.internal("battleTheme.mp3"));
-        music.setVolume(0.9f);
-        music.setLooping(true);
-        music.play();
+        createMusic();
 
         cam.setBounds(0, 4864, 0, 2688);
 
@@ -99,6 +95,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
         battle.beginBattle();
     }
 
+
     @Override
     public void handleInput() {
 
@@ -113,7 +110,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
         while (currentEvent == null || currentEvent.finished()) {
             if (queue.peek() == null) {
                 currentEvent = null;
-                if(battle.getState() == Battle.STATE.READY_TO_PROGRESS){
+                if (battle.getState() == Battle.STATE.READY_TO_PROGRESS) {
                     bcontroller.restart(); // <-----
                 } else if (battle.getState() == Battle.STATE.RUN) {
                     music.dispose();
@@ -144,7 +141,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
     @Override
     public void render() { // fix update cam (F11)
         //Gdx.input.setInputProcessor(bcontroller);
-        Gdx.gl20.glClearColor(0,0,0,1);
+        Gdx.gl20.glClearColor(0, 0, 0, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
         cam.setPosition(0, 0);
         cam.update();
@@ -240,8 +237,16 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
         body.setUserData(boss);
     }
 
+    private void createMusic() {
+        music = Gdx.audio.newMusic(Gdx.files.internal("music/battleTheme.mp3"));
+        music.setVolume(0.9f);
+        music.setLooping(true);
+        music.play();
+    }
+
     @Override
-    public void dispose() {}
+    public void dispose() {
+    }
 
     @Override
     public DialogBox getDialogBox() {

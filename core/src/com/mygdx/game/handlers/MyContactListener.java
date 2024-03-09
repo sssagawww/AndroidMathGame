@@ -6,6 +6,8 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.mygdx.game.states.Play;
 
+import java.util.ArrayList;
+
 public class MyContactListener implements com.badlogic.gdx.physics.box2d.ContactListener {
     private Play play;
     private GameStateManager gsm;
@@ -26,11 +28,10 @@ public class MyContactListener implements com.badlogic.gdx.physics.box2d.Contact
         }
 
         //контакт с нпс, юзается
-        if (fa.getUserData() != null && fb.getUserData().equals("npc")) {
+        if (fa.getUserData() != null) {
             play = gsm.getPlay();
-            System.out.println("npc contact");
-            play.canDraw = true;
-            //play.initUI();
+            System.out.println("contact with " + fb.getUserData());
+            play.loadStage((String) fb.getUserData());
         }
         //System.out.println(fa.getUserData() + ", " + fb.getUserData());
     }

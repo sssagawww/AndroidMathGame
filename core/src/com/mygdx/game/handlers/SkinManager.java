@@ -13,9 +13,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 public class SkinManager {
     public static Skin generateSkin(AssetManager assetManager) {
         Skin skin = new Skin();
-        TextureAtlas uiAtlas = assetManager.get("testAtlas.atlas"); //uipack
-        TextureAtlas uiAtlas2 = assetManager.get("testAtlas2.atlas");
-        TextureAtlas uiAtlas3 = assetManager.get("uipack.atlas");
+        TextureAtlas uiAtlas = assetManager.get("UI/testAtlas.atlas"); //uipack
+        TextureAtlas uiAtlas2 = assetManager.get("UI/testAtlas2.atlas");
+        TextureAtlas uiAtlas3 = assetManager.get("UI/uipack.atlas");
 
         //ninePatch - растягиваемая картинка
         NinePatch dialog = new NinePatch(uiAtlas.findRegion("background"), 10, 10, 5, 5);//dialoguebox

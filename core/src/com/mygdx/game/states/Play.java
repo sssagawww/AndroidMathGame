@@ -28,6 +28,7 @@ import com.mygdx.game.UI.DialogBox;
 import com.mygdx.game.UI.JoyStick;
 import com.mygdx.game.UI.OptionBox;
 import com.mygdx.game.entities.Boss;
+import com.mygdx.game.entities.PlayEntities;
 import com.mygdx.game.entities.Player2;
 import com.mygdx.game.handlers.BoundedCamera;
 import com.mygdx.game.handlers.MyContactListener;
@@ -38,6 +39,10 @@ import static com.mygdx.game.MyGdxGame.V_WIDTH;
 import static com.mygdx.game.handlers.B2DVars.*;
 import static com.mygdx.game.handlers.GameStateManager.BATTLE;
 import static com.mygdx.game.handlers.GameStateManager.MENU;
+import static com.mygdx.game.handlers.GameStateManager.PAINT;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Play extends GameState {
     private MyGdxGame game;
@@ -47,7 +52,8 @@ public class Play extends GameState {
     private BoundedCamera b2dCam;
     private MyContactListener cl;
     private Player2 player;
-    private Boss boss;
+    private PlayEntities entities;
+    //private Boss boss;
     private TiledMap tiledMap;
     private OrthogonalTiledMapRenderer tmr;
     private float tileSize;
@@ -78,6 +84,7 @@ public class Play extends GameState {
 
     // --------- END JoyStick ---------
     private boolean isStopped;
+    private int nextState;
     private static final String PREF_NAME = "position";
     private static final String PREF_X = "x";
     private static final String PREF_Y = "y";
@@ -90,7 +97,7 @@ public class Play extends GameState {
         multiplexer = new InputMultiplexer();
         cl = new MyContactListener(gsm); //детектит коллизию
         world.setContactListener(cl);
-        music = Gdx.audio.newMusic(Gdx.files.internal("song.wav"));
+        music = Gdx.audio.newMusic(Gdx.files.internal("music/song.wav"));
         prefs = Gdx.app.getPreferences(PREF_NAME);
         savePlay = game.save;
         skin_this = game.getSkin();
@@ -103,7 +110,7 @@ public class Play extends GameState {
         createNPC();
         //createMusic(); //отключено, чтобы не мешало при дебаггинге
 
-        initFight();
+        //initFight();
 
         cam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
         b2dCam = new BoundedCamera(); //рисует дебаг коллизию?
@@ -122,7 +129,8 @@ public class Play extends GameState {
         world.step(dt, 6, 2);
         controllerStage.act(dt);
         player.update(dt);
-        boss.update(dt);
+        //boss.update(dt);
+        entities.update(dt);
         player.updatePL();
 
         //нужно обновление размера экрана, и тогда будет resize всех компонентов
@@ -142,7 +150,7 @@ public class Play extends GameState {
         if (canDraw) {
             uiStage.act(dt);
             if (dialogueBox.isPressed() && dialogueBox.isFinished()) {
-                gsm.setState(BATTLE);
+                gsm.setState(nextState);
                 music.dispose();
                 isStopped = true;
                 canDraw = false;
@@ -181,7 +189,8 @@ public class Play extends GameState {
         //draw player and npc
         sb.setProjectionMatrix(cam.combined); //https://stackoverflow.com/questions/33703663/understanding-the-libgdx-projection-matrix - объяснение
         player.render(sb, 80f, 86.6f);
-        boss.render(sb, 200f, 200f);
+        //boss.render(sb, 200f, 200f);
+        entities.render(sb, 150f, 150f);
 
         //draw box?     ---need fix?---
         if (debug) {
@@ -196,7 +205,7 @@ public class Play extends GameState {
         }
 
         controllerStage.draw();
-        if(isJoyStick) joyStick.render(shapeRenderer);
+        if (isJoyStick) joyStick.render(shapeRenderer);
     }
 
     private void createPlayer() {
@@ -215,7 +224,7 @@ public class Play extends GameState {
         bdef.type = BodyDef.BodyType.DynamicBody;
         Body body = world.createBody(bdef);
 
-        ps.setAsBox(47f / PPM, 59f / PPM);
+        ps.setAsBox(40f / PPM, 50f / PPM, new Vector2(-5.4f,-3.6f), 0);
         fdef.shape = ps;
         fdef.filter.categoryBits = BIT_PLAYER;
         fdef.filter.maskBits = BIT_TROPA;
@@ -288,6 +297,7 @@ public class Play extends GameState {
     private void createNPC() {
         MapLayer mlayer = tiledMap.getLayers().get("npcLayer");
         if (mlayer == null) return;
+        entities = new PlayEntities();
 
         for (MapObject mo : mlayer.getObjects()) {
             BodyDef bdef = new BodyDef();
@@ -306,9 +316,12 @@ public class Play extends GameState {
             cdef.filter.maskBits = BIT_PLAYER;
             cshape.dispose();
 
-            body.createFixture(cdef).setUserData("npc");
-            boss = new Boss(body);
+            body.createFixture(cdef).setUserData(mo.getName());
+            entities.addEntity(body, mo.getName());
+
+            /*boss = new Boss(body);
             body.setUserData(boss);
+            System.out.println(body.getUserData());*/
         }
     }
 
@@ -348,10 +361,10 @@ public class Play extends GameState {
         Gdx.input.setInputProcessor(multiplexer);
 
         dialog = new Dialog();
-        DialogNode node1 = new DialogNode("Враг атакует!", 0);
+        /*DialogNode node1 = new DialogNode("Враг атакует!", 0);
 
         dialog.addNode(node1);
-        dcontroller.startDialog(dialog);
+        dcontroller.startDialog(dialog);*/
     }
 
     private void initController() {
@@ -444,6 +457,29 @@ public class Play extends GameState {
     public void save() {
         prefs.putFloat(PREF_X, player.getPosition().x).flush();
         prefs.putFloat(PREF_Y, player.getPosition().y).flush();
+    }
+
+    public void loadStage(String s) {
+        DialogNode node1;
+        initFight();
+        switch (s) {
+            case "enemy":
+                node1 = new DialogNode("Враг атакует!", 0);
+                dialog.addNode(node1);
+                dcontroller.startDialog(dialog);
+                nextState = BATTLE;
+                canDraw = true;
+                break;
+            case "npc":
+                node1 = new DialogNode("Начнем испытание!", 0);
+                dialog.addNode(node1);
+                dcontroller.startDialog(dialog);
+                nextState = PAINT;
+                canDraw = true;
+                break;
+            default:
+                break;
+        }
     }
 
     public Player2 getPlayer() {
