@@ -11,7 +11,7 @@ public class GameStateManager {
     private Stack<GameState> gameStates;
     public static final int PLAY = 912837;
     public static final int MENU = 0;
-    public static final int QUIT = 1;
+    public static final int PAINT = 1;
     public static final int BATTLE = 2;
     public static final int NEW_GAME = 4;
 
@@ -42,6 +42,8 @@ public class GameStateManager {
         } else if (state == NEW_GAME) {
             play = new Play(this);
             return play;
+        } else if (state == PAINT) {
+            return new PaintState(this);
         }
         return null;
     }

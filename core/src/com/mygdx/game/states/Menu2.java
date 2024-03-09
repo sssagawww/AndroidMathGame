@@ -1,11 +1,9 @@
 package com.mygdx.game.states;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.maps.tiled.TiledMap;
@@ -140,7 +138,7 @@ public class Menu2 extends GameState {
                 gsm.setState(NEW_GAME);
                 break;
             case SAVE:
-                play.savePosition();
+                play.save();
         }
     }
 

@@ -1,11 +1,11 @@
 package com.mygdx.game.states;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
@@ -13,6 +13,7 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -24,6 +25,7 @@ import com.mygdx.game.Dialog.Dialog;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.UI.Controller;
 import com.mygdx.game.UI.DialogBox;
+import com.mygdx.game.UI.JoyStick;
 import com.mygdx.game.UI.OptionBox;
 import com.mygdx.game.entities.Boss;
 import com.mygdx.game.entities.Player2;
@@ -67,6 +69,14 @@ public class Play extends GameState {
     public boolean savePlay;
     public BodyDef bdef;
     private Controller controller;
+    // -------- JoyStick ----------
+    private JoyStick joyStick;
+    private ShapeRenderer shapeRenderer;
+    private Vector3 mouse;
+    private BoundedCamera joyCam;
+    private boolean isJoyStick = false;  //true чтобы включить все методы с джойстиком + в player поменять методы (временно)
+
+    // --------- END JoyStick ---------
     private boolean isStopped;
     private static final String PREF_NAME = "position";
     private static final String PREF_X = "x";
@@ -86,6 +96,7 @@ public class Play extends GameState {
         skin_this = game.getSkin();
 
         //initUI();
+        if (isJoyStick) initJoyStick();
         initController();
         createPlayer();
         createTiles();
@@ -102,7 +113,8 @@ public class Play extends GameState {
     }
 
     @Override
-    public void handleInput() {}
+    public void handleInput() {
+    }
 
     @Override
     public void update(float dt) {
@@ -137,6 +149,21 @@ public class Play extends GameState {
             }
         }
         //dcontroller.update(dt);
+
+        //обновление джойстика
+        if (isJoyStick) {
+            if (Gdx.input.isTouched()) {
+                mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+                cam.unproject(mouse);
+            /*камера двигается вместе с персонажем, её координаты меняются,
+            а координаты mouse нет => камера уезжает на большие координаты, а мышь стоит на месте
+            возможный вариант исправления - добавить свою камеру для джойстика, которая не будет двигаться, либо же что-то другое*/
+                //System.out.println(mouse.x + " " + Gdx.input.getX());
+                joyStick.update(mouse.x, mouse.y);
+            } else {
+                joyStick.setDefaultPos();
+            }
+        }
     }
 
     @Override
@@ -169,6 +196,7 @@ public class Play extends GameState {
         }
 
         controllerStage.draw();
+        if(isJoyStick) joyStick.render(shapeRenderer);
     }
 
     private void createPlayer() {
@@ -179,6 +207,7 @@ public class Play extends GameState {
         if (savePlay) {
             bdef.position.x = prefs.getFloat(PREF_X, 607f / PPM);
             bdef.position.y = prefs.getFloat(PREF_Y, 337f / PPM);
+            game.save = false;
         } else {
             bdef.position.set(607f / PPM, 337f / PPM);
         }
@@ -341,6 +370,16 @@ public class Play extends GameState {
         Gdx.input.setInputProcessor(multiplexer);
     }
 
+    private void initJoyStick() {
+        //joyCam = new BoundedCamera();
+        //joyCam.setBounds(0, V_WIDTH, 0, V_HEIGHT);
+
+        joyStick = new JoyStick(200, 200, 200);
+        shapeRenderer = new ShapeRenderer();
+        shapeRenderer.setProjectionMatrix(cam.combined);
+        mouse = new Vector3();
+    }
+
     //был тестовый метод, чтобы понять работает ли диалог, можно использовать в других местах
     private void initUI() {
         skin_this = game.getSkin();
@@ -398,9 +437,11 @@ public class Play extends GameState {
     }
 
     @Override
-    public void dispose() {}
+    public void dispose() {
+        save();
+    }
 
-    public void savePosition(){
+    public void save() {
         prefs.putFloat(PREF_X, player.getPosition().x).flush();
         prefs.putFloat(PREF_Y, player.getPosition().y).flush();
     }
@@ -411,5 +452,13 @@ public class Play extends GameState {
 
     public Controller getController() {
         return controller;
+    }
+
+    public JoyStick getJoyStick() {
+        return joyStick;
+    }
+
+    public boolean isJoyStick() {
+        return isJoyStick;
     }
 }
