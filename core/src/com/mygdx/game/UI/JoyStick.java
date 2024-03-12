@@ -14,7 +14,7 @@ public class JoyStick {
 
     public void update(float x, float y) {
         //когда внутренний круг доходит до края, он застывает и не двигается
-        if (circle2.contains(x, y)) {
+        /*if (circle2.contains(x, y)) {
             circle2.setPosition(x, y);
             if (circle2.x > circle.x + circle.radius) {
                 circle2.x = circle.x + circle.radius;
@@ -28,21 +28,19 @@ public class JoyStick {
             if (circle2.y < circle.y - circle.radius) {
                 circle2.y = circle.y - circle.radius;
             }
-        }
+        }*/
 
-        // другой метод расчета положения кругов, тоже плохо работает..
-        /*double deltaX = x - circle.x;
-        double deltaY = y - circle.y;
-        double delta = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
-
-        if (delta < circle.radius + circle.x) {
-            circle2.x = circle.x + (float) deltaX;
-            circle2.y = circle.y + (float) deltaX;
+        float dx = x - circle.radius;
+        float dy = y - circle.radius;
+        float length = (float) Math.sqrt(dx * dx + dy * dy);
+        if (length < circle.radius) {
+            circle2.x = dx + circle.x;
+            circle2.y = dy + circle.y;
         } else {
-            circle2.x = circle.x + (float) (deltaX / delta) * circle.radius;
-            circle2.y = circle.y + (float) (deltaY / delta) * circle.radius;
+            float k = circle.radius / length;
+            circle2.x = dx * k + circle.x;
+            circle2.y = dy * k + circle.y;
         }
-        System.out.println(deltaY + " " + delta + " radius " + circle.radius);*/
     }
 
     public void setDefaultPos() {
