@@ -17,7 +17,6 @@ public class PaintState extends GameState implements InputProcessor {
     private ShapeRenderer shapeRenderer;
     private int rectX, rectY;
     private int rectWidth, rectHeight;
-
     private ArrayList<PixelPoint> points;
 
     public PaintState(GameStateManager gsm) {
@@ -48,14 +47,14 @@ public class PaintState extends GameState implements InputProcessor {
 
     @Override
     public void render() {
-        Gdx.gl20.glClearColor(0, 0, 0, 1);
+        Gdx.gl20.glClearColor(1, 1, 1, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         //shapeRenderer.setProjectionMatrix(cam.combined);
 
         sb.begin();
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(Color.RED);
+        shapeRenderer.setColor(Color.BLACK);
         for (int i = 0; i < points.size(); i++) {
             shapeRenderer.rect(points.get(i).getX(), points.get(i).getY(), rectWidth, rectHeight);
         }
@@ -68,6 +67,25 @@ public class PaintState extends GameState implements InputProcessor {
 
     }
 
+    public ArrayList<PixelPoint> getPoints() {
+        return points;
+    }
+
+    public ArrayList<Integer> getPointsX(){
+        ArrayList<Integer> list = new ArrayList<>();
+        for (int i = 0; i < points.size(); i++) {
+            list.add(points.get(i).getX());
+        }
+        return list;
+    }
+
+    public ArrayList<Integer> getPointsY(){
+        ArrayList<Integer> list = new ArrayList<>();
+        for (int i = 0; i < points.size(); i++) {
+            list.add(points.get(i).getY());
+        }
+        return list;
+    }
 
     @Override
     public boolean keyDown(int keycode) {
