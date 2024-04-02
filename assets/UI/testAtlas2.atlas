@@ -14,7 +14,7 @@ GUI_2x
 back
   rotate: false
   xy: 193, 2
-  size: 49, 47
+  size: 48, 48
   orig: 304, 224
   offset: 0, 0
   index: -1
@@ -50,6 +50,13 @@ next_btn
   rotate: false
   xy: 506, 212
   size: 8, 12
+  orig: 256, 32
+  offset: 0, 0
+  index: -1
+borders
+  rotate: false
+  xy: 146, 2
+  size: 48, 48
   orig: 256, 32
   offset: 0, 0
   index: -1

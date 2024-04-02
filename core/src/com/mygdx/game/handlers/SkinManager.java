@@ -30,6 +30,8 @@ public class SkinManager {
         skin.add("menuBtn_up", menuBtn_up);
         NinePatch menuBtn_down = new NinePatch(uiAtlas2.findRegion("menuBtn_down"),10, 10, 10, 10);
         skin.add("menuBtn_down", menuBtn_down);
+        NinePatch borders = new NinePatch(uiAtlas2.findRegion("borders"),10, 10, 10, 10);
+        skin.add("borders", borders);
         /*NinePatch next_btn = new NinePatch(uiAtlas2.findRegion("next_btn"),10, 10, 1, 1);
         skin.add("next_btn", next_btn);*/
 
@@ -48,6 +50,10 @@ public class SkinManager {
         skin.add("next_btn", uiAtlas2.findRegion("next_btn"), TextureRegion.class);
         BitmapFont font = assetManager.get("mcRus.fnt", BitmapFont.class);
         skin.add("font", font);
+
+        skin.add("ok", uiAtlas.findRegion("ok"), TextureRegion.class);
+        skin.add("ok_down", uiAtlas.findRegion("ok_down"), TextureRegion.class);
+        skin.add("wrong", uiAtlas.findRegion("wrong"), TextureRegion.class);
 
         Label.LabelStyle lstyle = new Label.LabelStyle();
         lstyle.font = skin.getFont("font");

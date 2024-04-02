@@ -15,8 +15,8 @@ import com.mygdx.game.handlers.*;
 public class MyGdxGame implements ApplicationListener {
     private static int width;
     private static int height;
-    public static int V_WIDTH = 1216;
-    public static int V_HEIGHT = 672;
+    public static int V_WIDTH = 1920;
+    public static int V_HEIGHT = 1080;
     //public static final int SCALE = 2;
     private SpriteBatch sb;
     private AssetManager assetManager;
