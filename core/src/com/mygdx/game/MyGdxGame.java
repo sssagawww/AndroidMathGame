@@ -11,12 +11,13 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.mygdx.game.battle.examples.ExampleDatabase;
 import com.mygdx.game.battle.steps.StepDatabase;
 import com.mygdx.game.handlers.*;
+import com.mygdx.game.paint.Figures.FiguresDatabase;
 
 public class MyGdxGame implements ApplicationListener {
     private static int width;
     private static int height;
-    public static int V_WIDTH = 1920;
-    public static int V_HEIGHT = 1080;
+    public static int V_WIDTH = 1920; //1216
+    public static int V_HEIGHT = 1080; //672
     //public static final int SCALE = 2;
     private SpriteBatch sb;
     private AssetManager assetManager;
@@ -29,6 +30,7 @@ public class MyGdxGame implements ApplicationListener {
     private Skin skin;
     private StepDatabase stepDatabase;
     private ExampleDatabase exampleDatabase;
+    private FiguresDatabase figuresDatabase;
     public boolean save = false;
 
     public void create() {
@@ -62,6 +64,7 @@ public class MyGdxGame implements ApplicationListener {
         cam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
         stepDatabase = new StepDatabase();
         exampleDatabase = new ExampleDatabase();
+        figuresDatabase = new FiguresDatabase();
         gsm = new GameStateManager(this);
     }
 
@@ -135,5 +138,9 @@ public class MyGdxGame implements ApplicationListener {
 
     public ExampleDatabase getExampleDatabase() {
         return exampleDatabase;
+    }
+
+    public FiguresDatabase getFiguresDatabase() {
+        return figuresDatabase;
     }
 }

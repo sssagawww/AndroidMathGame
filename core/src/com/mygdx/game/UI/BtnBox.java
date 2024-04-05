@@ -14,7 +14,7 @@ public class BtnBox extends Table {
     private Table uiTable;
     private TextButton.TextButtonStyle style;
 
-    //стейты кнопок для всех игровых стейтов (PaintState, Menu, ...)
+    //стейты кнопок для всех игровых стейтов (PaintState, Menu, ...), переделать?
     public enum STATES {
         MENU_TO_PLAY,
         EXIT,
@@ -24,7 +24,8 @@ public class BtnBox extends Table {
         CLEAR,
         OK,
         WRONG,
-        CHECK
+        CHECK,
+        DONE
     }
 
     private STATES state;

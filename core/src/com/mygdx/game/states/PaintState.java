@@ -19,8 +19,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.UI.PaintMenu;
 import com.mygdx.game.handlers.GameStateManager;
+import com.mygdx.game.paint.Figures.FiguresDatabase;
 import com.mygdx.game.paint.PixelPoint;
 
 import java.util.ArrayList;
@@ -30,6 +32,7 @@ public class PaintState extends GameState implements InputProcessor {
     private int rectX, rectY;
     private int rectWidth, rectHeight;
     private ArrayList<PixelPoint> points;
+    private FiguresDatabase figuresDatabase;
     private Stage uiStage;
     private PaintMenu paintMenu;
     private InputMultiplexer multiplexer;
@@ -37,6 +40,7 @@ public class PaintState extends GameState implements InputProcessor {
     public PaintState(GameStateManager gsm) {
         super(gsm);
         game = gsm.game();
+        figuresDatabase = game.getFiguresDatabase();
         shapeRenderer = new ShapeRenderer();
         rectX = 0;
         rectY = 0;
@@ -48,6 +52,13 @@ public class PaintState extends GameState implements InputProcessor {
         multiplexer.addProcessor(this);
 
         initUI();
+
+        /*ArrayList<PixelPoint> pointsList = new ArrayList<>();
+        pointsList.add(new PixelPoint(110,210));
+        pointsList.add(new PixelPoint(110,220));
+        pointsList.add(new PixelPoint(110,230));
+        Figure figure = new Figure(1,pointsList,"line");
+        figure.save();*/
 
         //cam.setBounds(0, V_WIDTH, 0, V_HEIGHT); //?
 
@@ -80,6 +91,10 @@ public class PaintState extends GameState implements InputProcessor {
             shapeRenderer.rect(points.get(i).getX(), points.get(i).getY(), rectWidth, rectHeight);
             //shapeRenderer.circle(points.get(i).getX(), points.get(i).getY(), rectWidth);
         }
+
+        /*for (int i = 0; i < drawFigure(0).size(); i++) {
+            shapeRenderer.rect(drawFigure(0).get(i).getX(),  drawFigure(0).get(i).getY(), rectWidth, rectHeight);
+        }*/
         shapeRenderer.end();
         sb.end();
 
@@ -99,7 +114,7 @@ public class PaintState extends GameState implements InputProcessor {
         root.setFillParent(true);
         uiStage.addActor(root);
 
-        paintMenu = new PaintMenu(game.getSkin());
+        paintMenu = new PaintMenu(game.getSkin(), game);
 
         //временная кнопка выхода обратно
         Image menuImg = new Image(new Texture("controller/menuBtn.png"));
@@ -163,11 +178,18 @@ public class PaintState extends GameState implements InputProcessor {
             case WRONG: //временно
                 points.clear();
                 //checkDistance() например, метод, проверяющий совпадение пикселей и ставящий нужный стейт ok or wrong
-                //этот метод вернул ok или wrong -> setResultImage() поставил нужную картинку -> checkProgress(), который обновляется в update()
+                //этот метод вернул ok или wrong -> setResultImage() поставил нужную картинку -> checkProgress(), который обновляется в update(),
                 //отсчитывает несколько секунд, чтобы показать картинку, и запускает таймер заново
                 paintMenu.setResultImage();
                 break;
+            case DONE:
+                gsm.setState(PLAY);
+                break;
         }
+    }
+
+    public ArrayList<PixelPoint> drawFigure(int index) {
+        return figuresDatabase.getFigure(index).getHints();
     }
 
     public ArrayList<PixelPoint> getPoints() {

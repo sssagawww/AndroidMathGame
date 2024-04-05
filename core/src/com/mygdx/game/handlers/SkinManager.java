@@ -3,6 +3,7 @@ package com.mygdx.game.handlers;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -54,6 +55,12 @@ public class SkinManager {
         skin.add("ok", uiAtlas.findRegion("ok"), TextureRegion.class);
         skin.add("ok_down", uiAtlas.findRegion("ok_down"), TextureRegion.class);
         skin.add("wrong", uiAtlas.findRegion("wrong"), TextureRegion.class);
+
+        skin.add("Круг", new Texture("controller/menuBtn.png"));
+        skin.add("Квадрат", new Texture("controller/downBtn.png"));
+        skin.add("Треугольник", new Texture("controller/upBtn.png"));
+        skin.add("Ромб", new Texture("controller/leftBtn.png"));
+        skin.add("Звезда", new Texture("controller/rightBtn.png"));
 
         Label.LabelStyle lstyle = new Label.LabelStyle();
         lstyle.font = skin.getFont("font");
