@@ -27,7 +27,7 @@ public class SkinManager {
         skin.add("background2", background2);
         NinePatch option = new NinePatch(uiAtlas3.findRegion("optionbox"),6, 6, 6, 6);
         skin.add("optionbox", option);
-        NinePatch status = new NinePatch(uiAtlas2.findRegion("status"),5, 4, 2, 2);
+        NinePatch status = new NinePatch(uiAtlas.findRegion("background"),5, 4, 2, 2);
         skin.add("status", status);
         NinePatch menuBtn_up = new NinePatch(uiAtlas2.findRegion("menuBtn_up"),10, 10, 10, 10);
         skin.add("menuBtn_up", menuBtn_up);
