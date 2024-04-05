@@ -145,6 +145,7 @@ public class Play extends GameState {
         //можно начать бой
         if (canDraw) {
             uiStage.act(dt);
+            dcontroller.update(dt);
             time+=dt;
             if (dialogueBox.isFinished() && time > 2f) {
                 time = 0;
@@ -168,8 +169,6 @@ public class Play extends GameState {
                 joyStick.setDefaultPos();
             }
         }
-
-        dcontroller.update(dt);
     }
 
     @Override

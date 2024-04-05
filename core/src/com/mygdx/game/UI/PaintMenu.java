@@ -89,7 +89,6 @@ public class PaintMenu extends Table {
     }
 
     public void checkProgress(float dt) {
-
         if (btnBox.getState() == NON) {
             time += dt;
             timerLabel.setText("00:" + (period - Math.round(time)) + "");
