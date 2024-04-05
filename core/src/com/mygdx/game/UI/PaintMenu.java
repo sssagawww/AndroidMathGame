@@ -89,10 +89,7 @@ public class PaintMenu extends Table {
     }
 
     public void checkProgress(float dt) {
-        if(curFigure == figuresDatabase.getFiguresCount()){
-            btnBox.setState(DONE);
-            return;
-        }
+
         if (btnBox.getState() == NON) {
             time += dt;
             timerLabel.setText("00:" + (period - Math.round(time)) + "");
@@ -110,6 +107,9 @@ public class PaintMenu extends Table {
                 resultStyle.background = null;
                 time = 0;
             }
+        }
+        if(curFigure == figuresDatabase.getFiguresCount()){
+            btnBox.setState(DONE);
         }
     }
 

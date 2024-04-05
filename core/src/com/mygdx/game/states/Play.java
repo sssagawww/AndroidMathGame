@@ -27,7 +27,6 @@ import com.mygdx.game.UI.Controller;
 import com.mygdx.game.UI.DialogBox;
 import com.mygdx.game.UI.JoyStick;
 import com.mygdx.game.UI.OptionBox;
-import com.mygdx.game.entities.Boss;
 import com.mygdx.game.entities.PlayEntities;
 import com.mygdx.game.entities.Player2;
 import com.mygdx.game.handlers.BoundedCamera;
@@ -40,9 +39,6 @@ import static com.mygdx.game.handlers.B2DVars.*;
 import static com.mygdx.game.handlers.GameStateManager.BATTLE;
 import static com.mygdx.game.handlers.GameStateManager.MENU;
 import static com.mygdx.game.handlers.GameStateManager.PAINT;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 
 public class Play extends GameState {
     private MyGdxGame game;
@@ -65,7 +61,6 @@ public class Play extends GameState {
     private DialogBox dialogueBox;
     private OptionBox optionBox;
     private Skin skin_this;
-    private OptionBoxController obc;
     private InputMultiplexer multiplexer;
     private Dialog dialog;
     private DialogController dcontroller;
@@ -73,6 +68,7 @@ public class Play extends GameState {
     private Preferences prefs;
     public boolean canDraw;
     public boolean savePlay;
+    private float time = 0;
     public BodyDef bdef;
     private Controller controller;
     // -------- JoyStick ----------
@@ -149,15 +145,15 @@ public class Play extends GameState {
         //можно начать бой
         if (canDraw) {
             uiStage.act(dt);
-            if (dialogueBox.isPressed() && dialogueBox.isFinished()) {
+            time+=dt;
+            if (dialogueBox.isFinished() && time > 2f) {
+                time = 0;
                 gsm.setState(nextState);
                 music.dispose();
                 isStopped = true;
                 canDraw = false;
             }
         }
-        //dcontroller.update(dt);
-
         //обновление джойстика
         if (isJoyStick) {
             if (Gdx.input.isTouched()) {
@@ -172,6 +168,8 @@ public class Play extends GameState {
                 joyStick.setDefaultPos();
             }
         }
+
+        dcontroller.update(dt);
     }
 
     @Override
@@ -357,7 +355,7 @@ public class Play extends GameState {
 
         dcontroller = new DialogController(dialogueBox, optionBox);
         multiplexer.addProcessor(uiStage); //не нагружает ли большое кол-во процессов программу?
-        multiplexer.addProcessor(dcontroller);
+        //multiplexer.addProcessor(dcontroller);
         Gdx.input.setInputProcessor(multiplexer);
 
         dialog = new Dialog();
@@ -426,9 +424,7 @@ public class Play extends GameState {
 
         dialogRoot.add(dialogTable).expand().align(Align.bottom).pad(15f);
 
-        obc = new OptionBoxController(optionBox);
         dcontroller = new DialogController(dialogueBox, optionBox);
-        multiplexer.addProcessor(obc);
         multiplexer.addProcessor(dcontroller);
         Gdx.input.setInputProcessor(multiplexer);
 

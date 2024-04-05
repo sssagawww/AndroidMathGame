@@ -19,7 +19,11 @@ import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.mygdx.game.MyGdxGame;
+import com.mygdx.game.Dialog.Dialog;
+import com.mygdx.game.Dialog.DialogController;
+import com.mygdx.game.Dialog.DialogNode;
+import com.mygdx.game.UI.DialogBox;
+import com.mygdx.game.UI.OptionBox;
 import com.mygdx.game.UI.PaintMenu;
 import com.mygdx.game.handlers.GameStateManager;
 import com.mygdx.game.paint.Figures.FiguresDatabase;
@@ -36,6 +40,9 @@ public class PaintState extends GameState implements InputProcessor {
     private Stage uiStage;
     private PaintMenu paintMenu;
     private InputMultiplexer multiplexer;
+    private Dialog dialog;
+    private DialogController dcontroller;
+    private DialogNode node;
 
     public PaintState(GameStateManager gsm) {
         super(gsm);
@@ -53,13 +60,6 @@ public class PaintState extends GameState implements InputProcessor {
 
         initUI();
 
-        /*ArrayList<PixelPoint> pointsList = new ArrayList<>();
-        pointsList.add(new PixelPoint(110,210));
-        pointsList.add(new PixelPoint(110,220));
-        pointsList.add(new PixelPoint(110,230));
-        Figure figure = new Figure(1,pointsList,"line");
-        figure.save();*/
-
         //cam.setBounds(0, V_WIDTH, 0, V_HEIGHT); //?
 
         Gdx.input.setInputProcessor(multiplexer);
@@ -74,6 +74,7 @@ public class PaintState extends GameState implements InputProcessor {
     public void update(float dt) {
         uiStage.act(dt);
         checkBtns();
+        dcontroller.update(dt);
         paintMenu.checkProgress(dt);
     }
 
@@ -137,6 +138,22 @@ public class PaintState extends GameState implements InputProcessor {
         root.add(menuImg).expand().align(Align.topLeft).padTop(65f);
         root.add(table).expand().align(Align.bottomRight).padBottom(10f);
 
+        Table dialogRoot = new Table();
+        dialogRoot.setFillParent(true);
+        uiStage.addActor(dialogRoot);
+
+        DialogBox dialogueBox = new DialogBox(game.getSkin());
+        dialogueBox.setVisible(false);
+
+        //уже не используется, но если переделать, то можно использовать в выборе из 2 варинтов
+        OptionBox optionBox = new OptionBox(game.getSkin());
+        optionBox.setVisible(false);
+
+        dialogRoot.add(dialogueBox).expand().align(Align.top).padTop(50f);
+
+        dcontroller = new DialogController(dialogueBox, optionBox);
+        dialog = new Dialog();
+
         multiplexer.addProcessor(uiStage);
         Gdx.input.setInputProcessor(multiplexer);
     }
@@ -173,19 +190,36 @@ public class PaintState extends GameState implements InputProcessor {
                 points.clear();
                 paintMenu.getBtnBox().setState(NON);
                 break;
-            case CHECK:
+            //case CHECK:
             case OK: //временно
-            case WRONG: //временно
+                node = new DialogNode("Получилось! Молодец!", 0);
+                startDialogController();
+
                 points.clear();
+                paintMenu.setResultImage();
+                break;
+            case WRONG: //временно
+                node = new DialogNode("Попробуй еще раз!", 0);
+                startDialogController();
+
                 //checkDistance() например, метод, проверяющий совпадение пикселей и ставящий нужный стейт ok or wrong
                 //этот метод вернул ok или wrong -> setResultImage() поставил нужную картинку -> checkProgress(), который обновляется в update(),
                 //отсчитывает несколько секунд, чтобы показать картинку, и запускает таймер заново
+                points.clear();
                 paintMenu.setResultImage();
                 break;
             case DONE:
                 gsm.setState(PLAY);
                 break;
         }
+    }
+
+    private void startDialogController(){
+        if(paintMenu.getBtnBox().isClicked()){
+            dialog.addNode(node);
+            dcontroller.startDialog(dialog);
+        }
+        paintMenu.getBtnBox().setClicked(false);
     }
 
     public ArrayList<PixelPoint> drawFigure(int index) {

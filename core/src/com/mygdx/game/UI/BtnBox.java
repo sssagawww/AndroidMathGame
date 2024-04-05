@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -29,6 +30,7 @@ public class BtnBox extends Table {
     }
 
     private STATES state;
+    private boolean clicked;
 
     public BtnBox(Skin skin) {
         super(skin);
@@ -52,6 +54,7 @@ public class BtnBox extends Table {
         btn.addListener(new InputListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                clicked = true;
                 return true;
             }
 
@@ -64,6 +67,14 @@ public class BtnBox extends Table {
 
         uiTable.add(btn).expand().align(Align.center).space(8f).padBottom(0f);
         uiTable.row();
+    }
+
+    public boolean isClicked(){
+        return clicked;
+    }
+
+    public void setClicked(boolean clicked) {
+        this.clicked = clicked;
     }
 
     public STATES getState() {

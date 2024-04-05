@@ -18,6 +18,13 @@ back
   orig: 304, 224
   offset: 0, 0
   index: -1
+light_back
+  rotate: false
+  xy: 310, 2
+  size: 48, 48
+  orig: 304, 224
+  offset: 0, 0
+  index: -1
 buttons_2x
   rotate: false
   xy: 308, 194
