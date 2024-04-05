@@ -10,8 +10,14 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.mygdx.game.battle.examples.ExampleDatabase;
 import com.mygdx.game.battle.steps.StepDatabase;
+import com.mygdx.game.db.DbWrapper;
 import com.mygdx.game.handlers.*;
+import com.mygdx.game.paint.Figures.Figure;
 import com.mygdx.game.paint.Figures.FiguresDatabase;
+import com.mygdx.game.paint.PixelPoint;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class MyGdxGame implements ApplicationListener {
     private static int width;
@@ -31,7 +37,12 @@ public class MyGdxGame implements ApplicationListener {
     private StepDatabase stepDatabase;
     private ExampleDatabase exampleDatabase;
     private FiguresDatabase figuresDatabase;
+    private DbWrapper dbWrapper;
     public boolean save = false;
+
+    public MyGdxGame(DbWrapper dbWrapper) {
+        this.dbWrapper = dbWrapper;
+    }
 
     public void create() {
         //Gdx.input.setInputProcessor(new MyInputProcessor());
@@ -64,8 +75,14 @@ public class MyGdxGame implements ApplicationListener {
         cam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
         stepDatabase = new StepDatabase();
         exampleDatabase = new ExampleDatabase();
-        figuresDatabase = new FiguresDatabase();
+        figuresDatabase = new FiguresDatabase(this);
         gsm = new GameStateManager(this);
+
+        dbWrapper.saveFigure(new Figure("Круг", FiguresDatabase.FIGURES_TYPES.CIRCLE, new ArrayList<>(Arrays.asList(
+                new PixelPoint(110, 210)
+        )), new ArrayList<>(Arrays.asList(
+                new PixelPoint(110, 210)
+        ))));
     }
 
     @Override
@@ -142,5 +159,9 @@ public class MyGdxGame implements ApplicationListener {
 
     public FiguresDatabase getFiguresDatabase() {
         return figuresDatabase;
+    }
+
+    public DbWrapper getDbWrapper() {
+        return dbWrapper;
     }
 }

@@ -93,9 +93,9 @@ public class PaintState extends GameState implements InputProcessor {
             //shapeRenderer.circle(points.get(i).getX(), points.get(i).getY(), rectWidth);
         }
 
-        /*for (int i = 0; i < drawFigure(0).size(); i++) {
+        for (int i = 0; i < drawFigure(0).size(); i++) {
             shapeRenderer.rect(drawFigure(0).get(i).getX(),  drawFigure(0).get(i).getY(), rectWidth, rectHeight);
-        }*/
+        }
         shapeRenderer.end();
         sb.end();
 

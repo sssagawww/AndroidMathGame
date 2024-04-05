@@ -1,5 +1,6 @@
 package com.mygdx.game.paint.Figures;
 
+import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.paint.PixelPoint;
 
 import java.util.ArrayList;
@@ -7,6 +8,7 @@ import java.util.Arrays;
 
 public class FiguresDatabase {
     private ArrayList<Figure> figures = new ArrayList<>();
+    private MyGdxGame game;
 
     public enum FIGURES_TYPES {
         SQUARE,
@@ -16,8 +18,14 @@ public class FiguresDatabase {
         RHOMBUS
     }
 
-    public FiguresDatabase() {
-        initializeFigures();
+    public FiguresDatabase(MyGdxGame game) {
+        this.game = game;
+        //initializeFigures();
+        figures = game.getDbWrapper().getFigures();
+    }
+
+    public void addFigure(Figure figure){
+        game.getDbWrapper().saveFigure(figure);
     }
 
     //???
@@ -67,9 +75,9 @@ public class FiguresDatabase {
         ))));
     }
 
-    public void addFigure(Figure figure) {
+    /*public void addFigure(Figure figure) {
         figures.add(figure);
-    }
+    }*/
 
     public Figure getFigure(int index){
         return figures.get(index);

@@ -1,22 +1,26 @@
-package com.mygdx.game.paint.Figures;
+package com.mygdx.game.db;
 
+import com.mygdx.game.paint.Figures.Figure;
+import com.mygdx.game.paint.Figures.FiguresDatabase;
 import com.mygdx.game.paint.PixelPoint;
+import com.orm.SugarRecord;
+
 import java.util.ArrayList;
 
-public class Figure {
+public class SugarFigure extends SugarRecord {
     private String name;
     private FiguresDatabase.FIGURES_TYPES figureType;
     private ArrayList<PixelPoint> points;
     private ArrayList<PixelPoint> hints;
 
-    public Figure() {
+    public SugarFigure() {
     }
 
-    public Figure(String name , FiguresDatabase.FIGURES_TYPES figureName, ArrayList<PixelPoint> points, ArrayList<PixelPoint> hints) {
-        this.name = name;
-        this.figureType = figureName;
-        this.points = points;
-        this.hints = hints;
+    public SugarFigure(Figure figure) {
+        this.name = figure.getName();
+        this.figureType = figure.getFigureType();
+        this.points = figure.getPoints();
+        this.hints = figure.getHints();
     }
 
     public String getName() {
@@ -25,6 +29,14 @@ public class Figure {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public FiguresDatabase.FIGURES_TYPES getFigureType() {
+        return figureType;
+    }
+
+    public void setFigureType(FiguresDatabase.FIGURES_TYPES figureType) {
+        this.figureType = figureType;
     }
 
     public ArrayList<PixelPoint> getPoints() {
@@ -41,13 +53,5 @@ public class Figure {
 
     public void setHints(ArrayList<PixelPoint> hints) {
         this.hints = hints;
-    }
-
-    public FiguresDatabase.FIGURES_TYPES getFigureType() {
-        return figureType;
-    }
-
-    public void setFigureType(FiguresDatabase.FIGURES_TYPES figureType) {
-        this.figureType = figureType;
     }
 }
