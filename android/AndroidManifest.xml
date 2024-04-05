@@ -6,7 +6,6 @@
     <uses-feature android:glEsVersion="0x00020000" android:required="true" />
 
     <application
-        android:name="com.orm.SugarApp"
         android:allowBackup="true"
         android:fullBackupContent="true"
         android:icon="@drawable/ic_launcher"
