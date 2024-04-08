@@ -26,10 +26,13 @@ import com.mygdx.game.UI.DialogBox;
 import com.mygdx.game.UI.OptionBox;
 import com.mygdx.game.UI.PaintMenu;
 import com.mygdx.game.handlers.GameStateManager;
+import com.mygdx.game.paint.DistanceCalc;
+import com.mygdx.game.paint.Figures.Figure;
 import com.mygdx.game.paint.Figures.FiguresDatabase;
 import com.mygdx.game.paint.PixelPoint;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class PaintState extends GameState implements InputProcessor {
     private ShapeRenderer shapeRenderer;
@@ -43,6 +46,7 @@ public class PaintState extends GameState implements InputProcessor {
     private Dialog dialog;
     private DialogController dcontroller;
     private DialogNode node;
+    private DistanceCalc distanceCalc;
 
     public PaintState(GameStateManager gsm) {
         super(gsm);
@@ -57,6 +61,8 @@ public class PaintState extends GameState implements InputProcessor {
         points = new ArrayList<>();
         multiplexer = new InputMultiplexer();
         multiplexer.addProcessor(this);
+
+        distanceCalc = new DistanceCalc(this);
 
         initUI();
 
@@ -88,14 +94,15 @@ public class PaintState extends GameState implements InputProcessor {
         sb.begin();
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.setColor(Color.BLACK);
-        for (int i = 0; i < points.size(); i++) {
-            shapeRenderer.rect(points.get(i).getX(), points.get(i).getY(), rectWidth, rectHeight);
+        for (int i = 0; i < getPoints().size(); i++) {
+            shapeRenderer.rect(getPoints().get(i).getX(), getPoints().get(i).getY(), rectWidth, rectHeight);
             //shapeRenderer.circle(points.get(i).getX(), points.get(i).getY(), rectWidth);
         }
 
-        for (int i = 0; i < drawFigure(0).size(); i++) {
-            shapeRenderer.rect(drawFigure(0).get(i).getX(),  drawFigure(0).get(i).getY(), rectWidth, rectHeight);
+        for (int i = 0; i < getFigurePoints().size(); i++) {
+            shapeRenderer.rect(getFigurePoints().get(i).getX(), getFigurePoints().get(i).getY(), rectWidth, rectHeight);
         }
+
         shapeRenderer.end();
         sb.end();
 
@@ -178,6 +185,7 @@ public class PaintState extends GameState implements InputProcessor {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 paintMenu.getBtnBox().setState(CHECK);
+                paintMenu.getBtnBox().setClicked(true);
             }
         });
         table.add(btn).width(100f).height(100f);
@@ -185,28 +193,30 @@ public class PaintState extends GameState implements InputProcessor {
     }
 
     private void checkBtns() {
+        if (paintMenu.getBtnBox().getState() == CHECK) {
+            if (distanceCalc.isSame()) {
+                paintMenu.getBtnBox().setState(OK);
+            } else {
+                paintMenu.getBtnBox().setState(WRONG);
+            }
+            paintMenu.setAccuracy(distanceCalc.getAccuracy());
+        }
         switch (paintMenu.getBtnBox().getState()) {
             case CLEAR:
+                // !!! ВРЕМЕННОЕ СОХРАНЕНИЕ НА КНОПКУ ФИГУРЫ В ДБ !!!
+                game.getDbWrapper().saveFigure(new Figure("Квадрат", FiguresDatabase.FIGURES_TYPES.SQUARE, points, points));
+                System.out.println(game.getDbWrapper().getFigures());
+
                 points.clear();
                 paintMenu.getBtnBox().setState(NON);
                 break;
-            //case CHECK:
-            case OK: //временно
+            case OK:
                 node = new DialogNode("Получилось! Молодец!", 0);
                 startDialogController();
-
-                points.clear();
-                paintMenu.setResultImage();
                 break;
-            case WRONG: //временно
+            case WRONG:
                 node = new DialogNode("Попробуй еще раз!", 0);
                 startDialogController();
-
-                //checkDistance() например, метод, проверяющий совпадение пикселей и ставящий нужный стейт ok or wrong
-                //этот метод вернул ok или wrong -> setResultImage() поставил нужную картинку -> checkProgress(), который обновляется в update(),
-                //отсчитывает несколько секунд, чтобы показать картинку, и запускает таймер заново
-                points.clear();
-                paintMenu.setResultImage();
                 break;
             case DONE:
                 gsm.setState(PLAY);
@@ -214,36 +224,30 @@ public class PaintState extends GameState implements InputProcessor {
         }
     }
 
-    private void startDialogController(){
-        if(paintMenu.getBtnBox().isClicked()){
+    private void startDialogController() {
+        if (paintMenu.getBtnBox().isClicked()) {
             dialog.addNode(node);
             dcontroller.startDialog(dialog);
         }
+        points.clear();
+        paintMenu.setResultImage();
         paintMenu.getBtnBox().setClicked(false);
-    }
-
-    public ArrayList<PixelPoint> drawFigure(int index) {
-        return figuresDatabase.getFigure(index).getHints();
     }
 
     public ArrayList<PixelPoint> getPoints() {
         return points;
     }
 
-    public ArrayList<Integer> getPointsX() {
-        ArrayList<Integer> list = new ArrayList<>();
+    /*public ArrayList<PixelPoint> getNewPoints() {
+        ArrayList<PixelPoint> list = new ArrayList<>();
         for (int i = 0; i < points.size(); i++) {
-            list.add(points.get(i).getX());
+            list.add(new PixelPoint(points.get(i).getX()*2, points.get(i).getY()*2));
         }
         return list;
-    }
+    }*/
 
-    public ArrayList<Integer> getPointsY() {
-        ArrayList<Integer> list = new ArrayList<>();
-        for (int i = 0; i < points.size(); i++) {
-            list.add(points.get(i).getY());
-        }
-        return list;
+    public ArrayList<PixelPoint> getFigurePoints() {
+        return figuresDatabase.getFigure(figuresDatabase.getCurFigure()).getPoints();
     }
 
     @Override
@@ -273,7 +277,10 @@ public class PaintState extends GameState implements InputProcessor {
 
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
-        points.add(new PixelPoint(screenX - rectWidth / 2 + 20, V_HEIGHT - screenY - rectHeight / 2));
+        if(screenX < V_WIDTH/1.55f && screenY < V_HEIGHT){
+            points.add(new PixelPoint(screenX, V_HEIGHT - screenY));
+        }
+        System.out.println(points + " points");
         return false;
     }
 

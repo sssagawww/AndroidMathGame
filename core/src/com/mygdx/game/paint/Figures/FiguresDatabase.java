@@ -1,6 +1,7 @@
 package com.mygdx.game.paint.Figures;
 
 import com.mygdx.game.MyGdxGame;
+import com.mygdx.game.db.DbWrapper;
 import com.mygdx.game.paint.PixelPoint;
 
 import java.util.ArrayList;
@@ -9,6 +10,8 @@ import java.util.Arrays;
 public class FiguresDatabase {
     private ArrayList<Figure> figures = new ArrayList<>();
     private MyGdxGame game;
+    private DbWrapper dbWrapper;
+    private int curFigure;
 
     public enum FIGURES_TYPES {
         SQUARE,
@@ -20,17 +23,19 @@ public class FiguresDatabase {
 
     public FiguresDatabase(MyGdxGame game) {
         this.game = game;
-        //initializeFigures();
-        figures = game.getDbWrapper().getFigures();
+        dbWrapper = game.getDbWrapper();
+        curFigure = 0;
+        initializeFigures();
+        //figures = game.getDbWrapper().getFigures();
     }
 
-    public void addFigure(Figure figure){
+    public void addFigure(Figure figure) {
         game.getDbWrapper().saveFigure(figure);
     }
 
     //???
     private void initializeFigures() {
-        addFigure(new Figure("Квадрат",FIGURES_TYPES.SQUARE, new ArrayList<>(Arrays.asList(
+        addArrayFigure(new Figure("Квадрат",FIGURES_TYPES.SQUARE, new ArrayList<>(Arrays.asList(
                 new PixelPoint(110, 210),
                 new PixelPoint(110, 220),
                 new PixelPoint(110, 230),
@@ -50,40 +55,72 @@ public class FiguresDatabase {
                 new PixelPoint(140, 240)
         ))));
 
-        addFigure(new Figure("Круг",FIGURES_TYPES.CIRCLE, new ArrayList<>(Arrays.asList(
+        addArrayFigure(new Figure("Круг", FIGURES_TYPES.CIRCLE, new ArrayList<>(Arrays.asList(
+                new PixelPoint(310, 310),
+                new PixelPoint(320, 320),
+                new PixelPoint(330, 330),
+                new PixelPoint(340, 330),
+                new PixelPoint(350, 330),
+                new PixelPoint(360, 330),
+                new PixelPoint(370, 320),
+                new PixelPoint(380, 310),
+                new PixelPoint(380, 300),
+                new PixelPoint(380, 290),
+                new PixelPoint(380, 280),
+                new PixelPoint(370, 270),
+                new PixelPoint(360, 260),
+                new PixelPoint(350, 260),
+                new PixelPoint(340, 260),
+                new PixelPoint(330, 260),
+                new PixelPoint(320, 270),
+                new PixelPoint(310, 280),
+                new PixelPoint(310, 290),
+                new PixelPoint(310, 300)
+
+        )), new ArrayList<>(Arrays.asList(
+                new PixelPoint(110, 210)
+        ))));
+
+        addArrayFigure(new Figure("Звезда",FIGURES_TYPES.STAR, new ArrayList<>(Arrays.asList(
                 new PixelPoint(110, 210)
         )), new ArrayList<>(Arrays.asList(
                 new PixelPoint(110, 210)
         ))));
 
-        addFigure(new Figure("Звезда",FIGURES_TYPES.STAR, new ArrayList<>(Arrays.asList(
-                new PixelPoint(110, 210)
-        )), new ArrayList<>(Arrays.asList(
-                new PixelPoint(110, 210)
-        ))));
-
-        addFigure(new Figure("Треугольник",FIGURES_TYPES.TRIANGLE, new ArrayList<>(
+        addArrayFigure(new Figure("Треугольник",FIGURES_TYPES.TRIANGLE, new ArrayList<>(
                 Arrays.asList(new PixelPoint(110, 210)
                 )), new ArrayList<>(Arrays.asList(
                 new PixelPoint(110, 210)
         ))));
 
-        addFigure(new Figure("Ромб",FIGURES_TYPES.RHOMBUS, new ArrayList<>(Arrays.asList(
+        addArrayFigure(new Figure("Ромб",FIGURES_TYPES.RHOMBUS, new ArrayList<>(Arrays.asList(
                 new PixelPoint(110, 210)
         )), new ArrayList<>(Arrays.asList(
                 new PixelPoint(110, 210)
         ))));
     }
 
-    /*public void addFigure(Figure figure) {
+    public void addArrayFigure(Figure figure) {
         figures.add(figure);
-    }*/
+    }
 
-    public Figure getFigure(int index){
+    public Figure getFigure(int index) {
         return figures.get(index);
     }
 
-    public int getFiguresCount(){
+    public int getFiguresCount() {
         return figures.size();
+    }
+
+    public int getCurFigure() {
+        return curFigure;
+    }
+
+    public int nextFigure() {
+        return ++curFigure;
+    }
+
+    public void resetFigureNum() {
+        curFigure = 0;
     }
 }

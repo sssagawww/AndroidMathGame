@@ -58,11 +58,11 @@ public class SkinManager {
         skin.add("ok_down", uiAtlas.findRegion("ok_down"), TextureRegion.class);
         skin.add("wrong", uiAtlas.findRegion("wrong"), TextureRegion.class);
 
-        skin.add("Круг", new Texture("controller/menuBtn.png"));
-        skin.add("Квадрат", new Texture("controller/downBtn.png"));
-        skin.add("Треугольник", new Texture("controller/upBtn.png"));
-        skin.add("Ромб", new Texture("controller/leftBtn.png"));
-        skin.add("Звезда", new Texture("controller/rightBtn.png"));
+        skin.add("Квадрат", new Texture("controller/square.png"));
+        skin.add("Круг", new Texture("controller/circle.png"));
+        skin.add("Звезда", new Texture("controller/star.png"));
+        skin.add("Треугольник", new Texture("controller/triangle.png"));
+        skin.add("Ромб", new Texture("controller/rhombus.png"));
 
         Label.LabelStyle lstyle = new Label.LabelStyle();
         lstyle.font = skin.getFont("font");

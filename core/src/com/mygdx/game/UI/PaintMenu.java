@@ -19,19 +19,20 @@ public class PaintMenu extends Table {
     private Table uiTable;
     private BtnBox btnBox;
     private Label.LabelStyle resultStyle;
+    private  Label.LabelStyle lstyle;
     private Label timerLabel;
     private Label figureLabel;
+    private Label accuracyLabel;
     private Image figureImage;
-    private  Label.LabelStyle lstyle;
     private float time;
     private int period;
-    private int curFigure = 0;
     private FiguresDatabase figuresDatabase;
 
     public PaintMenu(Skin skin, MyGdxGame game) {
         super(skin);
         this.game = game;
         figuresDatabase = game.getFiguresDatabase();
+        figuresDatabase.resetFigureNum();
         time = 0;
         period = 60;
 
@@ -49,7 +50,7 @@ public class PaintMenu extends Table {
         textLabel.setAlignment(Align.center);
         uiTable.add(textLabel).align(Align.bottom).width(getPrefWidth() - 4).row();
 
-        figureImage = new Image(new Texture("controller/star.png"));
+        figureImage = new Image(new Texture("controller/square.png"));
         //uiTable.add(image).align(Align.top).width(200f).height(200f).row();
 
         Table imageTable = new Table(getSkin());
@@ -58,7 +59,7 @@ public class PaintMenu extends Table {
         uiTable.add(imageTable).padTop(10f).padBottom(10f).row();
 
         figureLabel = new Label("\n", lstyle);
-        figureLabel.setText(figuresDatabase.getFigure(curFigure).getName());
+        figureLabel.setText(figuresDatabase.getFigure(figuresDatabase.getCurFigure()).getName());
         figureLabel.setAlignment(Align.center);
         uiTable.add(figureLabel).width(getPrefWidth() - 4).row();
 
@@ -73,6 +74,11 @@ public class PaintMenu extends Table {
         uiTable.add(resultTable).padBottom(20f).padTop(20f).row();
 
         initBtns();
+
+        accuracyLabel = new Label("\n", lstyle);
+        accuracyLabel.setText("Точность: ");
+        accuracyLabel.setAlignment(Align.center);
+        uiTable.add(accuracyLabel).align(Align.bottom).width(getPrefWidth() - 4).row();
     }
 
     private void setNextFigure(String name){
@@ -80,14 +86,18 @@ public class PaintMenu extends Table {
         figureImage.setDrawable(this.getSkin(), name);
     }
 
+    public void setAccuracy(double value){
+        accuracyLabel.setText("Точность: " + String.format("%.2f",1-value));
+    }
+
     private void initBtns() {
         btnBox = new BtnBox(getSkin());
         btnBox.addBtn("Стереть", CLEAR);
-        btnBox.addBtn("//Ок", OK);
-        btnBox.addBtn("//Не ок", WRONG);
-        uiTable.add(btnBox).align(Align.bottom);
+        uiTable.add(btnBox).align(Align.bottom).row();
     }
 
+    //isSame() сетнул ok или wrong -> setResultImage() поставил нужную картинку -> checkProgress(), который обновляется в update(),
+    //отсчитывает несколько секунд, чтобы показать картинку, и запускает таймер заново
     public void checkProgress(float dt) {
         if (btnBox.getState() == NON) {
             time += dt;
@@ -100,14 +110,16 @@ public class PaintMenu extends Table {
             time += dt;
             if (time > 3f) {
                 if(btnBox.getState() == OK){
-                    setNextFigure(figuresDatabase.getFigure(++curFigure % figuresDatabase.getFiguresCount()).getName());
+                    setNextFigure(figuresDatabase.getFigure(figuresDatabase.nextFigure() % figuresDatabase.getFiguresCount()).getName());
+                    setAccuracy(1);
                 }
                 btnBox.setState(NON);
                 resultStyle.background = null;
                 time = 0;
             }
         }
-        if(curFigure == figuresDatabase.getFiguresCount()){
+        if(figuresDatabase.getCurFigure() == figuresDatabase.getFiguresCount()){
+            figuresDatabase.resetFigureNum();
             btnBox.setState(DONE);
         }
     }

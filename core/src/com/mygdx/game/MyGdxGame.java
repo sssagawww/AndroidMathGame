@@ -40,6 +40,9 @@ public class MyGdxGame implements ApplicationListener {
     private DbWrapper dbWrapper;
     public boolean save = false;
 
+    public MyGdxGame() {
+    }
+
     public MyGdxGame(DbWrapper dbWrapper) {
         this.dbWrapper = dbWrapper;
     }
@@ -69,7 +72,6 @@ public class MyGdxGame implements ApplicationListener {
         assetManager.load("mcRus.fnt", BitmapFont.class);
         assetManager.finishLoading();
         skin = SkinManager.generateSkin(assetManager);
-
         sb = new SpriteBatch();
         cam = new BoundedCamera();
         cam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
@@ -77,12 +79,6 @@ public class MyGdxGame implements ApplicationListener {
         exampleDatabase = new ExampleDatabase();
         figuresDatabase = new FiguresDatabase(this);
         gsm = new GameStateManager(this);
-
-        dbWrapper.saveFigure(new Figure("Круг", FiguresDatabase.FIGURES_TYPES.CIRCLE, new ArrayList<>(Arrays.asList(
-                new PixelPoint(110, 210)
-        )), new ArrayList<>(Arrays.asList(
-                new PixelPoint(110, 210)
-        ))));
     }
 
     @Override
