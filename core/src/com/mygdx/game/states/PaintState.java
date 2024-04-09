@@ -36,9 +36,9 @@ import java.util.Arrays;
 
 public class PaintState extends GameState implements InputProcessor {
     private ShapeRenderer shapeRenderer;
-    private int rectX, rectY;
     private int rectWidth, rectHeight;
     private ArrayList<PixelPoint> points;
+    private ArrayList<Integer> skippedPoints = new ArrayList<>();
     private FiguresDatabase figuresDatabase;
     private Stage uiStage;
     private PaintMenu paintMenu;
@@ -53,8 +53,6 @@ public class PaintState extends GameState implements InputProcessor {
         game = gsm.game();
         figuresDatabase = game.getFiguresDatabase();
         shapeRenderer = new ShapeRenderer();
-        rectX = 0;
-        rectY = 0;
         rectWidth = 10;
         rectHeight = 10;
 
@@ -99,9 +97,9 @@ public class PaintState extends GameState implements InputProcessor {
         }
 
         shapeRenderer.setColor(Color.BLACK);
-        for (int i = 0; i < getPoints().size(); i++) {
-            shapeRenderer.rect(getPoints().get(i).getX(), getPoints().get(i).getY(), rectWidth, rectHeight);
-            //shapeRenderer.circle(points.get(i).getX(), points.get(i).getY(), rectWidth);
+        for (int i = 1; i < getPoints().size() - 1; i++) {
+            //shapeRenderer.rect(getPoints().get(i).getX(), getPoints().get(i).getY(), rectWidth, rectHeight);
+            if(!skippedPoints.contains(i)) shapeRenderer.rectLine(getPoints().get(i).getX(), getPoints().get(i).getY(), getPoints().get(i + 1).getX(), getPoints().get(i + 1).getY(), rectWidth);
         }
 
         shapeRenderer.end();
@@ -239,14 +237,6 @@ public class PaintState extends GameState implements InputProcessor {
         return points;
     }
 
-    /*public ArrayList<PixelPoint> getNewPoints() {
-        ArrayList<PixelPoint> list = new ArrayList<>();
-        for (int i = 0; i < points.size(); i++) {
-            list.add(new PixelPoint(points.get(i).getX()*2, points.get(i).getY()*2));
-        }
-        return list;
-    }*/
-
     public ArrayList<PixelPoint> getFigurePoints() {
         return figuresDatabase.getFigure(figuresDatabase.getCurFigure()).getPoints();
     }
@@ -277,15 +267,16 @@ public class PaintState extends GameState implements InputProcessor {
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+        skippedPoints.add(points.size()-1);
         return false;
     }
 
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
-        if(screenX < V_WIDTH/1.55f && screenY < V_HEIGHT){
+        if (screenX < V_WIDTH / 1.55f && screenY < V_HEIGHT) {
             points.add(new PixelPoint(screenX, V_HEIGHT - screenY));
         }
-        System.out.println(points + " points");
+        //System.out.println(points + " points");
         return false;
     }
 
