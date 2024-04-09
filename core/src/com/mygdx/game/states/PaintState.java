@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -18,6 +19,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.Dialog.Dialog;
 import com.mygdx.game.Dialog.DialogController;
@@ -33,6 +35,10 @@ import com.mygdx.game.paint.PixelPoint;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Vector;
+
+import space.earlygrey.shapedrawer.JoinType;
+import space.earlygrey.shapedrawer.ShapeDrawer;
 
 public class PaintState extends GameState implements InputProcessor {
     private ShapeRenderer shapeRenderer;
@@ -53,6 +59,7 @@ public class PaintState extends GameState implements InputProcessor {
         game = gsm.game();
         figuresDatabase = game.getFiguresDatabase();
         shapeRenderer = new ShapeRenderer();
+
         rectWidth = 10;
         rectHeight = 10;
 
@@ -95,14 +102,32 @@ public class PaintState extends GameState implements InputProcessor {
         for (int i = 0; i < getFigureHints().size(); i++) {
             shapeRenderer.rect(getFigureHints().get(i).getX(), getFigureHints().get(i).getY(), rectWidth, rectHeight);
         }
+        shapeRenderer.end();
+        sb.end();
 
-        shapeRenderer.setColor(Color.BLACK);
+        ShapeDrawer sd = new ShapeDrawer(sb);
+        sb.begin();
+        sd.setColor(Color.BLACK);
+
+        Array<Vector2> arr = new Array<>();
         for (int i = 1; i < getPoints().size() - 1; i++) {
-            //shapeRenderer.rect(getPoints().get(i).getX(), getPoints().get(i).getY(), rectWidth, rectHeight);
-            if(!skippedPoints.contains(i)) shapeRenderer.rectLine(getPoints().get(i).getX(), getPoints().get(i).getY(), getPoints().get(i + 1).getX(), getPoints().get(i + 1).getY(), rectWidth);
+            if (skippedPoints.contains(i)) {
+                sd.path(arr, JoinType.NONE);
+                arr.clear();
+                continue;
+            }
+            arr.add(new Vector2(getPoints().get(i).getX(), getPoints().get(i).getY()));
         }
 
-        shapeRenderer.end();
+//        shapeRenderer.setColor(Color.BLACK);
+//        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+//        for (int i = 1; i < getPoints().size() - 1; i++) {
+//            //shapeRenderer.rect(getPoints().get(i).getX(), getPoints().get(i).getY(), rectWidth, rectHeight);
+//            if (!skippedPoints.contains(i))
+//                shapeRenderer.rectLine(getPoints().get(i).getX(), getPoints().get(i).getY(), getPoints().get(i + 1).getX(), getPoints().get(i + 1).getY(), rectWidth);
+//        }
+//
+//        shapeRenderer.end();
         sb.end();
 
         uiStage.draw();
@@ -267,7 +292,7 @@ public class PaintState extends GameState implements InputProcessor {
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        skippedPoints.add(points.size()-1);
+        skippedPoints.add(points.size() - 1);
         return false;
     }
 
