@@ -19,7 +19,7 @@ public class GameStateManager {
         this.game = game;
         gameStates = new Stack<GameState>();
         //play = new Play(this);
-        pushState(PAINT);
+        pushState(MENU);
     }
 
     //peek - get верхний элемент
