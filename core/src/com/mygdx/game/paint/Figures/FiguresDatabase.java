@@ -26,22 +26,16 @@ public class FiguresDatabase {
         dbWrapper = game.getDbWrapper();
         curFigure = 0;
         //initializeFigures();
-        figures = game.getDbWrapper().getFigures();
-        setDbNames();
+        figures = dbWrapper.getFigures();
+        //setDbNames();
     }
 
-    private void setDbNames(){
-        figures.get(1).setName("Круг");
-        figures.get(1).setFigureType(FiguresDatabase.FIGURES_TYPES.CIRCLE);
-
-        figures.get(2).setName("Звезда");
-        figures.get(2).setFigureType(FiguresDatabase.FIGURES_TYPES.STAR);
-
-        figures.get(3).setName("Треугольник");
-        figures.get(3).setFigureType(FiguresDatabase.FIGURES_TYPES.TRIANGLE);
-
-        figures.get(4).setName("Ромб");
-        figures.get(4).setFigureType(FiguresDatabase.FIGURES_TYPES.RHOMBUS);
+    private void saveFigures(){
+        dbWrapper.saveFigure(figures.get(1));
+        dbWrapper.saveFigure(figures.get(2));
+        dbWrapper.saveFigure(figures.get(4));
+        dbWrapper.saveFigure(figures.get(6));
+        dbWrapper.saveFigure(figures.get(8));
     }
 
     public void addFigure(Figure figure) {

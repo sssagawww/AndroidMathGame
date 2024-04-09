@@ -92,15 +92,16 @@ public class PaintState extends GameState implements InputProcessor {
         //shapeRenderer.setProjectionMatrix(cam.combined);
 
         sb.begin();
+        shapeRenderer.setColor(Color.GRAY);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        for (int i = 0; i < getFigureHints().size(); i++) {
+            shapeRenderer.rect(getFigureHints().get(i).getX(), getFigureHints().get(i).getY(), rectWidth, rectHeight);
+        }
+
         shapeRenderer.setColor(Color.BLACK);
         for (int i = 0; i < getPoints().size(); i++) {
             shapeRenderer.rect(getPoints().get(i).getX(), getPoints().get(i).getY(), rectWidth, rectHeight);
             //shapeRenderer.circle(points.get(i).getX(), points.get(i).getY(), rectWidth);
-        }
-
-        for (int i = 0; i < getFigurePoints().size(); i++) {
-            shapeRenderer.rect(getFigurePoints().get(i).getX(), getFigurePoints().get(i).getY(), rectWidth, rectHeight);
         }
 
         shapeRenderer.end();
@@ -204,8 +205,8 @@ public class PaintState extends GameState implements InputProcessor {
         switch (paintMenu.getBtnBox().getState()) {
             case CLEAR:
                 // !!! ВРЕМЕННОЕ СОХРАНЕНИЕ НА КНОПКУ ФИГУРЫ В ДБ !!!
-                game.getDbWrapper().saveFigure(new Figure("Квадрат", FiguresDatabase.FIGURES_TYPES.SQUARE, points, points));
-                System.out.println(game.getDbWrapper().getFigures());
+                //game.getDbWrapper().saveFigure(new Figure("Ромб", FiguresDatabase.FIGURES_TYPES.RHOMBUS, points, points));
+                //System.out.println(game.getDbWrapper().getFigures());
 
                 points.clear();
                 paintMenu.getBtnBox().setState(NON);
@@ -248,6 +249,10 @@ public class PaintState extends GameState implements InputProcessor {
 
     public ArrayList<PixelPoint> getFigurePoints() {
         return figuresDatabase.getFigure(figuresDatabase.getCurFigure()).getPoints();
+    }
+
+    public ArrayList<PixelPoint> getFigureHints() {
+        return figuresDatabase.getFigure(figuresDatabase.getCurFigure()).getHints();
     }
 
     @Override

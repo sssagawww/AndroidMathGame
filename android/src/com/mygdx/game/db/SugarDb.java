@@ -30,7 +30,6 @@ public class SugarDb implements DbWrapper {
         for (SugarFigure sf : list) {
             figures.add(new Figure(sf.getName(), sf.getFigureType(), sf.getPoints(), sf.getHints()));
         }
-
         return figures;
     }
 
