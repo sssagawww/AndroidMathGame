@@ -27,7 +27,6 @@ public class FiguresDatabase {
         curFigure = 0;
         initializeFigures();
         //figures = dbWrapper.getFigures();
-        //setDbNames();
     }
 
     private void saveFigures(){

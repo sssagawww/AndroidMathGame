@@ -7,9 +7,13 @@ import static com.mygdx.game.handlers.GameStateManager.*;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -27,21 +31,21 @@ import com.mygdx.game.Dialog.DialogNode;
 import com.mygdx.game.UI.DialogBox;
 import com.mygdx.game.UI.OptionBox;
 import com.mygdx.game.UI.PaintMenu;
+import com.mygdx.game.handlers.BoundedCamera;
 import com.mygdx.game.handlers.GameStateManager;
 import com.mygdx.game.paint.DistanceCalc;
-import com.mygdx.game.paint.Figures.Figure;
 import com.mygdx.game.paint.Figures.FiguresDatabase;
 import com.mygdx.game.paint.PixelPoint;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Vector;
+import java.util.Objects;
 
 import space.earlygrey.shapedrawer.JoinType;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 public class PaintState extends GameState implements InputProcessor {
     private ShapeRenderer shapeRenderer;
+    private ShapeDrawer sd;
     private int rectWidth, rectHeight;
     private ArrayList<PixelPoint> points;
     private ArrayList<Integer> skippedPoints = new ArrayList<>();
@@ -53,6 +57,9 @@ public class PaintState extends GameState implements InputProcessor {
     private DialogController dcontroller;
     private DialogNode node;
     private DistanceCalc distanceCalc;
+    private Array<Vector2> arr = new Array<>();
+    private PolygonSpriteBatch batch;
+    private BoundedCamera paintCam;
 
     public PaintState(GameStateManager gsm) {
         super(gsm);
@@ -70,8 +77,11 @@ public class PaintState extends GameState implements InputProcessor {
         distanceCalc = new DistanceCalc(this);
 
         initUI();
+        createSD();
 
-        //cam.setBounds(0, V_WIDTH, 0, V_HEIGHT); //?
+        paintCam = new BoundedCamera();
+        paintCam.setBounds(0, V_WIDTH, 0, V_HEIGHT);
+        paintCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
 
         Gdx.input.setInputProcessor(multiplexer);
     }
@@ -94,8 +104,14 @@ public class PaintState extends GameState implements InputProcessor {
         Gdx.gl20.glClearColor(1, 1, 1, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+        paintCam.update();
+        sb.setProjectionMatrix(paintCam.combined);
+        batch.setProjectionMatrix(paintCam.combined);
+        //sd.update();
+
         //shapeRenderer.setProjectionMatrix(cam.combined);
 
+        //подсказки
         sb.begin();
         shapeRenderer.setColor(Color.GRAY);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
@@ -105,30 +121,42 @@ public class PaintState extends GameState implements InputProcessor {
         shapeRenderer.end();
         sb.end();
 
-        ShapeDrawer sd = new ShapeDrawer(sb);
-        sb.begin();
-        sd.setColor(Color.BLACK);
+        //рисунок игрока
 
-        Array<Vector2> arr = new Array<>();
+        //было изначально
+        /*shapeRenderer.setColor(Color.BLACK);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         for (int i = 1; i < getPoints().size() - 1; i++) {
-            if (skippedPoints.contains(i)) {
-                sd.path(arr, JoinType.NONE);
+            //shapeRenderer.rect(getPoints().get(i).getX(), getPoints().get(i).getY(), rectWidth, rectHeight);
+            if (!skippedPoints.contains(i))
+                shapeRenderer.rectLine(getPoints().get(i).getX(), getPoints().get(i).getY(), getPoints().get(i + 1).getX(), getPoints().get(i + 1).getY(), rectWidth);
+        }
+
+        shapeRenderer.end();*/
+
+        batch.begin();
+
+        for (int i = 0; i < getPoints().size() - 1; i++) {
+            //shapeRenderer.rect(getPoints().get(i).getX(), getPoints().get(i).getY(), rectWidth, rectHeight);
+            if (!skippedPoints.contains(i) && i % 2 == 0){
+                sd.line(getPoints().get(i).getX(), getPoints().get(i).getY(), getPoints().get(i + 1).getX(), getPoints().get(i + 1).getY(), rectWidth);
+            }
+        }
+
+        /*for (int i = 0; i < getPoints().size(); i++) {
+            sd.path(arr, JoinType.SMOOTH);
+            if (!skippedPoints.contains(i)) {
                 arr.clear();
                 continue;
             }
-            arr.add(new Vector2(getPoints().get(i).getX(), getPoints().get(i).getY()));
-        }
+            Vector2 newPoint = new Vector2(getPoints().get(i).getX(), getPoints().get(i).getY());
+            if (!arr.contains(newPoint, false)) {
+                arr.add(newPoint);
+            }
+            //arr.add(new Vector2(getPoints().get(i).getX(), getPoints().get(i).getY()));
+        }*/
 
-//        shapeRenderer.setColor(Color.BLACK);
-//        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-//        for (int i = 1; i < getPoints().size() - 1; i++) {
-//            //shapeRenderer.rect(getPoints().get(i).getX(), getPoints().get(i).getY(), rectWidth, rectHeight);
-//            if (!skippedPoints.contains(i))
-//                shapeRenderer.rectLine(getPoints().get(i).getX(), getPoints().get(i).getY(), getPoints().get(i + 1).getX(), getPoints().get(i + 1).getY(), rectWidth);
-//        }
-//
-//        shapeRenderer.end();
-        sb.end();
+        batch.end();
 
         uiStage.draw();
     }
@@ -136,6 +164,20 @@ public class PaintState extends GameState implements InputProcessor {
     @Override
     public void dispose() {
 
+    }
+
+    private void createSD() {
+        batch = new PolygonSpriteBatch();
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(Color.WHITE);
+        pixmap.fill();
+        Texture shapeDrawerTexture = new Texture(pixmap);
+        pixmap.dispose();
+        TextureRegion region = new TextureRegion(shapeDrawerTexture);
+
+        sd = new ShapeDrawer(batch, region);
+        sd.setDefaultLineWidth(10f);
+        sd.setColor(Color.BLACK);
     }
 
     public void initUI() {
@@ -232,6 +274,7 @@ public class PaintState extends GameState implements InputProcessor {
                 //System.out.println(game.getDbWrapper().getFigures());
 
                 points.clear();
+                arr.clear();
                 paintMenu.getBtnBox().setState(NON);
                 break;
             case OK:
@@ -253,6 +296,7 @@ public class PaintState extends GameState implements InputProcessor {
             dialog.addNode(node);
             dcontroller.startDialog(dialog);
         }
+        arr.clear();
         points.clear();
         paintMenu.setResultImage();
         paintMenu.getBtnBox().setClicked(false);
@@ -292,7 +336,9 @@ public class PaintState extends GameState implements InputProcessor {
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        skippedPoints.add(points.size() - 1);
+        if (screenX < V_WIDTH / 1.55f && screenY < V_HEIGHT) {
+            skippedPoints.add(points.size() - 1);
+        }
         return false;
     }
 
@@ -300,6 +346,11 @@ public class PaintState extends GameState implements InputProcessor {
     public boolean touchDragged(int screenX, int screenY, int pointer) {
         if (screenX < V_WIDTH / 1.55f && screenY < V_HEIGHT) {
             points.add(new PixelPoint(screenX, V_HEIGHT - screenY));
+            //arr.add(new Vector2(points.get(points.size()-1).getX(), points.get(points.size()-1).getY()));
+            /*Vector2 newPoint = new Vector2(getPoints().get(points.size()-1).getX(), getPoints().get(points.size()-1).getY());
+            if(!arr.contains(newPoint,false)){
+                arr.add(newPoint);
+            }*/
         }
         //System.out.println(points + " points");
         return false;
