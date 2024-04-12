@@ -134,25 +134,44 @@ public class PaintState extends GameState implements InputProcessor {
 
         batch.begin();
 
-        for (int i = 0; i < getPoints().size() - 1; i++) {
+        /*for (int i = 0; i < getPoints().size() - 1; i++) {
             //shapeRenderer.rect(getPoints().get(i).getX(), getPoints().get(i).getY(), rectWidth, rectHeight);
             if (!skippedPoints.contains(i) && i % 2 == 0){
                 sd.line(getPoints().get(i).getX(), getPoints().get(i).getY(), getPoints().get(i + 1).getX(), getPoints().get(i + 1).getY(), rectWidth);
             }
-        }
+        }*/
 
-        /*for (int i = 0; i < getPoints().size(); i++) {
+        int count = 0;
+        arr.clear();
+        for (int i = 0; i < getPoints().size(); i++) {
             if (skippedPoints.contains(i)) {
-                sd.path(arr, JoinType.SMOOTH);
+                count++;
+                sd.path(arr, JoinType.SMOOTH, true);
                 arr.clear();
                 continue;
             }
             Vector2 newPoint = new Vector2(getPoints().get(i).getX(), getPoints().get(i).getY());
-            if (!arr.contains(newPoint, false)) {
+
+            if (arr.isEmpty()) {
                 arr.add(newPoint);
+                arr.add(new Vector2(newPoint).add(1, 0));
+            } else {
+                Vector2 last = new Vector2(arr.get(arr.size - 2));
+                if (last.sub(newPoint).len() > rectWidth * 2) {
+                    arr.add(newPoint);
+                } else {
+                    arr.set(arr.size - 1, newPoint);
+                }
             }
+
+            /*if (!arr.contains(newPoint, false)) {
+                arr.add(newPoint);
+            }*/
             //arr.add(new Vector2(getPoints().get(i).getX(), getPoints().get(i).getY()));
-        }*/
+        }
+        sd.path(arr, JoinType.SMOOTH, true);
+
+        System.out.println(count);
 
         batch.end();
 
@@ -271,6 +290,7 @@ public class PaintState extends GameState implements InputProcessor {
                 //game.getDbWrapper().saveFigure(new Figure("Ромб", FiguresDatabase.FIGURES_TYPES.RHOMBUS, points, points));
                 //System.out.println(game.getDbWrapper().getFigures());
 
+                skippedPoints.clear();
                 points.clear();
                 arr.clear();
                 paintMenu.getBtnBox().setState(NON);
