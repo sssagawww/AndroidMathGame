@@ -7,7 +7,6 @@ import static com.mygdx.game.handlers.GameStateManager.*;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -38,7 +37,6 @@ import com.mygdx.game.paint.Figures.FiguresDatabase;
 import com.mygdx.game.paint.PixelPoint;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 import space.earlygrey.shapedrawer.JoinType;
 import space.earlygrey.shapedrawer.ShapeDrawer;
@@ -144,8 +142,8 @@ public class PaintState extends GameState implements InputProcessor {
         }
 
         /*for (int i = 0; i < getPoints().size(); i++) {
-            sd.path(arr, JoinType.SMOOTH);
-            if (!skippedPoints.contains(i)) {
+            if (skippedPoints.contains(i)) {
+                sd.path(arr, JoinType.SMOOTH);
                 arr.clear();
                 continue;
             }
