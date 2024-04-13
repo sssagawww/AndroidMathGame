@@ -25,8 +25,8 @@ public class FiguresDatabase {
         this.game = game;
         dbWrapper = game.getDbWrapper();
         curFigure = 0;
-        initializeFigures();
-        //figures = dbWrapper.getFigures();
+        //initializeFigures();
+        figures = dbWrapper.getFigures();
     }
 
     private void saveFigures(){

@@ -29,7 +29,7 @@ public class Controller extends Table {
         // --сделать атлас текстур и использовать его вместо нескольких картинок, как в других классах
 
         //кнопки взаимодействия
-        Image menuImg = new Image(new Texture("menuBtn.png"));
+        Image menuImg = new Image(new Texture("controller/menuBtn.png"));
         menuImg.setScale(5, 5);
         menuImg.addListener(new InputListener() {
             @Override
