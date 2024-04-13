@@ -76,7 +76,7 @@ public class Play extends GameState {
     private ShapeRenderer shapeRenderer;
     private Vector3 mouse;
     private BoundedCamera joyCam;
-    private boolean isJoyStick = false;  //true чтобы включить все методы с джойстиком + в player поменять методы (временно)
+    private boolean isJoyStick = true;  //true чтобы включить все методы с джойстиком + в player поменять методы (временно)
 
     // --------- END JoyStick ---------
     private boolean isStopped;
@@ -159,7 +159,8 @@ public class Play extends GameState {
         if (isJoyStick) {
             if (Gdx.input.isTouched()) {
                 mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-                cam.unproject(mouse);
+                joyCam.unproject(mouse);
+
             /*камера двигается вместе с персонажем, её координаты меняются,
             а координаты mouse нет => камера уезжает на большие координаты, а мышь стоит на месте
             возможный вариант исправления - добавить свою камеру для джойстика, которая не будет двигаться, либо же что-то другое*/
@@ -168,6 +169,7 @@ public class Play extends GameState {
             } else {
                 joyStick.setDefaultPos();
             }
+
         }
     }
 
@@ -380,8 +382,9 @@ public class Play extends GameState {
     }
 
     private void initJoyStick() {
-        //joyCam = new BoundedCamera();
-        //joyCam.setBounds(0, V_WIDTH, 0, V_HEIGHT);
+        joyCam = new BoundedCamera();
+        joyCam.setBounds(0, V_WIDTH, 0, V_HEIGHT);
+        joyCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT)); //не хватало этой строчки
 
         joyStick = new JoyStick(200, 200, 200);
         shapeRenderer = new ShapeRenderer();
