@@ -6,6 +6,7 @@ import android.view.Window;
 
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
+import com.mygdx.game.db.SugarDb;
 
 public class AndroidLauncher extends AndroidApplication {
 	@Override
@@ -18,7 +19,7 @@ public class AndroidLauncher extends AndroidApplication {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 
 		config.useImmersiveMode = true; //set fullScreen
-		initialize(new MyGdxGame(), config);
+		initialize(new MyGdxGame(new SugarDb()), config);
 
 		MyGdxGame.setWidth(displaymetrics.widthPixels);
 		MyGdxGame.setHeight(displaymetrics.heightPixels);

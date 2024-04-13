@@ -10,13 +10,20 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.mygdx.game.battle.examples.ExampleDatabase;
 import com.mygdx.game.battle.steps.StepDatabase;
+import com.mygdx.game.db.DbWrapper;
 import com.mygdx.game.handlers.*;
+import com.mygdx.game.paint.Figures.Figure;
+import com.mygdx.game.paint.Figures.FiguresDatabase;
+import com.mygdx.game.paint.PixelPoint;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class MyGdxGame implements ApplicationListener {
     private static int width;
     private static int height;
-    public static int V_WIDTH = 1216;
-    public static int V_HEIGHT = 672;
+    public static int V_WIDTH = 1216; //1216
+    public static int V_HEIGHT = 672; //672
     //public static final int SCALE = 2;
     private SpriteBatch sb;
     private AssetManager assetManager;
@@ -29,7 +36,16 @@ public class MyGdxGame implements ApplicationListener {
     private Skin skin;
     private StepDatabase stepDatabase;
     private ExampleDatabase exampleDatabase;
+    private FiguresDatabase figuresDatabase;
+    private DbWrapper dbWrapper;
     public boolean save = false;
+
+    public MyGdxGame() {
+    }
+
+    public MyGdxGame(DbWrapper dbWrapper) {
+        this.dbWrapper = dbWrapper;
+    }
 
     public void create() {
         //Gdx.input.setInputProcessor(new MyInputProcessor());
@@ -42,25 +58,26 @@ public class MyGdxGame implements ApplicationListener {
         //V_HEIGHT = (int) ((Gdx.graphics.getHeight()/672f)*672);
 
         res = new Content();
-        res.loadTexture("gnomikStep.png", "gnomik");
-        res.loadTexture("gnomik.png", "gnomikFull");
-        res.loadTexture("idleGnomik.png", "gnomikrow");
+        res.loadTexture("entitySprites/gnomikStep.png", "gnomik");
+        res.loadTexture("entitySprites/gnomik.png", "gnomikFull");
+        res.loadTexture("entitySprites/idleGnomik.png", "gnomikrow");
         res.loadTexture("allBtn.png", "btn");
-        res.loadTexture("enemySprite2.2.png", "enemy");
+        res.loadTexture("entitySprites/enemy2.png", "enemy");
+        res.loadTexture("entitySprites/bombGuy.png", "npc");
 
         assetManager = new AssetManager();
-        assetManager.load("testAtlas.atlas", TextureAtlas.class);
-        assetManager.load("testAtlas2.atlas", TextureAtlas.class);
-        assetManager.load("uipack.atlas", TextureAtlas.class);
+        assetManager.load("UI/testAtlas.atlas", TextureAtlas.class);
+        assetManager.load("UI/testAtlas2.atlas", TextureAtlas.class);
+        assetManager.load("UI/uipack.atlas", TextureAtlas.class);
         assetManager.load("mcRus.fnt", BitmapFont.class);
         assetManager.finishLoading();
         skin = SkinManager.generateSkin(assetManager);
-
         sb = new SpriteBatch();
         cam = new BoundedCamera();
         cam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
         stepDatabase = new StepDatabase();
         exampleDatabase = new ExampleDatabase();
+        figuresDatabase = new FiguresDatabase(this);
         gsm = new GameStateManager(this);
     }
 
@@ -134,5 +151,13 @@ public class MyGdxGame implements ApplicationListener {
 
     public ExampleDatabase getExampleDatabase() {
         return exampleDatabase;
+    }
+
+    public FiguresDatabase getFiguresDatabase() {
+        return figuresDatabase;
+    }
+
+    public DbWrapper getDbWrapper() {
+        return dbWrapper;
     }
 }

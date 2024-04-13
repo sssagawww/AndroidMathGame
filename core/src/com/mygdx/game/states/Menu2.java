@@ -19,6 +19,7 @@ import com.mygdx.game.handlers.GameStateManager;
 
 import static com.mygdx.game.MyGdxGame.V_HEIGHT;
 import static com.mygdx.game.MyGdxGame.V_WIDTH;
+import static com.mygdx.game.UI.BtnBox.STATES.*;
 import static com.mygdx.game.handlers.GameStateManager.*;
 
 public class Menu2 extends GameState {
@@ -33,14 +34,13 @@ public class Menu2 extends GameState {
     // UI
     private Table root;
     private Stage uiStage;
-    private MenuOptionBox optionBox;
     //private MenuBtn2 btn;
     private BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
     private GlyphLayout layout;
     /*private MenuBtn btn;
     private MenuBtn btn2;
     private MenuBtn btn3;*/
-    private MenuBtnBox btnBox;
+    private BtnBox btnBox;
     // END UI
 
     public Menu2(GameStateManager gsm) {
@@ -109,11 +109,11 @@ public class Menu2 extends GameState {
         root.setFillParent(true);
         uiStage.addActor(root);
 
-        btnBox = new MenuBtnBox(game.getSkin());
-        btnBox.addBtn("Начать", MenuBtnBox.MENU_STATE.MENU_TO_PLAY);
-        btnBox.addBtn("Продолжить", MenuBtnBox.MENU_STATE.SAVE_GAME);
-        btnBox.addBtn("Сохранить", MenuBtnBox.MENU_STATE.SAVE);
-        btnBox.addBtn("Выйти", MenuBtnBox.MENU_STATE.EXIT);
+        btnBox = new BtnBox(game.getSkin());
+        btnBox.addBtn("Начать", MENU_TO_PLAY);
+        btnBox.addBtn("Продолжить", SAVE_GAME);
+        btnBox.addBtn("Сохранить", SAVE);
+        btnBox.addBtn("Выйти", EXIT);
 
         Table table = new Table();
 

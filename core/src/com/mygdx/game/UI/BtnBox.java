@@ -5,34 +5,42 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.Align;
 
-public class MenuBtnBox extends Table {
+public class BtnBox extends Table {
     private Table uiTable;
     private TextButton.TextButtonStyle style;
 
-    public enum MENU_STATE {
+    //стейты кнопок для всех игровых стейтов (PaintState, Menu, ...), переделать?
+    public enum STATES {
         MENU_TO_PLAY,
         EXIT,
         SAVE,
         SAVE_GAME,
-        NON
+        NON,
+        CLEAR,
+        OK,
+        WRONG,
+        CHECK,
+        DONE
     }
 
-    private MENU_STATE state;
+    private STATES state;
+    private boolean clicked;
 
-    public MenuBtnBox(Skin skin) {
+    public BtnBox(Skin skin) {
         super(skin);
         uiTable = new Table();
-        state = MENU_STATE.NON;
+        state = STATES.NON;
 
         this.add(uiTable).pad(10f);
     }
 
-    public void addBtn(String btnText, final MENU_STATE newState) {
+    public void addBtn(String btnText, final STATES newState) {
         BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
         style = new TextButton.TextButtonStyle();
         style.font = font;
@@ -46,6 +54,7 @@ public class MenuBtnBox extends Table {
         btn.addListener(new InputListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                clicked = true;
                 return true;
             }
 
@@ -60,7 +69,19 @@ public class MenuBtnBox extends Table {
         uiTable.row();
     }
 
-    public MENU_STATE getState() {
+    public boolean isClicked(){
+        return clicked;
+    }
+
+    public void setClicked(boolean clicked) {
+        this.clicked = clicked;
+    }
+
+    public STATES getState() {
         return state;
+    }
+
+    public void setState(STATES state) {
+        this.state = state;
     }
 }

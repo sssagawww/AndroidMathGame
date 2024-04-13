@@ -40,3 +40,30 @@ rotate: false
   orig: 768, 352
   offset: 0, 0
   index: -1
+ok
+rotate: false
+  xy: 554, 170
+  size: 17, 17
+  split: 0, 0, 0, 0
+  pad: 0, 0, 0, 0
+  orig: 768, 352
+  offset: 0, 0
+  index: -1
+ok_down
+rotate: false
+  xy: 586, 170
+  size: 17, 17
+  split: 0, 0, 0, 0
+  pad: 0, 0, 0, 0
+  orig: 768, 352
+  offset: 0, 0
+  index: -1
+wrong
+rotate: false
+  xy: 553, 201
+  size: 17, 17
+  split: 0, 0, 0, 0
+  pad: 0, 0, 0, 0
+  orig: 768, 352
+  offset: 0, 0
+  index: -1

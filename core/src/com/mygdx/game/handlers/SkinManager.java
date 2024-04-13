@@ -3,6 +3,7 @@ package com.mygdx.game.handlers;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -13,15 +14,17 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 public class SkinManager {
     public static Skin generateSkin(AssetManager assetManager) {
         Skin skin = new Skin();
-        TextureAtlas uiAtlas = assetManager.get("testAtlas.atlas"); //uipack
-        TextureAtlas uiAtlas2 = assetManager.get("testAtlas2.atlas");
-        TextureAtlas uiAtlas3 = assetManager.get("uipack.atlas");
+        TextureAtlas uiAtlas = assetManager.get("UI/testAtlas.atlas"); //uipack
+        TextureAtlas uiAtlas2 = assetManager.get("UI/testAtlas2.atlas");
+        TextureAtlas uiAtlas3 = assetManager.get("UI/uipack.atlas");
 
         //ninePatch - растягиваемая картинка
         NinePatch dialog = new NinePatch(uiAtlas.findRegion("background"), 10, 10, 5, 5);//dialoguebox
         skin.add("GUI_img", dialog);
         NinePatch dialog2 = new NinePatch(uiAtlas2.findRegion("back"), 10, 10, 5, 5);
         skin.add("GUI_2x", dialog2);
+        NinePatch background2 = new NinePatch(uiAtlas2.findRegion("light_back"), 10, 10, 5, 5);
+        skin.add("background2", background2);
         NinePatch option = new NinePatch(uiAtlas3.findRegion("optionbox"),6, 6, 6, 6);
         skin.add("optionbox", option);
         NinePatch status = new NinePatch(uiAtlas.findRegion("background"),5, 4, 2, 2);
@@ -30,6 +33,8 @@ public class SkinManager {
         skin.add("menuBtn_up", menuBtn_up);
         NinePatch menuBtn_down = new NinePatch(uiAtlas2.findRegion("menuBtn_down"),10, 10, 10, 10);
         skin.add("menuBtn_down", menuBtn_down);
+        NinePatch borders = new NinePatch(uiAtlas2.findRegion("borders"),10, 10, 10, 10);
+        skin.add("borders", borders);
         /*NinePatch next_btn = new NinePatch(uiAtlas2.findRegion("next_btn"),10, 10, 1, 1);
         skin.add("next_btn", next_btn);*/
 
@@ -48,6 +53,16 @@ public class SkinManager {
         skin.add("next_btn", uiAtlas2.findRegion("next_btn"), TextureRegion.class);
         BitmapFont font = assetManager.get("mcRus.fnt", BitmapFont.class);
         skin.add("font", font);
+
+        skin.add("ok", uiAtlas.findRegion("ok"), TextureRegion.class);
+        skin.add("ok_down", uiAtlas.findRegion("ok_down"), TextureRegion.class);
+        skin.add("wrong", uiAtlas.findRegion("wrong"), TextureRegion.class);
+
+        skin.add("Квадрат", new Texture("controller/square.png"));
+        skin.add("Круг", new Texture("controller/circle.png"));
+        skin.add("Звезда", new Texture("controller/star.png"));
+        skin.add("Треугольник", new Texture("controller/triangle.png"));
+        skin.add("Ромб", new Texture("controller/rhombus.png"));
 
         Label.LabelStyle lstyle = new Label.LabelStyle();
         lstyle.font = skin.getFont("font");
