@@ -88,7 +88,7 @@ public class Play extends GameState {
     public Play(GameStateManager gsm) {
         super(gsm);
         world = new World(new Vector2(0, 0), true);
-        b2dr = new Box2DDebugRenderer();
+        b2dr = new Box2DDebugRenderer(); //отрисовщик дебаг коллизии
         game = gsm.game();
         multiplexer = new InputMultiplexer();
         cl = new MyContactListener(gsm); //детектит коллизию
@@ -129,7 +129,7 @@ public class Play extends GameState {
         entities.update(dt);
         player.updatePL();
 
-        //нужно обновление размера экрана, и тогда будет resize всех компонентов
+        //нужно обновление размера экрана, и тогда будет resize всех компонентов?
 
         //если этот state был выгружен, то при запуске все процессы должны возобновиться (удаляются ли они в multiplexer при выгрузке или просто останавливаются?)
         if (isStopped) {
@@ -228,7 +228,7 @@ public class Play extends GameState {
         body.createFixture(fdef).setUserData("player");
         ps.dispose();
 
-        //create foot sensor
+        //create foot sensor - дополнительная коллизия внизу игрока
         /*ps.setAsBox(10f / PPM, 10f / PPM, new Vector2(0, -50f/PPM), 0);
         fdef.shape = ps;
         fdef.filter.categoryBits = BIT_PLAYER;
@@ -243,19 +243,18 @@ public class Play extends GameState {
 
     private void createTiles() {
         tiledMap = new TmxMapLoader().load("sprites/mystic_woods_free_2.1/map.tmx");
-        tmr = new OrthogonalTiledMapRenderer(tiledMap, 4); // !!!
+        tmr = new OrthogonalTiledMapRenderer(tiledMap, 4); // !!! размер карты
         tileSize = (int) tiledMap.getProperties().get("tilewidth");
 
         tileMapWidth = (int) tiledMap.getProperties().get("width");
         tileMapHeight = (int) tiledMap.getProperties().get("height");
 
-        TiledMapTileLayer layer;
-        layer = (TiledMapTileLayer) tiledMap.getLayers().get("delete2"); //tropa borders
+        TiledMapTileLayer layer = (TiledMapTileLayer) tiledMap.getLayers().get("borders"); //слой с границами карты
         createLayer(layer, BIT_TROPA);
         //layer = (TiledMapTileLayer) tiledMap.getLayers().get("grass");
     }
 
-    //слои на карте (создаются в Tiled)
+    //коллизия слоя на карте (слой создаётся в Tiled)
     private void createLayer(TiledMapTileLayer layer, short bits) {
         BodyDef bdef = new BodyDef();
         FixtureDef fdef = new FixtureDef();

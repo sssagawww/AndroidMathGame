@@ -120,32 +120,10 @@ public class PaintState extends GameState implements InputProcessor {
         sb.end();
 
         //рисунок игрока
-
-        //было изначально
-        /*shapeRenderer.setColor(Color.BLACK);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        for (int i = 1; i < getPoints().size() - 1; i++) {
-            //shapeRenderer.rect(getPoints().get(i).getX(), getPoints().get(i).getY(), rectWidth, rectHeight);
-            if (!skippedPoints.contains(i))
-                shapeRenderer.rectLine(getPoints().get(i).getX(), getPoints().get(i).getY(), getPoints().get(i + 1).getX(), getPoints().get(i + 1).getY(), rectWidth);
-        }
-
-        shapeRenderer.end();*/
-
         batch.begin();
-
-        /*for (int i = 0; i < getPoints().size() - 1; i++) {
-            //shapeRenderer.rect(getPoints().get(i).getX(), getPoints().get(i).getY(), rectWidth, rectHeight);
-            if (!skippedPoints.contains(i) && i % 2 == 0){
-                sd.line(getPoints().get(i).getX(), getPoints().get(i).getY(), getPoints().get(i + 1).getX(), getPoints().get(i + 1).getY(), rectWidth);
-            }
-        }*/
-
-        int count = 0;
         arr.clear();
         for (int i = 0; i < getPoints().size(); i++) {
             if (skippedPoints.contains(i)) {
-                count++;
                 sd.path(arr, JoinType.SMOOTH, true);
                 arr.clear();
                 continue;
@@ -163,16 +141,8 @@ public class PaintState extends GameState implements InputProcessor {
                     arr.set(arr.size - 1, newPoint);
                 }
             }
-
-            /*if (!arr.contains(newPoint, false)) {
-                arr.add(newPoint);
-            }*/
-            //arr.add(new Vector2(getPoints().get(i).getX(), getPoints().get(i).getY()));
         }
         sd.path(arr, JoinType.SMOOTH, true);
-
-        System.out.println(count);
-
         batch.end();
 
         uiStage.draw();
