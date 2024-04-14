@@ -8,6 +8,7 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.UI.Controller;
 import com.mygdx.game.UI.JoyStick;
+import com.mygdx.game.states.MazeState;
 import com.mygdx.game.states.Play;
 
 import static com.mygdx.game.handlers.B2DVars.*;
@@ -23,6 +24,7 @@ public class Player2 extends B2DSprite {
     private JoyStick joyStick;
     private int countIdle = 0;
     private int countMove = 1;
+    private MazeState maze;
 
     public Player2(Body body) {
         super(body);
@@ -203,5 +205,11 @@ public class Player2 extends B2DSprite {
         this.play = play;
         joyStick = play.getJoyStick();
     }
+
+    public void setMaze (MazeState maze) {
+        this.maze = maze;
+        joyStick = maze.getJoystick();
+    }
+
 }
 

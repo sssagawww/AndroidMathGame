@@ -14,12 +14,13 @@ public class GameStateManager {
     public static final int PAINT = 1;
     public static final int BATTLE = 2;
     public static final int NEW_GAME = 4;
+    public static final int MAZE = 5;
 
     public GameStateManager(MyGdxGame game) {
         this.game = game;
         gameStates = new Stack<GameState>();
         //play = new Play(this);
-        pushState(MENU);
+        pushState(MAZE);
     }
 
     //peek - get верхний элемент
@@ -44,6 +45,8 @@ public class GameStateManager {
             return play;
         } else if (state == PAINT) {
             return new PaintState(this);
+        } else if (state == MAZE) {
+            return  new MazeState(this);
         }
         return null;
     }
