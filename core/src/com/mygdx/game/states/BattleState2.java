@@ -23,7 +23,7 @@ import com.mygdx.game.battle.events.BattleEvent;
 import com.mygdx.game.battle.events.BattleEventPlayer;
 import com.mygdx.game.battle.render_controller.BattleScreenController;
 import com.mygdx.game.entities.BattleEntity;
-import com.mygdx.game.entities.Boss;
+import com.mygdx.game.entities.StaticNPC;
 import com.mygdx.game.handlers.GameStateManager;
 import com.mygdx.game.handlers.MyContactListener;
 
@@ -59,7 +59,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
     private BattleEvent currentEvent;
     private Queue<BattleEvent> queue = new ArrayDeque<BattleEvent>();
     private Battle battle;
-    private Boss boss;
+    private StaticNPC boss;
     private Texture tex;
     private Texture texEnemy;
     private Music music;
@@ -233,7 +233,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
         bdef.position.set(600f / PPM, 350f / PPM);
         Body body = world.createBody(bdef);
 
-        boss = new Boss(body);
+        boss = new StaticNPC(body, "enemy", 5f);
         body.setUserData(boss);
     }
 

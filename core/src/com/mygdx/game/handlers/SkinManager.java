@@ -35,6 +35,8 @@ public class SkinManager {
         skin.add("menuBtn_down", menuBtn_down);
         NinePatch borders = new NinePatch(uiAtlas2.findRegion("borders"),10, 10, 10, 10);
         skin.add("borders", borders);
+        NinePatch prLine = new NinePatch(uiAtlas.findRegion("prLine"),1, 1, 1, 1);
+        skin.add("prLine", prLine);
         /*NinePatch next_btn = new NinePatch(uiAtlas2.findRegion("next_btn"),10, 10, 1, 1);
         skin.add("next_btn", next_btn);*/
 

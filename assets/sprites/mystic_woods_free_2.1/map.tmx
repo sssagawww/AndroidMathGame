@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="76" height="42" tilewidth="16" tileheight="16" infinite="0" nextlayerid="15" nextobjectid="4">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="76" height="42" tilewidth="16" tileheight="16" infinite="0" nextlayerid="15" nextobjectid="5">
  <tileset firstgid="1" source="grass.tsx"/>
  <tileset firstgid="2" source="plains2.tsx"/>
  <tileset firstgid="74" source="fences.tsx"/>
@@ -101,6 +101,9 @@
  <objectgroup id="11" name="npcLayer">
   <object id="1" name="enemy" x="385.5" y="272.5"/>
   <object id="2" name="npc" x="988" y="444">
+   <ellipse/>
+  </object>
+  <object id="4" name="hooded" x="974" y="134">
    <ellipse/>
   </object>
  </objectgroup>

@@ -39,6 +39,7 @@ import static com.mygdx.game.handlers.B2DVars.*;
 import static com.mygdx.game.handlers.GameStateManager.BATTLE;
 import static com.mygdx.game.handlers.GameStateManager.MENU;
 import static com.mygdx.game.handlers.GameStateManager.PAINT;
+import static com.mygdx.game.handlers.GameStateManager.RHYTHM;
 
 public class Play extends GameState {
     private MyGdxGame game;
@@ -76,8 +77,6 @@ public class Play extends GameState {
     private ShapeRenderer shapeRenderer;
     private Vector3 mouse;
     private BoundedCamera joyCam;
-    private boolean isJoyStick = true;  //true чтобы включить все методы с джойстиком + в player поменять методы (временно)
-
     // --------- END JoyStick ---------
     private boolean isStopped;
     private int nextState;
@@ -99,7 +98,7 @@ public class Play extends GameState {
         skin_this = game.getSkin();
 
         //initUI();
-        if (isJoyStick) initJoyStick();
+        initJoyStick();
         initController();
         createPlayer();
         createTiles();
@@ -146,7 +145,7 @@ public class Play extends GameState {
         if (canDraw) {
             uiStage.act(dt);
             dcontroller.update(dt);
-            time+=dt;
+            time += dt;
             if (dialogueBox.isFinished() && time > 2f) {
                 time = 0;
                 gsm.setState(nextState);
@@ -155,22 +154,16 @@ public class Play extends GameState {
                 canDraw = false;
             }
         }
+
         //обновление джойстика
-        if (isJoyStick) {
-            if (Gdx.input.isTouched()) {
-                mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-                joyCam.unproject(mouse);
-
-            /*камера двигается вместе с персонажем, её координаты меняются,
-            а координаты mouse нет => камера уезжает на большие координаты, а мышь стоит на месте
-            возможный вариант исправления - добавить свою камеру для джойстика, которая не будет двигаться, либо же что-то другое*/
-                //System.out.println(mouse.x + " " + Gdx.input.getX());
-                joyStick.update(mouse.x, mouse.y);
-            } else {
-                joyStick.setDefaultPos();
-            }
-
+        if (Gdx.input.isTouched()) {
+            mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+            joyCam.unproject(mouse);
+            joyStick.update(mouse.x, mouse.y);
+        } else {
+            joyStick.setDefaultPos();
         }
+
     }
 
     @Override
@@ -204,7 +197,7 @@ public class Play extends GameState {
         }
 
         controllerStage.draw();
-        if (isJoyStick) joyStick.render(shapeRenderer);
+        joyStick.render(shapeRenderer);
     }
 
     private void createPlayer() {
@@ -223,7 +216,7 @@ public class Play extends GameState {
         bdef.type = BodyDef.BodyType.DynamicBody;
         Body body = world.createBody(bdef);
 
-        ps.setAsBox(40f / PPM, 50f / PPM, new Vector2(-5.4f,-3.6f), 0);
+        ps.setAsBox(40f / PPM, 50f / PPM, new Vector2(-5.4f, -3.6f), 0);
         fdef.shape = ps;
         fdef.filter.categoryBits = BIT_PLAYER;
         fdef.filter.maskBits = BIT_TROPA;
@@ -474,6 +467,13 @@ public class Play extends GameState {
                 nextState = PAINT;
                 canDraw = true;
                 break;
+            case "hooded":
+                node1 = new DialogNode("Следуй ритму!", 0);
+                dialog.addNode(node1);
+                dcontroller.startDialog(dialog);
+                nextState = RHYTHM;
+                canDraw = true;
+                break;
             default:
                 break;
         }
@@ -489,9 +489,5 @@ public class Play extends GameState {
 
     public JoyStick getJoyStick() {
         return joyStick;
-    }
-
-    public boolean isJoyStick() {
-        return isJoyStick;
     }
 }
