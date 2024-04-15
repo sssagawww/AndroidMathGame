@@ -32,6 +32,7 @@ public class MyContactListener implements com.badlogic.gdx.physics.box2d.Contact
             play = gsm.getPlay();
             System.out.println("contact with " + fb.getUserData());
             play.loadStage((String) fb.getUserData());
+
         }
         //System.out.println(fa.getUserData() + ", " + fb.getUserData());
     }

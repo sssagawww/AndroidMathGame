@@ -45,11 +45,11 @@
             "expandedObjectLayers": [
                 5
             ],
-            "scale": 1,
-            "selectedLayer": 3,
+            "scale": 8,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 317.5,
-                "y": 366
+                "x": 362.9375,
+                "y": 341.5
             }
         },
         "labirint.tmx#chest": {

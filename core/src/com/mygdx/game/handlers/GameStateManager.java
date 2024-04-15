@@ -9,6 +9,7 @@ public class GameStateManager {
     private MyGdxGame game;
     private Play play;
     private Stack<GameState> gameStates;
+    private MazeState mazeState;
     public static final int PLAY = 912837;
     public static final int MENU = 0;
     public static final int PAINT = 1;
@@ -46,7 +47,8 @@ public class GameStateManager {
         } else if (state == PAINT) {
             return new PaintState(this);
         } else if (state == MAZE) {
-            return  new MazeState(this);
+            mazeState = new MazeState(this);
+            return mazeState;
         }
         return null;
     }
@@ -66,6 +68,10 @@ public class GameStateManager {
     //кидает в стэк тот стейт (обозначаются int переменными), который передан
     public void pushState(int state) {
         gameStates.push(getState(state));
+    }
+
+    public MazeState getMazeState() {
+        return mazeState;
     }
 
     public Play getPlay() {

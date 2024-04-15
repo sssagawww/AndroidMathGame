@@ -2,6 +2,8 @@ package com.mygdx.game.states;
 
 import static com.mygdx.game.MyGdxGame.V_HEIGHT;
 import static com.mygdx.game.MyGdxGame.V_WIDTH;
+import static com.mygdx.game.handlers.B2DVars.BIT_NOTHING;
+import static com.mygdx.game.handlers.B2DVars.BIT_PENEK;
 import static com.mygdx.game.handlers.B2DVars.BIT_PLAYER;
 import static com.mygdx.game.handlers.B2DVars.BIT_TROPA;
 import static com.mygdx.game.handlers.B2DVars.PPM;
@@ -49,6 +51,7 @@ import com.mygdx.game.entities.PlayEntities;
 import com.mygdx.game.entities.Player2;
 import com.mygdx.game.handlers.BoundedCamera;
 import com.mygdx.game.handlers.GameStateManager;
+import com.mygdx.game.handlers.MazeContactListener;
 import com.mygdx.game.handlers.MyContactListener;
 
 import jdk.internal.misc.ScopedMemoryAccess;
@@ -56,7 +59,7 @@ import jdk.internal.misc.ScopedMemoryAccess;
 public class MazeState extends GameState {
     private Box2DDebugRenderer b2dr;
     private InputMultiplexer multiplexer;
-    private MyContactListener cl;
+    private MazeContactListener cl;
     private Skin skin_this;
     private BoundedCamera b2dCam;
     private boolean isJoyStick = true;
@@ -100,7 +103,7 @@ public class MazeState extends GameState {
         world = new World(new Vector2(0, 0), true);
         b2dr = new Box2DDebugRenderer();
         multiplexer = new InputMultiplexer();
-        cl = new MyContactListener(gsm); //детектит коллизию
+        cl = new MazeContactListener(gsm); //детектит коллизию
         world.setContactListener(cl);
         music = Gdx.audio.newMusic(Gdx.files.internal("music/song.wav"));
         prefs = Gdx.app.getPreferences(PREF_NAME);
@@ -132,6 +135,7 @@ public class MazeState extends GameState {
             float y = (float) mo.getProperties().get("y") / PPM * 4;
             bdef.position.set(x, y);
 
+
             Body body = world.createBody(bdef);
             FixtureDef cdef = new FixtureDef();
             CircleShape cshape = new CircleShape();
@@ -141,6 +145,8 @@ public class MazeState extends GameState {
             cdef.filter.categoryBits = BIT_TROPA;
             cdef.filter.maskBits = BIT_PLAYER;
             cshape.dispose();
+
+            mo.setName("enemy");
 
             body.createFixture(cdef).setUserData(mo.getName());
             entities.addEntity(body, mo.getName());
@@ -227,7 +233,7 @@ public class MazeState extends GameState {
         TiledMapTileLayer chest =(TiledMapTileLayer) tiledMap.getLayers().get("chest");
 
         createLayer(borders, BIT_TROPA);
-        createLayer(walls, BIT_TROPA);
+        createLayer(walls, BIT_PENEK);
         createLayer(chest, BIT_TROPA);
 
         //borders = (TiledMapTileLayer) tiledMap.getLayers().get("grass");
