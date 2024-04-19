@@ -67,3 +67,12 @@ rotate: false
   orig: 768, 352
   offset: 0, 0
   index: -1
+prLine
+rotate: false
+  xy: 418, 172
+  size: 32, 12
+  split: 0, 0, 0, 0
+  pad: 0, 0, 0, 0
+  orig: 768, 352
+  offset: 0, 0
+  index: -1

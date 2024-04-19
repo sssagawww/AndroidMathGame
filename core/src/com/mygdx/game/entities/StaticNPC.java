@@ -5,14 +5,14 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.mygdx.game.MyGdxGame;
 
-public class Boss extends B2DSprite{
+public class StaticNPC extends B2DSprite {
     public Texture tex;
     public TextureRegion[] sprites;
 
-    public Boss(Body body) {
+    public StaticNPC(Body body, String texName, float animationSpeed) {
         super(body);
-        tex = MyGdxGame.res.getTexture("enemy");
+        tex = MyGdxGame.res.getTexture(texName);
         sprites = TextureRegion.split(tex, tex.getHeight(), tex.getHeight())[0];
-        setAnimation(sprites, 1 / 5f);
+        setAnimation(sprites, 1 / animationSpeed);
     }
 }
