@@ -1,5 +1,16 @@
 package com.mygdx.game.states;
 
+import static com.mygdx.game.MyGdxGame.V_HEIGHT;
+import static com.mygdx.game.MyGdxGame.V_WIDTH;
+import static com.mygdx.game.handlers.B2DVars.BIT_PENEK;
+import static com.mygdx.game.handlers.B2DVars.BIT_PLAYER;
+import static com.mygdx.game.handlers.B2DVars.BIT_TROPA;
+import static com.mygdx.game.handlers.B2DVars.PPM;
+import static com.mygdx.game.handlers.GameStateManager.BATTLE;
+import static com.mygdx.game.handlers.GameStateManager.MENU;
+import static com.mygdx.game.handlers.GameStateManager.PAINT;
+import static com.mygdx.game.handlers.GameStateManager.RHYTHM;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Preferences;
@@ -14,14 +25,22 @@ import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.badlogic.gdx.physics.box2d.ChainShape;
+import com.badlogic.gdx.physics.box2d.CircleShape;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.mygdx.game.Dialog.*;
 import com.mygdx.game.Dialog.Dialog;
+import com.mygdx.game.Dialog.DialogController;
+import com.mygdx.game.Dialog.DialogNode;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.UI.Controller;
 import com.mygdx.game.UI.DialogBox;
@@ -31,28 +50,18 @@ import com.mygdx.game.entities.PlayEntities;
 import com.mygdx.game.entities.Player2;
 import com.mygdx.game.handlers.BoundedCamera;
 import com.mygdx.game.handlers.Controllable;
-import com.mygdx.game.handlers.MyContactListener;
 import com.mygdx.game.handlers.GameStateManager;
+import com.mygdx.game.handlers.MyContactListener;
 
-import static com.mygdx.game.MyGdxGame.V_HEIGHT;
-import static com.mygdx.game.MyGdxGame.V_WIDTH;
-import static com.mygdx.game.handlers.B2DVars.*;
-import static com.mygdx.game.handlers.GameStateManager.BATTLE;
-import static com.mygdx.game.handlers.GameStateManager.FOREST;
-import static com.mygdx.game.handlers.GameStateManager.MENU;
-import static com.mygdx.game.handlers.GameStateManager.PAINT;
-import static com.mygdx.game.handlers.GameStateManager.RHYTHM;
-
-public class Play extends GameState implements Controllable {
+public class Forest extends GameState implements Controllable {
     private MyGdxGame game;
-    private boolean debug = true;
+    private boolean debug = false;
     private World world;
     private Box2DDebugRenderer b2dr;
     private BoundedCamera b2dCam;
     private MyContactListener cl;
     private Player2 player;
     private PlayEntities entities;
-    //private Boss boss;
     private TiledMap tiledMap;
     private OrthogonalTiledMapRenderer tmr;
     private float tileSize;
@@ -67,12 +76,8 @@ public class Play extends GameState implements Controllable {
     private InputMultiplexer multiplexer;
     private Dialog dialog;
     private DialogController dcontroller;
-    private Music music;
-    private Preferences prefs;
     public boolean canDraw;
-    public boolean savePlay;
     private float time = 0;
-    public BodyDef bdef;
     private Controller controller;
     // -------- JoyStick ----------
     private JoyStick joyStick;
@@ -82,42 +87,32 @@ public class Play extends GameState implements Controllable {
     // --------- END JoyStick ---------
     private boolean isStopped;
     private int nextState;
-    private static final String PREF_NAME = "position";
-    private static final String PREF_X = "x";
-    private static final String PREF_Y = "y";
 
-    public Play(GameStateManager gsm) {
+    public Forest(GameStateManager gsm) {
         super(gsm);
         world = new World(new Vector2(0, 0), true);
-        b2dr = new Box2DDebugRenderer(); //отрисовщик дебаг коллизии
+        b2dr = new Box2DDebugRenderer();
         game = gsm.game();
         multiplexer = new InputMultiplexer();
-        cl = new MyContactListener(this); //детектит коллизию
+        cl = new MyContactListener(this);
         world.setContactListener(cl);
-        music = Gdx.audio.newMusic(Gdx.files.internal("music/song.wav"));
-        prefs = Gdx.app.getPreferences(PREF_NAME);
-        savePlay = game.save;
         skin_this = game.getSkin();
 
-        //initUI();
         initJoyStick();
         initController();
         createPlayer();
         createTiles();
         createNPC();
-        //createMusic(); //отключено, чтобы не мешало при дебаггинге
-
-        //initFight();
 
         cam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
-        b2dCam = new BoundedCamera(); //рисует дебаг коллизию?
-        b2dCam.setToOrtho(false, V_WIDTH / PPM, V_HEIGHT / PPM); // /2?
+        b2dCam = new BoundedCamera();
+        b2dCam.setToOrtho(false, V_WIDTH / PPM, V_HEIGHT / PPM);
         b2dCam.setBounds(0, (tileMapWidth * tileSize) / PPM, 0, (tileMapHeight * tileSize) / PPM);
-        System.out.println("V_HEIGHT: " + MyGdxGame.V_HEIGHT + " player: " + player.getPosition().x + " " + player.getPosition().y);
     }
 
     @Override
     public void handleInput() {
+
     }
 
     @Override
@@ -126,13 +121,9 @@ public class Play extends GameState implements Controllable {
         world.step(dt, 6, 2);
         controllerStage.act(dt);
         player.update(dt);
-        //boss.update(dt);
         entities.update(dt);
         player.updatePL();
 
-        //нужно обновление размера экрана, и тогда будет resize всех компонентов?
-
-        //если этот state был выгружен, то при запуске все процессы должны возобновиться (удаляются ли они в multiplexer при выгрузке или просто останавливаются?)
         if (isStopped) {
             isStopped = false;
             multiplexer.addProcessor(controllerStage);
@@ -143,18 +134,20 @@ public class Play extends GameState implements Controllable {
             gsm.setState(MENU);
         }
 
-        //можно начать бой
         if (canDraw) {
             uiStage.act(dt);
             dcontroller.update(dt);
-            time += dt;
-            if (dialogueBox.isFinished() && time > 2f) {
-                time = 0;
-                stop();
+            if (dialogueBox.isFinished()) {
+                time += dt;
+                if (time > 2f) {
+                    time = 0;
+                    gsm.setState(nextState);
+                    isStopped = true;
+                    canDraw = false;
+                }
             }
         }
 
-        //обновление джойстика
         if (Gdx.input.isTouched()) {
             mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
             joyCam.unproject(mouse);
@@ -162,7 +155,6 @@ public class Play extends GameState implements Controllable {
         } else {
             joyStick.setDefaultPos();
         }
-
     }
 
     @Override
@@ -170,27 +162,21 @@ public class Play extends GameState implements Controllable {
         Gdx.gl20.glClearColor(0, 0, 0, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
         cam.setPosition(player.getPosition().x * PPM + V_WIDTH / 35, player.getPosition().y * PPM + V_HEIGHT / 35);
-        //cam.position.set(player.getPosition().x * PPM / 2, player.getPosition().y * PPM / 2, 0);
         cam.update();
 
-        //draw map
         tmr.setView(cam);
         tmr.render();
 
-        //draw player and npc
-        sb.setProjectionMatrix(cam.combined); //https://stackoverflow.com/questions/33703663/understanding-the-libgdx-projection-matrix - объяснение
+        sb.setProjectionMatrix(cam.combined);
         player.render(sb, 80f, 86.6f);
-        //boss.render(sb, 200f, 200f);
         entities.render(sb, 150f, 150f);
 
-        //draw box?     ---need fix?---
         if (debug) {
             b2dCam.position.set(player.getPosition().x, player.getPosition().y, 0);
             b2dCam.update();
             b2dr.render(world, b2dCam.combined);
         }
 
-        //draw initFight() if battle begin
         if (canDraw) {
             uiStage.draw();
         }
@@ -199,18 +185,18 @@ public class Play extends GameState implements Controllable {
         joyStick.render(shapeRenderer);
     }
 
+    @Override
+    public void dispose() {
+
+    }
+
     private void createPlayer() {
-        bdef = new BodyDef();
+        BodyDef bdef = new BodyDef();
         PolygonShape ps = new PolygonShape();
         FixtureDef fdef = new FixtureDef();
 
-        if (savePlay) {
-            bdef.position.x = prefs.getFloat(PREF_X, 607f / PPM);
-            bdef.position.y = prefs.getFloat(PREF_Y, 337f / PPM);
-            game.save = false;
-        } else {
-            bdef.position.set(607f / PPM, 337f / PPM);
-        }
+        bdef.position.set(207f / PPM, 737f / PPM);
+
 
         bdef.type = BodyDef.BodyType.DynamicBody;
         Body body = world.createBody(bdef);
@@ -222,35 +208,23 @@ public class Play extends GameState implements Controllable {
         body.createFixture(fdef).setUserData("player");
         ps.dispose();
 
-        //create foot sensor - дополнительная коллизия внизу игрока
-        /*ps.setAsBox(10f / PPM, 10f / PPM, new Vector2(0, -50f/PPM), 0);
-        fdef.shape = ps;
-        fdef.filter.categoryBits = BIT_PLAYER;
-        fdef.filter.maskBits = BIT_BLOCK;
-        fdef.isSensor = true;
-        body.createFixture(fdef).setUserData("foot");*/
-
         player = new Player2(body);
         player.setState(this);
         body.setUserData(player);
     }
 
     private void createTiles() {
-        tiledMap = new TmxMapLoader().load("sprites/mystic_woods_free_2.1/map.tmx");
-        tmr = new OrthogonalTiledMapRenderer(tiledMap, 4); // !!! размер карты
+        tiledMap = new TmxMapLoader().load("sprites/mystic_woods_free_2.1/forest.tmx");
+        tmr = new OrthogonalTiledMapRenderer(tiledMap, 4.5f);
         tileSize = (int) tiledMap.getProperties().get("tilewidth");
 
         tileMapWidth = (int) tiledMap.getProperties().get("width");
         tileMapHeight = (int) tiledMap.getProperties().get("height");
 
-        TiledMapTileLayer layer = (TiledMapTileLayer) tiledMap.getLayers().get("borders"); //слой с границами карты
-        TiledMapTileLayer nextStage = (TiledMapTileLayer) tiledMap.getLayers().get("next");
-        createLayer(layer, BIT_TROPA);
-        createLayer(nextStage, BIT_PENEK);
-        //layer = (TiledMapTileLayer) tiledMap.getLayers().get("grass");
+        /*TiledMapTileLayer sword = (TiledMapTileLayer) tiledMap.getLayers().get("reward");
+        createLayer(sword, BIT_PENEK);*/
     }
 
-    //коллизия слоя на карте (слой создаётся в Tiled)
     private void createLayer(TiledMapTileLayer layer, short bits) {
         BodyDef bdef = new BodyDef();
         FixtureDef fdef = new FixtureDef();
@@ -280,7 +254,7 @@ public class Play extends GameState implements Controllable {
                 fdef.filter.categoryBits = BIT_TROPA;
                 fdef.filter.maskBits = BIT_PLAYER;
                 fdef.isSensor = false;
-                world.createBody(bdef).createFixture(fdef).setUserData(layer.getName());
+                world.createBody(bdef).createFixture(fdef);
                 cs.dispose();
             }
         }
@@ -310,18 +284,7 @@ public class Play extends GameState implements Controllable {
 
             body.createFixture(cdef).setUserData(mo.getName());
             entities.addEntity(body, mo.getName());
-
-            /*boss = new Boss(body);
-            body.setUserData(boss);
-            System.out.println(body.getUserData());*/
         }
-    }
-
-    private void createMusic() {
-        music.setVolume(0.9f);
-        music.setLooping(true);
-        music.play();
-        //music.dispose();
     }
 
     private void initFight() {
@@ -378,76 +341,12 @@ public class Play extends GameState implements Controllable {
     private void initJoyStick() {
         joyCam = new BoundedCamera();
         joyCam.setBounds(0, V_WIDTH, 0, V_HEIGHT);
-        joyCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT)); //не хватало этой строчки
+        joyCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
 
         joyStick = new JoyStick(200, 200, 200);
         shapeRenderer = new ShapeRenderer();
         shapeRenderer.setProjectionMatrix(cam.combined);
         mouse = new Vector3();
-    }
-
-    //был тестовый метод, чтобы понять работает ли диалог, можно использовать в других местах
-    private void initUI() {
-        skin_this = game.getSkin();
-        uiStage = new Stage(new ScreenViewport());
-        uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
-
-        dialogRoot = new Table();
-        dialogRoot.setFillParent(true);
-        uiStage.addActor(dialogRoot);
-
-        dialogueBox = new DialogBox(skin_this);
-        dialogueBox.setVisible(false);
-        /*dialogueBox.animateText("RU font doesn't support!");
-        dialogueBox.isFinished();*/
-
-        optionBox = new OptionBox(skin_this);
-        optionBox.setVisible(false);
-        /*optionBox.addOption("option 1");
-        optionBox.addOption("option 2");
-        optionBox.addOption("option 3");*/
-
-        Table dialogTable = new Table();
-        dialogTable.add(optionBox)
-                .expand().align(Align.right)
-                .space(8f)
-                .row();
-        dialogTable.add(dialogueBox)
-                .expand().align(Align.bottom)
-                .space(8f)
-                .row();
-
-        dialogRoot.add(dialogTable).expand().align(Align.bottom).pad(15f);
-
-        dcontroller = new DialogController(dialogueBox, optionBox);
-        multiplexer.addProcessor(dcontroller);
-        Gdx.input.setInputProcessor(multiplexer);
-
-        dialog = new Dialog();
-        DialogNode node1 = new DialogNode("Привет! Это первая фраза", 0);
-        DialogNode node2 = new DialogNode("И это вторая?", 1);
-        DialogNode node3 = new DialogNode("Да, ты прав", 2);
-        DialogNode node4 = new DialogNode("Неа, не угадал :(", 4);
-
-        node1.makeLinear(node2.getId());
-        node2.addChoice("Да", 2);
-        node2.addChoice("Нет", 4);
-
-        dialog.addNode(node1);
-        dialog.addNode(node2);
-        dialog.addNode(node3);
-        dialog.addNode(node4);
-        dcontroller.startDialog(dialog);
-    }
-
-    @Override
-    public void dispose() {
-        save();
-    }
-
-    public void save() {
-        prefs.putFloat(PREF_X, player.getPosition().x).flush();
-        prefs.putFloat(PREF_Y, player.getPosition().y).flush();
     }
 
     public void loadStage(String s) {
@@ -468,37 +367,19 @@ public class Play extends GameState implements Controllable {
                 nextState = PAINT;
                 canDraw = true;
                 break;
-            case "hooded":
-                node1 = new DialogNode("Следуй ритму!", 0);
+            case "sword":
+                node1 = new DialogNode("Вы решили вытянуть меч силы.", 0);
                 dialog.addNode(node1);
                 dcontroller.startDialog(dialog);
                 nextState = RHYTHM;
                 canDraw = true;
-                break;
-            case "next":
-                stop();
-                gsm.setState(FOREST);
                 break;
             default:
                 break;
         }
     }
 
-    private void stop() {
-        gsm.setState(nextState);
-        music.dispose();
-        isStopped = true;
-        canDraw = false;
-    }
-
-    public Player2 getPlayer() {
-        return player;
-    }
-
-    public Controller getController() {
-        return controller;
-    }
-
+    @Override
     public JoyStick getJoyStick() {
         return joyStick;
     }

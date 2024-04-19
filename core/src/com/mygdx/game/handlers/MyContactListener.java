@@ -4,15 +4,12 @@ import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Manifold;
-import com.mygdx.game.states.Play;
-
-import java.util.ArrayList;
 
 public class MyContactListener implements com.badlogic.gdx.physics.box2d.ContactListener {
-    private Play play;
+    private Controllable state;
     private GameStateManager gsm;
-    public MyContactListener(GameStateManager gsm){
-        this.gsm = gsm;
+    public MyContactListener(Controllable state){
+        this.state = state;
     }
     @Override
     public void beginContact(Contact c) {
@@ -29,9 +26,8 @@ public class MyContactListener implements com.badlogic.gdx.physics.box2d.Contact
 
         //контакт с нпс, юзается
         if (fa.getUserData() != null) {
-            play = gsm.getPlay();
             System.out.println("contact with " + fb.getUserData());
-            play.loadStage((String) fb.getUserData());
+            state.loadStage((String) fb.getUserData());
         }
         //System.out.println(fa.getUserData() + ", " + fb.getUserData());
     }

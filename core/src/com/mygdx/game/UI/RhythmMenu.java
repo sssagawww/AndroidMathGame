@@ -183,7 +183,7 @@ public class RhythmMenu extends Table {
         time += dt;
         if (canProgress) {
             if (time > 1) {
-                randomNum = (int) (Math.random() * 5) + 2;
+                randomNum = (int) (Math.random() * 3) + 2;
                 time = 0;
                 speed = 3f - (float) Math.random();
             }

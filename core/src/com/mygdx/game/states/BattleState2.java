@@ -42,7 +42,6 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
     private float tileSize;
     private int tileMapWidth;
     private int tileMapHeight;
-    private MyContactListener cl;
     // UI
     private Stage uiStage;
     private Table dialogRoot;
@@ -67,8 +66,6 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
     public BattleState2(GameStateManager gsm) {
         super(gsm);
         world = new World(new Vector2(0, 0), true);
-        cl = new MyContactListener(gsm);
-        world.setContactListener(cl);
         game = gsm.game();
         multiplexer = new InputMultiplexer(); //не нужен(?), пока нет процессов, обработчиков событий
 

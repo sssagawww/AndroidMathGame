@@ -16,6 +16,7 @@ public class GameStateManager {
     public static final int BATTLE = 2;
     public static final int NEW_GAME = 4;
     public static final int RHYTHM = 8;
+    public static final int FOREST = 5;
 
     public GameStateManager(MyGdxGame game) {
         this.game = game;
@@ -48,6 +49,8 @@ public class GameStateManager {
             return new PaintState(this);
         } else if (state == RHYTHM) {
             return new RhythmState(this);
+        } else if (state == FOREST) {
+            return new Forest(this);
         }
         return null;
     }
