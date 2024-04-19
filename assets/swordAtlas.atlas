@@ -1,0 +1,13 @@
+
+swordAtlas.png
+size: 256, 128
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+sword2
+  rotate: false
+  xy: 2, 2
+  size: 128, 64
+  orig: 128, 64
+  offset: 0, 0
+  index: -1

@@ -6,9 +6,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.mygdx.game.MyGdxGame;
-import com.mygdx.game.UI.Controller;
 import com.mygdx.game.UI.JoyStick;
-import com.mygdx.game.states.Play;
+import com.mygdx.game.handlers.Controllable;
 
 import static com.mygdx.game.handlers.B2DVars.*;
 import static com.mygdx.game.handlers.B2DVars.PlayerAnim.*;
@@ -19,7 +18,7 @@ public class Player2 extends B2DSprite {
     private Texture tex2;
     private int dir = IDLE;
     private boolean move = false;
-    private Play play;
+    private Controllable state;
     private JoyStick joyStick;
     private int countIdle = 0;
     private int countMove = 1;
@@ -199,9 +198,9 @@ public class Player2 extends B2DSprite {
         this.move = move;
     }
 
-    public void setPlay(Play play) {
-        this.play = play;
-        joyStick = play.getJoyStick();
+    public void setState(Controllable state) {
+        this.state = state;
+        joyStick = state.getJoyStick();
     }
 }
 

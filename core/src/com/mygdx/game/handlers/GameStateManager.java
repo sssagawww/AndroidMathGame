@@ -3,6 +3,7 @@ package com.mygdx.game.handlers;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.states.*;
 
+import java.awt.Menu;
 import java.util.Stack;
 
 public class GameStateManager {
@@ -14,6 +15,8 @@ public class GameStateManager {
     public static final int PAINT = 1;
     public static final int BATTLE = 2;
     public static final int NEW_GAME = 4;
+    public static final int RHYTHM = 8;
+    public static final int FOREST = 5;
 
     public GameStateManager(MyGdxGame game) {
         this.game = game;
@@ -44,6 +47,10 @@ public class GameStateManager {
             return play;
         } else if (state == PAINT) {
             return new PaintState(this);
+        } else if (state == RHYTHM) {
+            return new RhythmState(this);
+        } else if (state == FOREST) {
+            return new Forest(this);
         }
         return null;
     }
