@@ -50,16 +50,14 @@ import com.mygdx.game.UI.OptionBox;
 import com.mygdx.game.entities.PlayEntities;
 import com.mygdx.game.entities.Player2;
 import com.mygdx.game.handlers.BoundedCamera;
+import com.mygdx.game.handlers.Controllable;
 import com.mygdx.game.handlers.GameStateManager;
-import com.mygdx.game.handlers.MazeContactListener;
 import com.mygdx.game.handlers.MyContactListener;
 
-import jdk.internal.misc.ScopedMemoryAccess;
-
-public class MazeState extends GameState {
+public class MazeState extends GameState implements Controllable {
     private Box2DDebugRenderer b2dr;
     private InputMultiplexer multiplexer;
-    private MazeContactListener cl;
+    private MyContactListener cl;
     private Skin skin_this;
     private BoundedCamera b2dCam;
     private boolean isJoyStick = true;
@@ -103,7 +101,7 @@ public class MazeState extends GameState {
         world = new World(new Vector2(0, 0), true);
         b2dr = new Box2DDebugRenderer();
         multiplexer = new InputMultiplexer();
-        cl = new MazeContactListener(gsm); //детектит коллизию
+        cl = new MyContactListener(this); //детектит коллизию
         world.setContactListener(cl);
         music = Gdx.audio.newMusic(Gdx.files.internal("music/song.wav"));
         prefs = Gdx.app.getPreferences(PREF_NAME);
@@ -216,7 +214,7 @@ public class MazeState extends GameState {
         body.createFixture(fdef).setUserData("foot");*/
 
         player = new Player2(body);
-        player.setMaze(this);
+        player.setState(this);
         body.setUserData(player);
     }
 
@@ -367,10 +365,6 @@ public class MazeState extends GameState {
     public void dispose() {
         save();
     }
-
-    public JoyStick getJoystick() {
-        return joyStick;
-    }
     public void save() {
         prefs.putFloat(PREF_X, player.getPosition().x).flush();
         prefs.putFloat(PREF_Y, player.getPosition().y).flush();
@@ -397,6 +391,11 @@ public class MazeState extends GameState {
             default:
                 break;
         }
+    }
+
+    @Override
+    public JoyStick getJoyStick() {
+        return joyStick;
     }
 
     private void initFight() {

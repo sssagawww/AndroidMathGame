@@ -23,8 +23,6 @@ public class Player2 extends B2DSprite {
     private JoyStick joyStick;
     private int countIdle = 0;
     private int countMove = 1;
-    private MazeState maze;
-
     public Player2(Body body) {
         super(body);
         tex = MyGdxGame.res.getTexture("gnomik");
@@ -204,11 +202,5 @@ public class Player2 extends B2DSprite {
         this.state = state;
         joyStick = state.getJoyStick();
     }
-
-    public void setMaze (MazeState maze) {
-        this.maze = maze;
-        joyStick = maze.getJoystick();
-    }
-
 }
 
