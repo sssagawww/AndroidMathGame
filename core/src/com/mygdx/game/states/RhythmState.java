@@ -76,7 +76,7 @@ public class RhythmState extends GameState {
         uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
 
         Table root = new Table();
-        root.setBackground(game.getSkin().getDrawable("bg"));
+        //root.setBackground(game.getSkin().getDrawable("bg"));
         root.setFillParent(true);
         uiStage.addActor(root);
 
