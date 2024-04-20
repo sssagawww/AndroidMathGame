@@ -268,8 +268,8 @@ public class Forest extends GameState implements Controllable {
         for (MapObject mo : mlayer.getObjects()) {
             BodyDef bdef = new BodyDef();
             bdef.type = BodyDef.BodyType.StaticBody;
-            float x = (float) mo.getProperties().get("x") / PPM * 4;
-            float y = (float) mo.getProperties().get("y") / PPM * 4;
+            float x = (float) mo.getProperties().get("x") / PPM * 4.5f;
+            float y = (float) mo.getProperties().get("y") / PPM * 4.5f;
             bdef.position.set(x, y);
 
             Body body = world.createBody(bdef);

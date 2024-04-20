@@ -184,7 +184,7 @@ public class Play extends GameState implements Controllable {
         //boss.render(sb, 200f, 200f);
         entities.render(sb, 150f, 150f);
 
-        //draw box?     ---need fix?---
+        //draw collision
         if (debug) {
             b2dCam.position.set(player.getPosition().x, player.getPosition().y, 0);
             b2dCam.update();
