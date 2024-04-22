@@ -197,7 +197,6 @@ public class Forest extends GameState implements Controllable {
 
         bdef.position.set(207f / PPM, 737f / PPM);
 
-
         bdef.type = BodyDef.BodyType.DynamicBody;
         Body body = world.createBody(bdef);
 
@@ -268,8 +267,8 @@ public class Forest extends GameState implements Controllable {
         for (MapObject mo : mlayer.getObjects()) {
             BodyDef bdef = new BodyDef();
             bdef.type = BodyDef.BodyType.StaticBody;
-            float x = (float) mo.getProperties().get("x") / PPM * 4;
-            float y = (float) mo.getProperties().get("y") / PPM * 4;
+            float x = (float) mo.getProperties().get("x") / PPM * 4.5f;
+            float y = (float) mo.getProperties().get("y") / PPM * 4.5f;
             bdef.position.set(x, y);
 
             Body body = world.createBody(bdef);
@@ -345,7 +344,7 @@ public class Forest extends GameState implements Controllable {
 
         joyStick = new JoyStick(200, 200, 200);
         shapeRenderer = new ShapeRenderer();
-        shapeRenderer.setProjectionMatrix(cam.combined);
+        shapeRenderer.setProjectionMatrix(joyCam.combined);
         mouse = new Vector3();
     }
 

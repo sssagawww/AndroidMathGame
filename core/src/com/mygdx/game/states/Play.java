@@ -244,9 +244,7 @@ public class Play extends GameState implements Controllable {
         tileMapHeight = (int) tiledMap.getProperties().get("height");
 
         TiledMapTileLayer layer = (TiledMapTileLayer) tiledMap.getLayers().get("borders"); //слой с границами карты
-        TiledMapTileLayer nextStage = (TiledMapTileLayer) tiledMap.getLayers().get("next");
         createLayer(layer, BIT_TROPA);
-        createLayer(nextStage, BIT_PENEK);
         //layer = (TiledMapTileLayer) tiledMap.getLayers().get("grass");
     }
 
@@ -280,7 +278,7 @@ public class Play extends GameState implements Controllable {
                 fdef.filter.categoryBits = BIT_TROPA;
                 fdef.filter.maskBits = BIT_PLAYER;
                 fdef.isSensor = false;
-                world.createBody(bdef).createFixture(fdef).setUserData(layer.getName());
+                world.createBody(bdef).createFixture(fdef);
                 cs.dispose();
             }
         }
@@ -382,7 +380,7 @@ public class Play extends GameState implements Controllable {
 
         joyStick = new JoyStick(200, 200, 200);
         shapeRenderer = new ShapeRenderer();
-        shapeRenderer.setProjectionMatrix(cam.combined);
+        shapeRenderer.setProjectionMatrix(joyCam.combined);
         mouse = new Vector3();
     }
 
@@ -476,8 +474,8 @@ public class Play extends GameState implements Controllable {
                 canDraw = true;
                 break;
             case "next":
+                nextState = FOREST;
                 stop();
-                gsm.setState(FOREST);
                 break;
             default:
                 break;

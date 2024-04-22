@@ -9,6 +9,7 @@ import java.util.Stack;
 public class GameStateManager {
     private MyGdxGame game;
     private Play play;
+    private Forest forest;
     private Stack<GameState> gameStates;
     public static final int PLAY = 912837;
     public static final int MENU = 0;
@@ -50,7 +51,8 @@ public class GameStateManager {
         } else if (state == RHYTHM) {
             return new RhythmState(this);
         } else if (state == FOREST) {
-            return new Forest(this);
+            if (forest==null) return forest = new Forest(this);
+            return forest;
         }
         return null;
     }
