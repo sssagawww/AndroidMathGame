@@ -16,16 +16,17 @@ import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.mygdx.game.MyGdxGame;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 public class RhythmMenu extends Table {
     private Table strengthTable;
     private Image playerImage;
+    private Drawable finalSword;
     private ArrayList<TextureRegionDrawable> drawables;
     private ProgressBar strengthBar;
     private ProgressBar progressBar;
@@ -42,7 +43,11 @@ public class RhythmMenu extends Table {
     private float progress = 0;
     private int strength = 0;
     private boolean progressReverse;
+    private boolean percent100;
     private float speed = 1;
+    private float size = V_HEIGHT / 1.5f * 1.34f;
+    private float playerImageX;
+    private float playerImageSize;
 
     public RhythmMenu(Skin skin) {
         super(skin);
@@ -71,6 +76,7 @@ public class RhythmMenu extends Table {
         clickBtn.addListener(new InputListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                setPlayerImage(1);
                 float value = progressBar.getValue() + strength * 0.2f;
                 if (curTime > 1) {
                     canProgress = true;
@@ -79,9 +85,10 @@ public class RhythmMenu extends Table {
                 if (!sBtnClicked) {
                     return true;
                 }
-                setPlayerImage(1);
                 strengthLabel.setText("Сила: 0");
                 if (value >= 100) {
+                    playerImage.setDrawable(finalSword);
+                    percent100 = true;
                     percentsLabel.setText("100%");
                     value = 100;
                 }
@@ -93,7 +100,9 @@ public class RhythmMenu extends Table {
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                setPlayerImage(0);
+                if(progressBar.getValue() < 100){
+                    setPlayerImage(0);
+                }
                 timeLabel.setText("0,00");
                 canProgress = true;
                 sBtnClicked = false;
@@ -102,12 +111,18 @@ public class RhythmMenu extends Table {
 
         createBars();
 
+        Texture finalTex = MyGdxGame.res.getTexture("finalSword");
+        TextureRegion finalSprite = new TextureRegion(finalTex, finalTex.getHeight(), finalTex.getHeight());
+        finalSword = new TextureRegionDrawable(finalSprite);
+
         //спрайт гг
         Texture tex = MyGdxGame.res.getTexture("playerSword");
         TextureRegion[] sprites = TextureRegion.split(tex, tex.getHeight(), tex.getHeight())[0];
         drawables.add(new TextureRegionDrawable(sprites[0]));
         drawables.add(new TextureRegionDrawable(sprites[1]));
         playerImage = new Image(sprites[0]);
+
+        playerImageSize = size/1.65f;
 
         //стиль для label
         BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
@@ -132,8 +147,8 @@ public class RhythmMenu extends Table {
         timeLabel.setAlignment(Align.top);
 
         Table playerTable = new Table();
-        playerTable.add(playerImage).align(Align.center).width(V_HEIGHT / 1.5f).height(V_HEIGHT / 1.5f).padLeft(146f).expand().row();
-        playerTable.add(progressBar).width(500f).align(Align.center).padLeft(146f);
+        playerTable.add(playerImage).align(Align.center).width(V_HEIGHT / 1.5f).height(V_HEIGHT / 1.5f).padLeft(80f).expand().row();
+        playerTable.add(progressBar).width(500f).align(Align.center).padLeft(80f);
         playerTable.add(percentsLabel).align(Align.left).padLeft(25f);
 
         Table rightTable = new Table();
@@ -178,8 +193,13 @@ public class RhythmMenu extends Table {
         playerImage.setDrawable(drawables.get(num));
     }
 
-
     public void update(float dt) {
+        if (progressBar.getValue() >= 100 && size >= playerImageSize) {
+            size -= 1;
+            playerImage.setSize(size, size);
+            playerImageX += 0.003f;
+            playerImage.setPosition(playerImageX + playerImage.getX(), playerImage.getY());
+        }
         time += dt;
         if (canProgress) {
             if (time > 1) {
@@ -208,5 +228,13 @@ public class RhythmMenu extends Table {
         int i = Math.round(strengthBar.getValue());
         strengthLabel.setText("Сила: " + i);
         return i;
+    }
+
+    public boolean isPercent100() {
+        return percent100;
+    }
+
+    public void setPercent100(boolean percent100) {
+        this.percent100 = percent100;
     }
 }

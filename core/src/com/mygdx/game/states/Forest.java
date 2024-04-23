@@ -13,8 +13,6 @@ import static com.mygdx.game.handlers.GameStateManager.RHYTHM;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.Preferences;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.MapLayer;
@@ -79,14 +77,14 @@ public class Forest extends GameState implements Controllable {
     public boolean canDraw;
     private float time = 0;
     private Controller controller;
-    // -------- JoyStick ----------
     private JoyStick joyStick;
     private ShapeRenderer shapeRenderer;
     private Vector3 mouse;
     private BoundedCamera joyCam;
-    // --------- END JoyStick ---------
     private boolean isStopped;
     private int nextState;
+    private int[] backgroundLayers = {0, 1};
+    private int[] foregroundLayers = {2, 3, 4,5,6};
 
     public Forest(GameStateManager gsm) {
         super(gsm);
@@ -165,11 +163,13 @@ public class Forest extends GameState implements Controllable {
         cam.update();
 
         tmr.setView(cam);
-        tmr.render();
+        tmr.render(backgroundLayers);
 
         sb.setProjectionMatrix(cam.combined);
         player.render(sb, 80f, 86.6f);
         entities.render(sb, 150f, 150f);
+
+        tmr.render(foregroundLayers);
 
         if (debug) {
             b2dCam.position.set(player.getPosition().x, player.getPosition().y, 0);
@@ -197,7 +197,6 @@ public class Forest extends GameState implements Controllable {
 
         bdef.position.set(207f / PPM, 737f / PPM);
 
-
         bdef.type = BodyDef.BodyType.DynamicBody;
         Body body = world.createBody(bdef);
 
@@ -215,14 +214,14 @@ public class Forest extends GameState implements Controllable {
 
     private void createTiles() {
         tiledMap = new TmxMapLoader().load("sprites/mystic_woods_free_2.1/forest.tmx");
-        tmr = new OrthogonalTiledMapRenderer(tiledMap, 4.5f);
+        tmr = new OrthogonalTiledMapRenderer(tiledMap, 4f);
         tileSize = (int) tiledMap.getProperties().get("tilewidth");
 
         tileMapWidth = (int) tiledMap.getProperties().get("width");
         tileMapHeight = (int) tiledMap.getProperties().get("height");
 
-        /*TiledMapTileLayer sword = (TiledMapTileLayer) tiledMap.getLayers().get("reward");
-        createLayer(sword, BIT_PENEK);*/
+        TiledMapTileLayer trees = (TiledMapTileLayer) tiledMap.getLayers().get("treescollision");
+        createLayer(trees, BIT_PENEK);
     }
 
     private void createLayer(TiledMapTileLayer layer, short bits) {
@@ -241,13 +240,13 @@ public class Forest extends GameState implements Controllable {
 
                 bdef.type = BodyDef.BodyType.StaticBody;
                 bdef.position.set(
-                        (col + 0.2f) * tileSize / 2.5f,
-                        (row + 0.4f) * tileSize / 2.5f);
+                        (col + 0.1f) * tileSize / 2.5f,
+                        (row + 0.2f) * tileSize / 2.5f);
                 ChainShape cs = new ChainShape();
                 Vector2[] v = new Vector2[3];
-                v[0] = new Vector2(-tileSize / 6, -tileSize / 6);
-                v[1] = new Vector2(-tileSize / 6, tileSize / 6);
-                v[2] = new Vector2(tileSize / 6, tileSize / 6);
+                v[0] = new Vector2(-tileSize / 6, -tileSize / 10);
+                v[1] = new Vector2(-tileSize / 6, tileSize / 10);
+                v[2] = new Vector2(tileSize / 6, tileSize / 10);
                 cs.createChain(v);
                 fdef.friction = 0;
                 fdef.shape = cs;
@@ -268,8 +267,10 @@ public class Forest extends GameState implements Controllable {
         for (MapObject mo : mlayer.getObjects()) {
             BodyDef bdef = new BodyDef();
             bdef.type = BodyDef.BodyType.StaticBody;
-            float x = (float) mo.getProperties().get("x") / PPM * 4.5f;
-            float y = (float) mo.getProperties().get("y") / PPM * 4.5f;
+          
+            float x = (float) mo.getProperties().get("x") / PPM * 4f;
+            float y = (float) mo.getProperties().get("y") / PPM * 4f;
+
             bdef.position.set(x, y);
 
             Body body = world.createBody(bdef);
@@ -345,7 +346,7 @@ public class Forest extends GameState implements Controllable {
 
         joyStick = new JoyStick(200, 200, 200);
         shapeRenderer = new ShapeRenderer();
-        shapeRenderer.setProjectionMatrix(cam.combined);
+        shapeRenderer.setProjectionMatrix(joyCam.combined);
         mouse = new Vector3();
     }
 

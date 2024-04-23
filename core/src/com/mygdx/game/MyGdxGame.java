@@ -65,8 +65,10 @@ public class MyGdxGame implements ApplicationListener {
         res.loadTexture("entitySprites/enemy2.png", "enemy");
         res.loadTexture("entitySprites/bombGuy.png", "npc");
         res.loadTexture("entitySprites/hooded.png", "hooded");
-        res.loadTexture("entitySprites/sword2.png", "playerSword");
+        res.loadTexture("entitySprites/sword3.png", "playerSword");
+        res.loadTexture("entitySprites/finalSword.png", "finalSword");
         res.loadTexture("entitySprites/swordAnim.png", "sword");
+        res.loadTexture("entitySprites/next.png", "next");
 
         assetManager = new AssetManager();
         assetManager.load("UI/testAtlas.atlas", TextureAtlas.class);

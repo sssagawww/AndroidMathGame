@@ -2,6 +2,7 @@ package com.mygdx.game.states;
 
 import static com.mygdx.game.MyGdxGame.V_HEIGHT;
 import static com.mygdx.game.MyGdxGame.V_WIDTH;
+import static com.mygdx.game.handlers.GameStateManager.FOREST;
 import static com.mygdx.game.handlers.GameStateManager.PLAY;
 
 import com.badlogic.gdx.Gdx;
@@ -23,6 +24,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.Dialog.Dialog;
 import com.mygdx.game.Dialog.DialogController;
+import com.mygdx.game.Dialog.DialogNode;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.UI.DialogBox;
 import com.mygdx.game.UI.OptionBox;
@@ -35,6 +37,7 @@ import java.util.ArrayList;
 public class RhythmState extends GameState {
     private InputMultiplexer multiplexer;
     private Stage uiStage;
+    private DialogBox dialogBox;
     private RhythmMenu rhythmMenu;
 
     public RhythmState(GameStateManager gsm) {
@@ -56,6 +59,14 @@ public class RhythmState extends GameState {
     public void update(float dt) {
         uiStage.act(dt);
         rhythmMenu.update(dt);
+        if (rhythmMenu.isPercent100()) {
+            rhythmMenu.setPercent100(false);
+            dialogBox.animateText("Готово! >>");
+            dialogBox.setVisible(true);
+        }
+        if (dialogBox.isPressed()) {
+            gsm.setState(FOREST);
+        }
     }
 
     @Override
@@ -92,7 +103,6 @@ public class RhythmState extends GameState {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 gsm.setState(PLAY);
-                //setPlayerImage(i++ % 2);
             }
         });
 
@@ -102,6 +112,15 @@ public class RhythmState extends GameState {
         root.add(menuImg).expand().align(Align.topLeft).padTop(65f);
         root.add(rhythmMenu).align(Align.center).width(V_HEIGHT / 1.5f).height(V_HEIGHT / 1.5f);
         root.add(table).expand().align(Align.center);
+
+        Table dialogRoot = new Table();
+        dialogRoot.setFillParent(true);
+        uiStage.addActor(dialogRoot);
+
+        dialogBox = new DialogBox(game.getSkin());
+        dialogBox.setVisible(false);
+
+        dialogRoot.add(dialogBox).expand().align(Align.top).padTop(50f);
 
         multiplexer.addProcessor(uiStage);
     }
