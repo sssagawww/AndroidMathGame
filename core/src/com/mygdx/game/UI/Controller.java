@@ -15,22 +15,21 @@ import com.badlogic.gdx.utils.Align;
 Player2 проверяет состояние переменной и ставит нужную траекторию, если она true*/
 public class Controller extends Table {
     private boolean menuPressed;
+    private boolean inventoryPressed;
 
     public Controller(Skin skin) {
         super(skin);
-        Table uiTable = new Table();
         Table uiTableRight = new Table();
         Table uiTableTop = new Table();
-        this.add(uiTableTop).align(Align.topLeft).pad(0, 0, V_HEIGHT / 1.11f, 0);
-        this.add(uiTable).align(Align.bottomLeft);
-        this.add(uiTableRight).align(Align.right).pad(V_HEIGHT / 1.8f, V_WIDTH / 1.9f, 0, 0);
+        this.setFillParent(true);
+        this.add(uiTableTop).align(Align.topLeft).expand();
+        this.add(uiTableRight).align(Align.topRight).expand();
 
         // Эту реализацию можно доработать или переделать (не конечный вариант)
         // --сделать атлас текстур и использовать его вместо нескольких картинок, как в других классах
 
         //кнопки взаимодействия
         Image menuImg = new Image(new Texture("controller/menuBtn.png"));
-        menuImg.setScale(5, 5);
         menuImg.addListener(new InputListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
@@ -44,12 +43,30 @@ public class Controller extends Table {
             }
         });
 
+        Image inventImg = new Image(new Texture("controller/circle.png"));
+        inventImg.addListener(new InputListener() {
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                inventoryPressed = true;
+                return true;
+            }
+
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                inventoryPressed = false;
+            }
+        });
+
         //добавление в таблицу и выравнивание
-        //uiTableRight.add(interactImg);
-        uiTableTop.add(menuImg);
+        uiTableTop.add(menuImg).width(menuImg.getWidth()*5).height(menuImg.getHeight()*5);
+        uiTableRight.add(inventImg).width(inventImg.getWidth()*5).height(inventImg.getHeight()*5);
     }
 
     public boolean isMenuPressed() {
         return menuPressed;
+    }
+
+    public boolean isInventoryPressed() {
+        return inventoryPressed;
     }
 }
