@@ -40,6 +40,7 @@ import static com.mygdx.game.MyGdxGame.V_WIDTH;
 import static com.mygdx.game.handlers.B2DVars.*;
 import static com.mygdx.game.handlers.GameStateManager.BATTLE;
 import static com.mygdx.game.handlers.GameStateManager.FOREST;
+import static com.mygdx.game.handlers.GameStateManager.MAZE;
 import static com.mygdx.game.handlers.GameStateManager.MENU;
 import static com.mygdx.game.handlers.GameStateManager.PAINT;
 import static com.mygdx.game.handlers.GameStateManager.RHYTHM;
@@ -192,7 +193,7 @@ public class Play extends GameState implements Controllable {
         //boss.render(sb, 200f, 200f);
         entities.render(sb, 150f, 150f);
 
-        //draw box?     ---need fix?---
+        //draw collision
         if (debug) {
             b2dCam.position.set(player.getPosition().x, player.getPosition().y, 0);
             b2dCam.update();
@@ -493,10 +494,10 @@ public class Play extends GameState implements Controllable {
                 canDraw = true;
                 break;
             case "hooded":
-                node1 = new DialogNode("Следуй ритму!", 0);
+                node1 = new DialogNode("Идем в руины.", 0);
                 dialog.addNode(node1);
                 dcontroller.startDialog(dialog);
-                nextState = RHYTHM;
+                nextState = MAZE;
                 canDraw = true;
                 break;
             case "next":

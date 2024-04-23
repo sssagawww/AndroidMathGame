@@ -26,7 +26,7 @@ public class FiguresDatabase {
         dbWrapper = game.getDbWrapper();
         curFigure = 0;
         initializeFigures();
-        //figures = dbWrapper.getFigures();
+        //figures = dbWrapper.getFigures(); // загружает из дб, которая пока доступна только на 1 устройстве, не переносится
     }
 
     private void saveFigures(){

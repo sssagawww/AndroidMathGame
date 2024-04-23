@@ -11,18 +11,19 @@ public class GameStateManager {
     private Play play;
     private Forest forest;
     private Stack<GameState> gameStates;
+    private MazeState mazeState;
     public static final int PLAY = 912837;
     public static final int MENU = 0;
     public static final int PAINT = 1;
     public static final int BATTLE = 2;
     public static final int NEW_GAME = 4;
-    public static final int RHYTHM = 8;
     public static final int FOREST = 5;
+    public static final int MAZE = 6;
+    public static final int RHYTHM = 8;
 
     public GameStateManager(MyGdxGame game) {
         this.game = game;
         gameStates = new Stack<GameState>();
-        //play = new Play(this);
         pushState(MENU);
     }
 
@@ -48,6 +49,9 @@ public class GameStateManager {
             return play;
         } else if (state == PAINT) {
             return new PaintState(this);
+        } else if (state == MAZE) {
+            mazeState = new MazeState(this);
+            return mazeState;
         } else if (state == RHYTHM) {
             return new RhythmState(this);
         } else if (state == FOREST) {
@@ -72,6 +76,10 @@ public class GameStateManager {
     //кидает в стэк тот стейт (обозначаются int переменными), который передан
     public void pushState(int state) {
         gameStates.push(getState(state));
+    }
+
+    public MazeState getMazeState() {
+        return mazeState;
     }
 
     public Play getPlay() {

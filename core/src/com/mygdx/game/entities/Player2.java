@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.UI.JoyStick;
+
 import com.mygdx.game.handlers.Controllable;
 
 import static com.mygdx.game.handlers.B2DVars.*;
@@ -22,7 +23,6 @@ public class Player2 extends B2DSprite {
     private JoyStick joyStick;
     private int countIdle = 0;
     private int countMove = 1;
-
     public Player2(Body body) {
         super(body);
         tex = MyGdxGame.res.getTexture("gnomik");
