@@ -99,8 +99,6 @@ public class DungeonState extends GameState implements Controllable {
         cl = new MyContactListener(this); //детектит коллизию
         world.setContactListener(cl);
         music = Gdx.audio.newMusic(Gdx.files.internal("music/song.wav"));
-//        prefs = Gdx.app.getPreferences(PREF_NAME);
-//        savePlay = game.save;
         skin_this = game.getSkin();
 
         //initUI();
@@ -109,7 +107,6 @@ public class DungeonState extends GameState implements Controllable {
         createPlayer();
         createTiles();
         createNPC();
-        //createMusic(); //отключено, чтобы не мешало при дебаггинге
 
         //initFight();
 
@@ -117,69 +114,45 @@ public class DungeonState extends GameState implements Controllable {
         b2dCam = new BoundedCamera(); //рисует дебаг коллизию?
         b2dCam.setToOrtho(false, V_WIDTH / PPM, V_HEIGHT / PPM); // /2?
         b2dCam.setBounds(0, (tileMapWidth * tileSize) / PPM, 0, (tileMapHeight * tileSize) / PPM);
-        System.out.println("V_HEIGHT: " + MyGdxGame.V_HEIGHT + " player: " + player.getPosition().x + " " + player.getPosition().y);
-    }
-
-    private void initController() {
-        controllerStage = new Stage(new ScreenViewport());
-        controllerStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
-
-        controller = new Controller(skin_this);
-        controller.setVisible(true);
-
-        Table controllerRoot = new Table();
-        controllerRoot.setFillParent(true);
-        controllerRoot.add(controller).expand().align(Align.bottomLeft);
-        controllerStage.addActor(controllerRoot);
-
-        multiplexer.addProcessor(controllerStage);
-        Gdx.input.setInputProcessor(multiplexer);
-    }
-
-    private void initJoyStick() {
-        joyCam = new BoundedCamera();
-        joyCam.setBounds(0, V_WIDTH, 0, V_HEIGHT);
-        joyCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT)); //не хватало этой строчки
-
-        joyStick = new JoyStick(200, 200, 200);
-        shapeRenderer = new ShapeRenderer();
-        shapeRenderer.setProjectionMatrix(cam.combined);
-        mouse = new Vector3();
     }
 
     @Override
-    public void handleInput() {
-    }
+    public void update(float dt) {
+        handleInput();
+        world.step(dt, 6, 2);
+        controllerStage.act(dt);
+        player.update(dt);
+        entities.update(dt);
+        player.updatePL();
 
-    private void createPlayer() {
-        bdef = new BodyDef();
-        PolygonShape ps = new PolygonShape();
-        FixtureDef fdef = new FixtureDef();
+        if (isStopped) {
+            isStopped = false;
+            multiplexer.addProcessor(controllerStage);
+            Gdx.input.setInputProcessor(multiplexer);
+        }
 
-        bdef.position.set(607f / PPM, 337f / PPM);
+        if (controller.isMenuPressed()) {
+            gsm.setState(MENU);
+        }
 
+        if (Gdx.input.isTouched()) {
+            mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+            joyCam.unproject(mouse);
+            joyStick.update(mouse.x, mouse.y);
+        } else {
+            joyStick.setDefaultPos();
+        }
 
-        bdef.type = BodyDef.BodyType.DynamicBody;
-        Body body = world.createBody(bdef);
-
-        ps.setAsBox(40f / PPM, 50f / PPM, new Vector2(-5.4f, -3.6f), 0);
-        fdef.shape = ps;
-        fdef.filter.categoryBits = BIT_PLAYER;
-        fdef.filter.maskBits = BIT_TROPA;
-        body.createFixture(fdef).setUserData("player");
-        ps.dispose();
-
-        //create foot sensor - дополнительная коллизия внизу игрока
-        /*ps.setAsBox(10f / PPM, 10f / PPM, new Vector2(0, -50f/PPM), 0);
-        fdef.shape = ps;
-        fdef.filter.categoryBits = BIT_PLAYER;
-        fdef.filter.maskBits = BIT_BLOCK;
-        fdef.isSensor = true;
-        body.createFixture(fdef).setUserData("foot");*/
-
-        player = new Player2(body);
-        player.setState(this);
-        body.setUserData(player);
+        //можно начать бой
+        if (canDraw) {
+            uiStage.act(dt);
+            dcontroller.update(dt);
+            time += dt;
+            if (dialogueBox.isFinished() && time > 2f) {
+                time = 0;
+                stop();
+            }
+        }
     }
 
     @Override
@@ -216,54 +189,6 @@ public class DungeonState extends GameState implements Controllable {
         joyStick.render(shapeRenderer);
     }
 
-    @Override
-    public void dispose() {
-
-    }
-
-    @Override
-    public void update(float dt) {
-        handleInput();
-        world.step(dt, 6, 2);
-        controllerStage.act(dt);
-        player.update(dt);
-        //boss.update(dt);
-        entities.update(dt);
-        player.updatePL();
-
-        //нужно обновление размера экрана, и тогда будет resize всех компонентов?
-
-        //если этот state был выгружен, то при запуске все процессы должны возобновиться (удаляются ли они в multiplexer при выгрузке или просто останавливаются?)
-        if (isStopped) {
-            isStopped = false;
-            multiplexer.addProcessor(controllerStage);
-            Gdx.input.setInputProcessor(multiplexer);
-        }
-
-        if (controller.isMenuPressed()) {
-            gsm.setState(MENU);
-        }
-
-        if (Gdx.input.isTouched()) {
-            mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-            joyCam.unproject(mouse);
-            joyStick.update(mouse.x, mouse.y);
-        } else {
-            joyStick.setDefaultPos();
-        }
-
-        //можно начать бой
-        if (canDraw) {
-            uiStage.act(dt);
-            dcontroller.update(dt);
-            time += dt;
-            if (dialogueBox.isFinished() && time > 2f) {
-                time = 0;
-                stop();
-            }
-        }
-    }
-
     private void createTiles() {
         tiledMap = new TmxMapLoader().load("sprites/mystic_woods_free_2.1/dungeon.tmx");
         tmr = new OrthogonalTiledMapRenderer(tiledMap, 4); // !!! размер карты
@@ -274,34 +199,6 @@ public class DungeonState extends GameState implements Controllable {
 
         TiledMapTileLayer walls = (TiledMapTileLayer) tiledMap.getLayers().get("walls");
         createLayer(walls, BIT_TROPA);
-    }
-
-    private void createNPC() {
-        MapLayer mlayer = tiledMap.getLayers().get("objects");
-        if (mlayer == null) return;
-        entities = new PlayEntities();
-
-        for (MapObject mo : mlayer.getObjects()) {
-            BodyDef bdef = new BodyDef();
-            bdef.type = BodyDef.BodyType.StaticBody;
-            float x = (float) mo.getProperties().get("x") / PPM * 4;
-            float y = (float) mo.getProperties().get("y") / PPM * 4;
-            bdef.position.set(x, y);
-
-            Body body = world.createBody(bdef);
-            FixtureDef cdef = new FixtureDef();
-            CircleShape cshape = new CircleShape();
-            cshape.setRadius(50f / PPM);
-            cdef.shape = cshape;
-            cdef.isSensor = true;
-            cdef.filter.categoryBits = BIT_TROPA;
-            cdef.filter.maskBits = BIT_PLAYER;
-            cshape.dispose();
-
-            body.createFixture(cdef).setUserData(mo.getName());
-            entities.addEntity(body, mo.getName());
-
-        }
     }
 
     private void createLayer(TiledMapTileLayer layer, short bits) {
@@ -339,9 +236,86 @@ public class DungeonState extends GameState implements Controllable {
         }
     }
 
-    @Override
-    public JoyStick getJoyStick() {
-        return joyStick;
+    private void createPlayer() {
+        bdef = new BodyDef();
+        PolygonShape ps = new PolygonShape();
+        FixtureDef fdef = new FixtureDef();
+
+        bdef.position.set(607f / PPM, 337f / PPM);
+
+
+        bdef.type = BodyDef.BodyType.DynamicBody;
+        Body body = world.createBody(bdef);
+
+        ps.setAsBox(40f / PPM, 50f / PPM, new Vector2(-5.4f, -3.6f), 0);
+        fdef.shape = ps;
+        fdef.filter.categoryBits = BIT_PLAYER;
+        fdef.filter.maskBits = BIT_TROPA;
+        body.createFixture(fdef).setUserData("player");
+        ps.dispose();
+
+        player = new Player2(body);
+        player.setState(this);
+        body.setUserData(player);
+    }
+
+    private void createNPC() {
+        MapLayer mlayer = tiledMap.getLayers().get("objects");
+        if (mlayer == null) return;
+        entities = new PlayEntities();
+
+        for (MapObject mo : mlayer.getObjects()) {
+            BodyDef bdef = new BodyDef();
+            bdef.type = BodyDef.BodyType.StaticBody;
+            float x = (float) mo.getProperties().get("x") / PPM * 4;
+            float y = (float) mo.getProperties().get("y") / PPM * 4;
+            bdef.position.set(x, y);
+
+            Body body = world.createBody(bdef);
+            FixtureDef cdef = new FixtureDef();
+            CircleShape cshape = new CircleShape();
+            cshape.setRadius(50f / PPM);
+            cdef.shape = cshape;
+            cdef.isSensor = true;
+            cdef.filter.categoryBits = BIT_TROPA;
+            cdef.filter.maskBits = BIT_PLAYER;
+            cshape.dispose();
+
+            body.createFixture(cdef).setUserData(mo.getName());
+            entities.addEntity(body, mo.getName());
+
+        }
+    }
+
+    private void initController() {
+        controllerStage = new Stage(new ScreenViewport());
+        controllerStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+
+        controller = new Controller(skin_this);
+        controller.setVisible(true);
+
+        Table controllerRoot = new Table();
+        controllerRoot.setFillParent(true);
+        controllerRoot.add(controller).expand().align(Align.bottomLeft);
+        controllerStage.addActor(controllerRoot);
+
+        multiplexer.addProcessor(controllerStage);
+        Gdx.input.setInputProcessor(multiplexer);
+    }
+
+    private void initJoyStick() {
+        joyCam = new BoundedCamera();
+        joyCam.setBounds(0, V_WIDTH, 0, V_HEIGHT);
+        joyCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT)); //не хватало этой строчки
+
+        joyStick = new JoyStick(200, 200, 200);
+        shapeRenderer = new ShapeRenderer();
+        shapeRenderer.setProjectionMatrix(cam.combined);
+        mouse = new Vector3();
+    }
+
+    private void initFight() {
+
     }
 
     @Override
@@ -379,8 +353,18 @@ public class DungeonState extends GameState implements Controllable {
         }
     }
 
-    private void initFight() {
+    @Override
+    public void handleInput() {
+    }
 
+    @Override
+    public void dispose() {
+
+    }
+
+    @Override
+    public JoyStick getJoyStick() {
+        return joyStick;
     }
 }
 
