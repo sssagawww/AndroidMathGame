@@ -28,7 +28,7 @@ public class Inventory extends Table {
     private Image amuletImage;
     private Image exitImage;
 
-    public Inventory(Skin skin, Play play) {
+    public Inventory(Skin skin, Controller controller) {
         super(skin);
         uiTable = new Table();
         this.add(uiTable).width(V_WIDTH / 1.2f).height(V_HEIGHT / 1.2f);
@@ -48,7 +48,7 @@ public class Inventory extends Table {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 setVisible(false);
-                play.getController().setVisible(true);
+                controller.setBtnsVisibility(true);
             }
         });
 

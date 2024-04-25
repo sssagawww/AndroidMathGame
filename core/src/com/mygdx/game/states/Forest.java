@@ -117,7 +117,6 @@ public class Forest extends GameState implements Controllable {
     public void update(float dt) {
         handleInput();
         world.step(dt, 6, 2);
-        controllerStage.act(dt);
         player.update(dt);
         entities.update(dt);
         player.updatePL();
@@ -146,13 +145,15 @@ public class Forest extends GameState implements Controllable {
             }
         }
 
-        if (Gdx.input.isTouched()) {
+        if (Gdx.input.isTouched() && !controller.isInventoryVisible()) {
             mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
             joyCam.unproject(mouse);
             joyStick.update(mouse.x, mouse.y);
         } else {
             joyStick.setDefaultPos();
         }
+
+        controllerStage.act(dt);
     }
 
     @Override
@@ -181,8 +182,8 @@ public class Forest extends GameState implements Controllable {
             uiStage.draw();
         }
 
-        controllerStage.draw();
         joyStick.render(shapeRenderer);
+        controllerStage.draw();
     }
 
     @Override

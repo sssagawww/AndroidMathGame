@@ -25,7 +25,6 @@ import com.mygdx.game.Dialog.Dialog;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.UI.Controller;
 import com.mygdx.game.UI.DialogBox;
-import com.mygdx.game.UI.Inventory;
 import com.mygdx.game.UI.JoyStick;
 import com.mygdx.game.UI.OptionBox;
 import com.mygdx.game.entities.PlayEntities;
@@ -35,15 +34,9 @@ import com.mygdx.game.handlers.Controllable;
 import com.mygdx.game.handlers.MyContactListener;
 import com.mygdx.game.handlers.GameStateManager;
 
-import static com.mygdx.game.MyGdxGame.V_HEIGHT;
-import static com.mygdx.game.MyGdxGame.V_WIDTH;
+import static com.mygdx.game.MyGdxGame.*;
 import static com.mygdx.game.handlers.B2DVars.*;
-import static com.mygdx.game.handlers.GameStateManager.BATTLE;
-import static com.mygdx.game.handlers.GameStateManager.FOREST;
-import static com.mygdx.game.handlers.GameStateManager.MAZE;
-import static com.mygdx.game.handlers.GameStateManager.MENU;
-import static com.mygdx.game.handlers.GameStateManager.PAINT;
-import static com.mygdx.game.handlers.GameStateManager.RHYTHM;
+import static com.mygdx.game.handlers.GameStateManager.*;
 
 public class Play extends GameState implements Controllable {
     private MyGdxGame game;
@@ -62,8 +55,6 @@ public class Play extends GameState implements Controllable {
     private int tileMapHeight;
     private Stage uiStage;
     private Stage controllerStage;
-    private Stage inventoryStage;
-    private Inventory inventory;
     private Table dialogRoot;
     private DialogBox dialogueBox;
     private OptionBox optionBox;
@@ -106,7 +97,6 @@ public class Play extends GameState implements Controllable {
         //initUI();
         initJoyStick();
         initController();
-        initInventory();
         createPlayer();
         createTiles();
         createNPC();
@@ -129,8 +119,6 @@ public class Play extends GameState implements Controllable {
     public void update(float dt) {
         handleInput();
         world.step(dt, 6, 2);
-        controllerStage.act(dt);
-        if (inventory.isVisible()) inventoryStage.act(dt);
         player.update(dt);
         //boss.update(dt);
         entities.update(dt);
@@ -142,15 +130,11 @@ public class Play extends GameState implements Controllable {
         if (isStopped) {
             isStopped = false;
             multiplexer.addProcessor(controllerStage);
-            multiplexer.addProcessor(inventoryStage);
             Gdx.input.setInputProcessor(multiplexer);
         }
 
         if (controller.isMenuPressed()) {
             gsm.setState(MENU);
-        } else if (controller.isInventoryPressed()) {
-            inventory.setVisible(true);
-            controller.setVisible(false);
         }
 
         //можно начать бой
@@ -165,7 +149,7 @@ public class Play extends GameState implements Controllable {
         }
 
         //обновление джойстика
-        if (Gdx.input.isTouched() && !inventory.isVisible()) {
+        if (Gdx.input.isTouched() && !controller.isInventoryVisible()) {
             mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
             joyCam.unproject(mouse);
             joyStick.update(mouse.x, mouse.y);
@@ -173,6 +157,7 @@ public class Play extends GameState implements Controllable {
             joyStick.setDefaultPos();
         }
 
+        controllerStage.act(dt);
     }
 
     @Override
@@ -205,9 +190,8 @@ public class Play extends GameState implements Controllable {
             uiStage.draw();
         }
 
-        controllerStage.draw();
         joyStick.render(shapeRenderer);
-        if (inventory.isVisible()) inventoryStage.draw();
+        controllerStage.draw();
     }
 
     private void createPlayer() {
@@ -366,22 +350,6 @@ public class Play extends GameState implements Controllable {
 
         dialog.addNode(node1);
         dcontroller.startDialog(dialog);*/
-    }
-
-    private void initInventory() {
-        inventoryStage = new Stage(new ScreenViewport());
-        inventoryStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
-
-        inventory = new Inventory(game.getSkin(), this);
-        inventory.setVisible(false);
-
-        Table controllerRoot = new Table();
-        controllerRoot.setFillParent(true);
-        controllerRoot.add(inventory).expand().align(Align.center);
-        inventoryStage.addActor(controllerRoot);
-
-        multiplexer.addProcessor(inventoryStage);
-        Gdx.input.setInputProcessor(multiplexer);
     }
 
     private void initController() {
