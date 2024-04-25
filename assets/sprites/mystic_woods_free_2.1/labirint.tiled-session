@@ -3,7 +3,7 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "labirint.tmx",
+    "activeFile": "forest.tmx",
     "expandedProjectPaths": [
         "."
     ],
@@ -12,10 +12,22 @@
         "": {
             "scaleInDock": 1
         },
+        "Dungeon_Tileset.tsx": {
+            "scaleInDock": 1
+        },
         "Pixel UI new.tsx": {
             "scaleInDock": 1
         },
         "Water.tsx": {
+            "scaleInDock": 1
+        },
+        "darkGrass.tsx": {
+            "scaleInDock": 1
+        },
+        "darkPlains.tsx": {
+            "scaleInDock": 1
+        },
+        "darkTrees.tsx": {
             "scaleInDock": 1
         },
         "decor.tsx": {
@@ -26,6 +38,14 @@
             "dynamicWrapping": true,
             "scaleInDock": 1
         },
+        "dungeon.tmx": {
+            "scale": 1.9460156249999998,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 317.31502669717776,
+                "y": 160.32759243646876
+            }
+        },
         "fences.tsx": {
             "dynamicWrapping": false,
             "scaleInDock": 1
@@ -34,8 +54,16 @@
             "scale": 3.2593749999999995,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 192.8283796740173,
-                "y": 87.74688398849474
+                "x": 151.86960690316397,
+                "y": 88.05369127516781
+            }
+        },
+        "forest.tmx": {
+            "scale": 1.9460156249999998,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 287.25360311533984,
+                "y": 160.32759243646876
             }
         },
         "grass.tsx": {
@@ -48,8 +76,8 @@
             "scale": 8,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 362.9375,
-                "y": 341.5
+                "x": 313.625,
+                "y": 302.25
             }
         },
         "labirint.tmx#chest": {
@@ -62,8 +90,8 @@
             "scale": 1,
             "selectedLayer": 4,
             "viewCenter": {
-                "x": 42,
-                "y": 7
+                "x": 608,
+                "y": 336
             }
         },
         "map2.tmx": {
@@ -101,13 +129,18 @@
     "map.width": 40,
     "openFiles": [
         "map.tmx",
-        "labirint.tmx"
+        "labirint.tmx",
+        "fightmap.tmx",
+        "dungeon.tmx",
+        "forest.tmx"
     ],
     "project": "labirint.tiled-project",
     "recentFiles": [
         "map.tmx",
         "labirint.tmx",
         "fightmap.tmx",
+        "dungeon.tmx",
+        "forest.tmx",
         "menu.tmx",
         "map2.tmx"
     ],
