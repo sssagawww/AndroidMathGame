@@ -191,9 +191,8 @@
   <object id="2" name="enemy" x="525.667" y="257.333"/>
   <object id="3" name="enemy" x="598.667" y="338.333"/>
   <object id="4" name="enemy" x="472" y="155.333"/>
-  <object id="5" x="396.667" y="86.3333" height="0.333333"/>
   <object id="6" name="enemy" x="491.667" y="75.3333"/>
-  <object id="7" name="enemy" x="396.333" y="85.6667"/>
+  <object id="7" name="enemy" x="399.606" y="82.9394"/>
   <object id="8" name="enemy" x="407.333" y="43"/>
  </objectgroup>
  <layer id="4" name="chest" width="40" height="40">

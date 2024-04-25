@@ -60,8 +60,6 @@ public class MazeState extends GameState implements Controllable {
     private MyContactListener cl;
     private Skin skin_this;
     private BoundedCamera b2dCam;
-    private boolean isJoyStick = true;
-    private Music music;
     private TiledMap tiledMap;
     private OrthogonalTiledMapRenderer tmr;
     private int tileSize;
@@ -70,7 +68,6 @@ public class MazeState extends GameState implements Controllable {
     private World world;
     private BodyDef bdef;
     public boolean savePlay;
-    private Preferences prefs;
     private static final String PREF_X = "x";
     private static final String PREF_Y = "y";
     private Player2 player;
@@ -94,31 +91,68 @@ public class MazeState extends GameState implements Controllable {
     private OptionBox optionBox;
     private boolean debug = false;
 
-
     public MazeState(GameStateManager gsm) {
         super(gsm);
-
         world = new World(new Vector2(0, 0), true);
         b2dr = new Box2DDebugRenderer();
+        game = gsm.game();
         multiplexer = new InputMultiplexer();
-        cl = new MyContactListener(this); //детектит коллизию
+        cl = new MyContactListener(this);
         world.setContactListener(cl);
-        music = Gdx.audio.newMusic(Gdx.files.internal("music/song.wav"));
-        prefs = Gdx.app.getPreferences(PREF_NAME);
-        savePlay = game.save;
         skin_this = game.getSkin();
 
-        if (isJoyStick) initJoyStick();
+        initJoyStick();
         initController();
         createPlayer();
         createTiles();
         createNPC();
 
         cam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
-        b2dCam = new BoundedCamera(); //рисует дебаг коллизию?
-        b2dCam.setToOrtho(false, V_WIDTH / PPM, V_HEIGHT / PPM); // /2?
+        b2dCam = new BoundedCamera();
+        b2dCam.setToOrtho(false, V_WIDTH / PPM, V_HEIGHT / PPM);
         b2dCam.setBounds(0, (tileMapWidth * tileSize) / PPM, 0, (tileMapHeight * tileSize) / PPM);
-        System.out.println("V_HEIGHT: " + MyGdxGame.V_HEIGHT + " player: " + player.getPosition().x + " " + player.getPosition().y);
+    }
+
+    @Override
+    public void update(float dt) {
+        handleInput();
+        world.step(dt, 6, 2);
+        controllerStage.act(dt);
+        player.update(dt);
+        entities.update(dt);
+        player.updatePL();
+
+        if (isStopped) {
+            isStopped = false;
+            multiplexer.addProcessor(controllerStage);
+            Gdx.input.setInputProcessor(multiplexer);
+        }
+
+        if (controller.isMenuPressed()) {
+            gsm.setState(MENU);
+        }
+
+        if (canDraw) {
+            uiStage.act(dt);
+            dcontroller.update(dt);
+            if (dialogueBox.isFinished()) {
+                time += dt;
+                if (time > 2f) {
+                    time = 0;
+                    gsm.setState(nextState);
+                    isStopped = true;
+                    canDraw = false;
+                }
+            }
+        }
+
+        if (Gdx.input.isTouched()) {
+            mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+            joyCam.unproject(mouse);
+            joyStick.update(mouse.x, mouse.y);
+        } else {
+            joyStick.setDefaultPos();
+        }
     }
 
     private void createNPC() {
@@ -155,50 +189,18 @@ public class MazeState extends GameState implements Controllable {
         }
     }
 
-    private void initController() {
-        controllerStage = new Stage(new ScreenViewport());
-        controllerStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
-
-        controller = new Controller(skin_this);
-        controller.setVisible(true);
-
-        Table controllerRoot = new Table();
-        controllerRoot.setFillParent(true);
-        controllerRoot.add(controller).expand().align(Align.bottomLeft);
-        controllerStage.addActor(controllerRoot);
-
-        multiplexer.addProcessor(controllerStage);
-        Gdx.input.setInputProcessor(multiplexer);
-    }
-
-    private void initJoyStick() {
-        joyCam = new BoundedCamera();
-        joyCam.setBounds(0, V_WIDTH, 0, V_HEIGHT);
-        joyCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT)); //не хватало этой строчки
-
-        joyStick = new JoyStick(200, 200, 200);
-        shapeRenderer = new ShapeRenderer();
-        shapeRenderer.setProjectionMatrix(cam.combined);
-        mouse = new Vector3();
-    }
-
     private void createPlayer() {
         bdef = new BodyDef();
         PolygonShape ps = new PolygonShape();
         FixtureDef fdef = new FixtureDef();
 
-        if (savePlay) {
-            bdef.position.x = prefs.getFloat(PREF_X, 607f / PPM);
-            bdef.position.y = prefs.getFloat(PREF_Y, 337f / PPM);
-            game.save = false;
-        } else {
-            bdef.position.set(607f / PPM, 337f / PPM);
-        }
+        bdef.position.set(607f / PPM, 337f / PPM);
+
 
         bdef.type = BodyDef.BodyType.DynamicBody;
         Body body = world.createBody(bdef);
 
-        ps.setAsBox(40f / PPM, 50f / PPM, new Vector2(-5.4f,-3.6f), 0);
+        ps.setAsBox(40f / PPM, 50f / PPM, new Vector2(-5.4f, -3.6f), 0);
         fdef.shape = ps;
         fdef.filter.categoryBits = BIT_PLAYER;
         fdef.filter.maskBits = BIT_TROPA;
@@ -228,14 +230,15 @@ public class MazeState extends GameState implements Controllable {
 
         TiledMapTileLayer borders = (TiledMapTileLayer) tiledMap.getLayers().get("borders"); //слой с границами карты
         TiledMapTileLayer walls = (TiledMapTileLayer) tiledMap.getLayers().get("walls");
-        TiledMapTileLayer chest =(TiledMapTileLayer) tiledMap.getLayers().get("chest");
+        TiledMapTileLayer chest = (TiledMapTileLayer) tiledMap.getLayers().get("chest");
 
         createLayer(borders, BIT_TROPA);
-        createLayer(walls, BIT_PENEK);
+        //createLayer(walls, BIT_PENEK);
         createLayer(chest, BIT_TROPA);
 
         //borders = (TiledMapTileLayer) tiledMap.getLayers().get("grass");
     }
+
     private void createLayer(TiledMapTileLayer layer, short bits) {
         BodyDef bdef = new BodyDef();
         FixtureDef fdef = new FixtureDef();
@@ -271,60 +274,35 @@ public class MazeState extends GameState implements Controllable {
         }
     }
 
-    @Override
-    public void handleInput() {}
+    private void initController() {
+        controllerStage = new Stage(new ScreenViewport());
+        controllerStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+
+        controller = new Controller(skin_this);
+        controller.setVisible(true);
+
+        Table controllerRoot = new Table();
+        controllerRoot.setFillParent(true);
+        controllerRoot.add(controller).expand().align(Align.bottomLeft);
+        controllerStage.addActor(controllerRoot);
+
+        multiplexer.addProcessor(controllerStage);
+        Gdx.input.setInputProcessor(multiplexer);
+    }
+
+    private void initJoyStick() {
+        joyCam = new BoundedCamera();
+        joyCam.setBounds(0, V_WIDTH, 0, V_HEIGHT);
+        joyCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT)); //не хватало этой строчки
+
+        joyStick = new JoyStick(200, 200, 200);
+        shapeRenderer = new ShapeRenderer();
+        shapeRenderer.setProjectionMatrix(joyCam.combined);
+        mouse = new Vector3();
+    }
 
     @Override
-    public void update(float dt) {
-
-        handleInput();
-        world.step(dt, 6, 2);
-        controllerStage.act(dt);
-        player.update(dt);
-        //boss.update(dt);
-        entities.update(dt);
-        player.updatePL();
-
-        //нужно обновление размера экрана, и тогда будет resize всех компонентов?
-        if (canDraw) {
-            uiStage.act(dt);
-            dcontroller.update(dt);
-            time+=dt;
-            if (dialogueBox.isFinished() && time > 2f) {
-                time = 0;
-                gsm.setState(nextState);
-                music.dispose();
-                isStopped = true;
-                canDraw = false;
-            }
-        }
-
-        //если этот state был выгружен, то при запуске все процессы должны возобновиться (удаляются ли они в multiplexer при выгрузке или просто останавливаются?)
-        if (isStopped) {
-            isStopped = false;
-            multiplexer.addProcessor(controllerStage);
-            Gdx.input.setInputProcessor(multiplexer);
-        }
-
-        if (controller.isMenuPressed()) {
-            gsm.setState(MENU);
-        }
-
-        if (isJoyStick) {
-            if (Gdx.input.isTouched()) {
-                mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-                joyCam.unproject(mouse);
-
-            /*камера двигается вместе с персонажем, её координаты меняются,
-            а координаты mouse нет => камера уезжает на большие координаты, а мышь стоит на месте
-            возможный вариант исправления - добавить свою камеру для джойстика, которая не будет двигаться, либо же что-то другое*/
-                //System.out.println(mouse.x + " " + Gdx.input.getX());
-                joyStick.update(mouse.x, mouse.y);
-            } else {
-                joyStick.setDefaultPos();
-            }
-
-        }
+    public void handleInput() {
     }
 
     @Override
@@ -332,42 +310,32 @@ public class MazeState extends GameState implements Controllable {
         Gdx.gl20.glClearColor(0, 0, 0, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
         cam.setPosition(player.getPosition().x * PPM + V_WIDTH / 35, player.getPosition().y * PPM + V_HEIGHT / 35);
-        //cam.position.set(player.getPosition().x * PPM / 2, player.getPosition().y * PPM / 2, 0);
         cam.update();
 
-        //draw map
         tmr.setView(cam);
         tmr.render();
 
-        //draw player and npc
-        sb.setProjectionMatrix(cam.combined); //https://stackoverflow.com/questions/33703663/understanding-the-libgdx-projection-matrix - объяснение
+        sb.setProjectionMatrix(cam.combined);
         player.render(sb, 80f, 86.6f);
-        //boss.render(sb, 200f, 200f);
         entities.render(sb, 1.5f, 1.5f);
 
-        //draw box?     ---need fix?---
         if (debug) {
             b2dCam.position.set(player.getPosition().x, player.getPosition().y, 0);
             b2dCam.update();
             b2dr.render(world, b2dCam.combined);
         }
 
-        //draw initFight() if battle begin
         if (canDraw) {
             uiStage.draw();
         }
 
         controllerStage.draw();
-        if (isJoyStick) joyStick.render(shapeRenderer);
+        joyStick.render(shapeRenderer);
     }
 
     @Override
     public void dispose() {
-        save();
-    }
-    public void save() {
-        prefs.putFloat(PREF_X, player.getPosition().x).flush();
-        prefs.putFloat(PREF_Y, player.getPosition().y).flush();
+
     }
 
     public void loadStage(String s) {

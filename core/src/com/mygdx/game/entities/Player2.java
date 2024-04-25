@@ -103,6 +103,8 @@ public class Player2 extends B2DSprite {
         body.setLinearVelocity(velx * speed, vely * speed);
     }
 
+    private int prevDir = IDLE;
+
     private void checkJoyStick() {
         velx = 0;
         vely = 0;
@@ -145,26 +147,26 @@ public class Player2 extends B2DSprite {
         }
 
         if (move) {
+            if (joyStick.getState() == 3) {
+                setDir(RIGHT);
+                sprites = TextureRegion.split(tex, 120, 129)[3];
+            } else if (joyStick.getState() == 7) {
+                setDir(LEFT);
+                sprites = TextureRegion.split(tex, 120, 129)[1];
+            } else if (joyStick.getState() == 1 || joyStick.getState() == 2 || joyStick.getState() == 8) {
+                setDir(UP);
+                sprites = TextureRegion.split(tex, 120, 130)[2];
+            } else if (joyStick.getState() == 4 || joyStick.getState() == 5 || joyStick.getState() == 6) {
+                setDir(DOWN);
+                sprites = TextureRegion.split(tex, 120, 129)[0];
+            }
+            if (getDir() != prevDir || prevDir == IDLE) {
+                setAnimation(sprites, 1 / 12f);
+            }
+            prevDir = dir;
             if (countMove == 1) {
                 countIdle = 1;
                 countMove = 0;
-                if (joyStick.getState() == 3) {
-                    setDir(RIGHT);
-                    sprites = TextureRegion.split(tex, 120, 129)[3];
-                    setAnimation(sprites, 1 / 12f);
-                } else if (joyStick.getState() == 7) {
-                    setDir(LEFT);
-                    sprites = TextureRegion.split(tex, 120, 129)[1];
-                    setAnimation(sprites, 1 / 12f);
-                } else if (joyStick.getState() == 1 || joyStick.getState() == 2 || joyStick.getState() == 8) {
-                    setDir(UP);
-                    sprites = TextureRegion.split(tex, 120, 130)[2];
-                    setAnimation(sprites, 1 / 12f);
-                } else if (joyStick.getState() == 4 || joyStick.getState() == 5 || joyStick.getState() == 6) {
-                    setDir(DOWN);
-                    sprites = TextureRegion.split(tex, 120, 129)[0];
-                    setAnimation(sprites, 1 / 12f);
-                }
             }
         } else if (countIdle == 1) {
             countIdle = 0;
@@ -185,6 +187,7 @@ public class Player2 extends B2DSprite {
                 default:
                     return;
             }
+            prevDir = IDLE;
             setAnimation(sprites, 1 / 6f);
         }
         body.setLinearVelocity(velx * speed, vely * speed);
@@ -192,6 +195,10 @@ public class Player2 extends B2DSprite {
 
     public void setDir(int dir) {
         this.dir = dir;
+    }
+
+    public int getDir() {
+        return dir;
     }
 
     public void setMove(boolean move) {
