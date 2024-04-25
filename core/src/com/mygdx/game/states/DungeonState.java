@@ -198,7 +198,7 @@ public class DungeonState extends GameState implements Controllable {
         sb.setProjectionMatrix(cam.combined); //https://stackoverflow.com/questions/33703663/understanding-the-libgdx-projection-matrix - объяснение
         player.render(sb, 80f, 86.6f);
         //boss.render(sb, 200f, 200f);
-        entities.render(sb, 150f, 150f);
+        entities.render(sb, 4.5f, 4.5f);
 
         //draw collision
         if (debug) {
@@ -244,6 +244,14 @@ public class DungeonState extends GameState implements Controllable {
             gsm.setState(MENU);
         }
 
+        if (Gdx.input.isTouched()) {
+            mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+            joyCam.unproject(mouse);
+            joyStick.update(mouse.x, mouse.y);
+        } else {
+            joyStick.setDefaultPos();
+        }
+
         //можно начать бой
         if (canDraw) {
             uiStage.act(dt);
@@ -257,15 +265,15 @@ public class DungeonState extends GameState implements Controllable {
     }
 
     private void createTiles() {
-        tiledMap = new TmxMapLoader().load("sprites/mystic_woods_free_2.1/map.tmx");
+        tiledMap = new TmxMapLoader().load("sprites/mystic_woods_free_2.1/dungeon.tmx");
         tmr = new OrthogonalTiledMapRenderer(tiledMap, 4); // !!! размер карты
         tileSize = (int) tiledMap.getProperties().get("tilewidth");
 
         tileMapWidth = (int) tiledMap.getProperties().get("width");
         tileMapHeight = (int) tiledMap.getProperties().get("height");
 
-        //TiledMapLayer walls = ...
-        //createLayer(walls, BIT_TROPA);
+        TiledMapTileLayer walls = (TiledMapTileLayer) tiledMap.getLayers().get("walls");
+        createLayer(walls, BIT_TROPA);
     }
 
     private void createNPC() {

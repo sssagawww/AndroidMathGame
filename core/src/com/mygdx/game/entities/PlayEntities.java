@@ -30,9 +30,9 @@ public class PlayEntities {
         list.add(sprite);
     }
 
-    public void render(SpriteBatch sb, float width, float height) {
+    public void render(SpriteBatch sb, float widthK, float heightK) {
         for (B2DSprite i : list) {
-            i.render(sb, i.getHeight()*1.5f, i.getHeight()*1.5f);
+            i.render(sb, i.getHeight()*widthK, i.getHeight()*heightK);
         }
     }
 

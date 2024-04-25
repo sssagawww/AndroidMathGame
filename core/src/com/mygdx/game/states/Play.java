@@ -182,7 +182,7 @@ public class Play extends GameState implements Controllable {
         sb.setProjectionMatrix(cam.combined); //https://stackoverflow.com/questions/33703663/understanding-the-libgdx-projection-matrix - объяснение
         player.render(sb, 80f, 86.6f);
         //boss.render(sb, 200f, 200f);
-        entities.render(sb, 150f, 150f);
+        entities.render(sb, 1.5f, 1.5f);
 
         //draw collision
         if (debug) {

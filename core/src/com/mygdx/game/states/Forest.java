@@ -169,7 +169,7 @@ public class Forest extends GameState implements Controllable {
 
         sb.setProjectionMatrix(cam.combined);
         player.render(sb, 80f, 86.6f);
-        entities.render(sb, 150f, 150f);
+        entities.render(sb, 1.5f, 1.5f);
 
         if (debug) {
             b2dCam.position.set(player.getPosition().x, player.getPosition().y, 0);
