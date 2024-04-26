@@ -86,11 +86,11 @@ public class Forest extends GameState implements Controllable {
     private ShapeRenderer shapeRenderer;
     private Vector3 mouse;
     private BoundedCamera joyCam;
+    private BoundedCamera forCam;
     private boolean isStopped;
     private int nextState;
     private int[] backgroundLayers = {0, 1};
     private int[] foregroundLayers = {2, 3, 4,5,6};
-    private BoundedCamera forCam;
 
     public Forest(GameStateManager gsm) {
         super(gsm);

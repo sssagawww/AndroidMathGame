@@ -17,6 +17,8 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
@@ -24,6 +26,7 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -35,6 +38,7 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
@@ -67,16 +71,13 @@ public class MazeState extends GameState implements Controllable {
     private int tileMapHeight;
     private World world;
     private BodyDef bdef;
-    public boolean savePlay;
-    private static final String PREF_X = "x";
-    private static final String PREF_Y = "y";
     private Player2 player;
     private JoyStick joyStick;
-    private static final String PREF_NAME = "position";
     private BoundedCamera joyCam;
     private ShapeRenderer shapeRenderer;
     private Vector3 mouse;
     private Stage controllerStage;
+    private Stage darkStage;
     private Controller controller;
     private PlayEntities entities;
     private boolean isStopped;
@@ -90,6 +91,7 @@ public class MazeState extends GameState implements Controllable {
     private Table dialogRoot;
     private OptionBox optionBox;
     private boolean debug = false;
+    //private ShaderProgram shader;
 
     public MazeState(GameStateManager gsm) {
         super(gsm);
@@ -105,7 +107,9 @@ public class MazeState extends GameState implements Controllable {
         initController();
         createPlayer();
         createTiles();
+        //createVignette();
         createNPC();
+        initDarkness();
 
         cam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
         b2dCam = new BoundedCamera();
@@ -132,6 +136,8 @@ public class MazeState extends GameState implements Controllable {
             gsm.setState(MENU);
         }
 
+        darkStage.act(dt);
+
         if (canDraw) {
             uiStage.act(dt);
             dcontroller.update(dt);
@@ -153,6 +159,37 @@ public class MazeState extends GameState implements Controllable {
         } else {
             joyStick.setDefaultPos();
         }
+    }
+
+    @Override
+    public void render() {
+        Gdx.gl20.glClearColor(0, 0, 0, 1);
+        Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        cam.setPosition(player.getPosition().x * PPM + V_WIDTH / 35, player.getPosition().y * PPM + V_HEIGHT / 35);
+        cam.update();
+
+        tmr.setView(cam);
+        tmr.render();
+
+        sb.setProjectionMatrix(cam.combined);
+        player.render(sb, 80f, 86.6f);
+        entities.render(sb, 150f, 150f);
+
+        if (debug) {
+            b2dCam.position.set(player.getPosition().x, player.getPosition().y, 0);
+            b2dCam.update();
+            b2dr.render(world, b2dCam.combined);
+        }
+
+        darkStage.draw();
+
+        if (canDraw) {
+            uiStage.draw();
+        }
+
+        //shader.setUniformf("resolution", Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        controllerStage.draw();
+        joyStick.render(shapeRenderer);
     }
 
     private void createNPC() {
@@ -274,6 +311,12 @@ public class MazeState extends GameState implements Controllable {
         }
     }
 
+    /*private void createVignette(){
+        ShaderProgram.pedantic = false;
+        shader = new ShaderProgram("shaders/shader.vsh", "shaders/vignette.fsh");
+        tmr.getBatch().setShader(shader);
+    }*/
+
     private void initController() {
         controllerStage = new Stage(new ScreenViewport());
         controllerStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
@@ -301,36 +344,18 @@ public class MazeState extends GameState implements Controllable {
         mouse = new Vector3();
     }
 
-    @Override
-    public void handleInput() {
+    private void initDarkness(){
+        Image image = new Image(new Texture("UI/darkness2.png"));
+        Table root = new Table();
+        root.setFillParent(true);
+        root.add(image).center();
+        darkStage = new Stage(new ScreenViewport());
+        darkStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+        darkStage.addActor(root);
     }
 
     @Override
-    public void render() {
-        Gdx.gl20.glClearColor(0, 0, 0, 1);
-        Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        cam.setPosition(player.getPosition().x * PPM + V_WIDTH / 35, player.getPosition().y * PPM + V_HEIGHT / 35);
-        cam.update();
-
-        tmr.setView(cam);
-        tmr.render();
-
-        sb.setProjectionMatrix(cam.combined);
-        player.render(sb, 80f, 86.6f);
-        entities.render(sb, 150f, 150f);
-
-        if (debug) {
-            b2dCam.position.set(player.getPosition().x, player.getPosition().y, 0);
-            b2dCam.update();
-            b2dr.render(world, b2dCam.combined);
-        }
-
-        if (canDraw) {
-            uiStage.draw();
-        }
-
-        controllerStage.draw();
-        joyStick.render(shapeRenderer);
+    public void handleInput() {
     }
 
     @Override
