@@ -109,7 +109,7 @@ public class Play extends GameState implements Controllable {
         createPlayer();
         createTiles();
         createNPC();
-        //startNewGame();
+        if (!savePlay) startNewGame();
         //createMusic(); //отключено, чтобы не мешало при дебаггинге
 
         //initFight();
@@ -169,7 +169,7 @@ public class Play extends GameState implements Controllable {
         }
 
         controllerStage.act(dt);
-        //mainUistage.act(dt);
+        if(!savePlay) mainUistage.act(dt);
     }
 
     @Override
@@ -204,13 +204,15 @@ public class Play extends GameState implements Controllable {
 
         joyStick.render(shapeRenderer);
         controllerStage.draw();
-        //mainUistage.draw();
 
-        /*sb.begin();
-        font.getData().setScale(2);
-        layout.setText(font, "MathGame");
-        font.draw(sb, layout, V_WIDTH/2f-layout.width/2, V_HEIGHT/2f+layout.height);
-        sb.end();*/
+        if (!savePlay) {
+            mainUistage.draw();
+            sb.begin();
+            font.getData().setScale(2);
+            layout.setText(font, "MathGame");
+            font.draw(sb, layout, V_WIDTH / 2f - layout.width / 2, V_HEIGHT / 2f + layout.height);
+            sb.end();
+        }
     }
 
     private void createPlayer() {
@@ -371,7 +373,7 @@ public class Play extends GameState implements Controllable {
         dcontroller.startDialog(dialog);*/
     }
 
-    private void startNewGame(){
+    private void startNewGame() {
         Image image = new Image(new Texture("UI/blackScreen.png"));
         mainUistage = new Stage(new ScreenViewport());
         mainUistage.getViewport().update(V_WIDTH, V_HEIGHT, true);
