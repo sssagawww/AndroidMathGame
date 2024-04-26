@@ -437,6 +437,7 @@ public class Play extends GameState implements Controllable {
     @Override
     public void dispose() {
         save();
+        isStopped = true;
     }
 
     public void save() {
@@ -481,7 +482,6 @@ public class Play extends GameState implements Controllable {
     private void stop() {
         gsm.setState(nextState);
         music.dispose();
-        isStopped = true;
         canDraw = false;
     }
 

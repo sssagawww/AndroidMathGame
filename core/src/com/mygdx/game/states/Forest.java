@@ -90,6 +90,7 @@ public class Forest extends GameState implements Controllable {
     private int nextState;
     private int[] backgroundLayers = {0, 1};
     private int[] foregroundLayers = {2, 3, 4,5,6};
+    private BoundedCamera forCam;
 
     public Forest(GameStateManager gsm) {
         super(gsm);
@@ -108,7 +109,9 @@ public class Forest extends GameState implements Controllable {
         createNPC();
         initDarkness();
 
-        cam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
+        forCam = new BoundedCamera();
+        forCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
+        forCam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
         b2dCam = new BoundedCamera();
         b2dCam.setToOrtho(false, V_WIDTH / PPM, V_HEIGHT / PPM);
         b2dCam.setBounds(0, (tileMapWidth * tileSize) / PPM, 0, (tileMapHeight * tileSize) / PPM);
@@ -166,13 +169,13 @@ public class Forest extends GameState implements Controllable {
     public void render() {
         Gdx.gl20.glClearColor(0, 0, 0, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        cam.setPosition(player.getPosition().x * PPM + V_WIDTH / 35, player.getPosition().y * PPM + V_HEIGHT / 35);
-        cam.update();
+        forCam.setPosition(player.getPosition().x * PPM + V_WIDTH / 35, player.getPosition().y * PPM + V_HEIGHT / 35);
+        forCam.update();
 
-        tmr.setView(cam);
+        tmr.setView(forCam);
         tmr.render(backgroundLayers);
 
-        sb.setProjectionMatrix(cam.combined);
+        sb.setProjectionMatrix(forCam.combined);
         player.render(sb, 80f, 86.6f);
         entities.render(sb, 150f, 150f);
 
