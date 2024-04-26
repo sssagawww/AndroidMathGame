@@ -360,7 +360,7 @@ public class Forest extends GameState implements Controllable {
     }
 
     private void initDarkness(){
-        Image image = new Image(new Texture("UI/screenDarkness.png"));
+        Image image = new Image(new Texture("UI/darkness2.png"));
         Table root = new Table();
         root.setFillParent(true);
         root.add(image).center();
