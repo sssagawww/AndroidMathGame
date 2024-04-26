@@ -64,7 +64,7 @@ public class Inventory extends Table {
         playerImage = new Image(new Texture("entitySprites/idle.png"));
 
         Table rightTable = new Table(getSkin());
-        rightTable.add(exitImage).align(Align.topLeft).width(exitImage.getWidth()*5).height(exitImage.getHeight()*5).row();
+        uiTable.add(exitImage).align(Align.topLeft).width(exitImage.getWidth()*5).height(exitImage.getHeight()*5);
         rightTable.add(playerImage).width(playerImage.getWidth()*2).height(playerImage.getHeight()*2).align(Align.center).padLeft(25f).row();
 
         Table imagesTable = new Table();
@@ -80,8 +80,8 @@ public class Inventory extends Table {
         Table achievementsTable = new Table(getSkin());
         achievementsTable.setBackground("borders");
 
-        //rightTable.debug();
-        uiTable.add(rightTable).center();
-        uiTable.add(achievementsTable).width(getPrefWidth()/2.5f).height(getPrefHeight()/1.1f).align(Align.right).pad(10f).expand();
+        //uiTable.debug();
+        uiTable.add(rightTable).right();
+        uiTable.add(achievementsTable).width(getPrefWidth()/2.5f).height(getPrefHeight()/1.1f).align(Align.left).pad(10f).expand();
     }
 }

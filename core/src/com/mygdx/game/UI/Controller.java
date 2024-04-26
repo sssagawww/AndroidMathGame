@@ -24,7 +24,7 @@ public class Controller extends Table {
         this.setFillParent(true);
 
         inventory = new Inventory(skin, this);
-        inventory.setVisible(false);
+        inventory.setVisible(true);
 
         // Эту реализацию можно доработать или переделать (не конечный вариант)
         // --сделать атлас текстур и использовать его вместо нескольких картинок, как в других классах
