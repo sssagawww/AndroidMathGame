@@ -4,7 +4,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
@@ -16,6 +21,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
@@ -54,6 +60,7 @@ public class Play extends GameState implements Controllable {
     private int tileMapWidth;
     private int tileMapHeight;
     private Stage uiStage;
+    private Stage mainUistage;
     private Stage controllerStage;
     private Table dialogRoot;
     private DialogBox dialogueBox;
@@ -69,6 +76,8 @@ public class Play extends GameState implements Controllable {
     private float time = 0;
     public BodyDef bdef;
     private Controller controller;
+    private BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
+    private GlyphLayout layout;
     // -------- JoyStick ----------
     private JoyStick joyStick;
     private ShapeRenderer shapeRenderer;
@@ -100,6 +109,7 @@ public class Play extends GameState implements Controllable {
         createPlayer();
         createTiles();
         createNPC();
+        //startNewGame();
         //createMusic(); //отключено, чтобы не мешало при дебаггинге
 
         //initFight();
@@ -159,6 +169,7 @@ public class Play extends GameState implements Controllable {
         }
 
         controllerStage.act(dt);
+        //mainUistage.act(dt);
     }
 
     @Override
@@ -193,6 +204,13 @@ public class Play extends GameState implements Controllable {
 
         joyStick.render(shapeRenderer);
         controllerStage.draw();
+        //mainUistage.draw();
+
+        /*sb.begin();
+        font.getData().setScale(2);
+        layout.setText(font, "MathGame");
+        font.draw(sb, layout, V_WIDTH/2f-layout.width/2, V_HEIGHT/2f+layout.height);
+        sb.end();*/
     }
 
     private void createPlayer() {
@@ -351,6 +369,15 @@ public class Play extends GameState implements Controllable {
 
         dialog.addNode(node1);
         dcontroller.startDialog(dialog);*/
+    }
+
+    private void startNewGame(){
+        Image image = new Image(new Texture("UI/blackScreen.png"));
+        mainUistage = new Stage(new ScreenViewport());
+        mainUistage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+        mainUistage.addActor(image);
+        font.setColor(Color.WHITE);
+        layout = new GlyphLayout(font, "MathGame");
     }
 
     private void initController() {

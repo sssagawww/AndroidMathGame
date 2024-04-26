@@ -24,7 +24,7 @@ public class GameStateManager {
     public GameStateManager(MyGdxGame game) {
         this.game = game;
         gameStates = new Stack<GameState>();
-        pushState(FOREST);
+        pushState(MENU);
     }
 
     //peek - get верхний элемент
