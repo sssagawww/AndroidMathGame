@@ -7,13 +7,16 @@ import static com.mygdx.game.handlers.B2DVars.BIT_PLAYER;
 import static com.mygdx.game.handlers.B2DVars.BIT_TROPA;
 import static com.mygdx.game.handlers.B2DVars.PPM;
 import static com.mygdx.game.handlers.GameStateManager.BATTLE;
+import static com.mygdx.game.handlers.GameStateManager.FOREST;
 import static com.mygdx.game.handlers.GameStateManager.MENU;
 import static com.mygdx.game.handlers.GameStateManager.PAINT;
+import static com.mygdx.game.handlers.GameStateManager.PLAY;
 import static com.mygdx.game.handlers.GameStateManager.RHYTHM;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
@@ -32,6 +35,7 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
@@ -67,6 +71,7 @@ public class Forest extends GameState implements Controllable {
     private int tileMapHeight;
     private Stage uiStage;
     private Stage controllerStage;
+    private Stage darkStage;
     private Table dialogRoot;
     private DialogBox dialogueBox;
     private OptionBox optionBox;
@@ -101,6 +106,7 @@ public class Forest extends GameState implements Controllable {
         createPlayer();
         createTiles();
         createNPC();
+        initDarkness();
 
         cam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
         b2dCam = new BoundedCamera();
@@ -131,6 +137,8 @@ public class Forest extends GameState implements Controllable {
             gsm.setState(MENU);
         }
 
+        darkStage.act(dt);
+
         if (canDraw) {
             uiStage.act(dt);
             dcontroller.update(dt);
@@ -138,9 +146,7 @@ public class Forest extends GameState implements Controllable {
                 time += dt;
                 if (time > 2f) {
                     time = 0;
-                    gsm.setState(nextState);
-                    isStopped = true;
-                    canDraw = false;
+                    stop();
                 }
             }
         }
@@ -177,6 +183,8 @@ public class Forest extends GameState implements Controllable {
             b2dCam.update();
             b2dr.render(world, b2dCam.combined);
         }
+
+        darkStage.draw();
 
         if (canDraw) {
             uiStage.draw();
@@ -351,6 +359,16 @@ public class Forest extends GameState implements Controllable {
         mouse = new Vector3();
     }
 
+    private void initDarkness(){
+        Image image = new Image(new Texture("UI/screenDarkness.png"));
+        Table root = new Table();
+        root.setFillParent(true);
+        root.add(image).center();
+        darkStage = new Stage(new ScreenViewport());
+        darkStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+        darkStage.addActor(root);
+    }
+
     public void loadStage(String s) {
         DialogNode node1;
         initFight();
@@ -376,9 +394,19 @@ public class Forest extends GameState implements Controllable {
                 nextState = RHYTHM;
                 canDraw = true;
                 break;
+            case "next":
+                nextState = PLAY;
+                stop();
+                break;
             default:
                 break;
         }
+    }
+
+    private void stop() {
+        gsm.setState(nextState);
+        isStopped = true;
+        canDraw = false;
     }
 
     @Override

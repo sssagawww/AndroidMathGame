@@ -129,6 +129,7 @@ public class Play extends GameState implements Controllable {
         //если этот state был выгружен, то при запуске все процессы должны возобновиться (удаляются ли они в multiplexer при выгрузке или просто останавливаются?)
         if (isStopped) {
             isStopped = false;
+            cam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
             multiplexer.addProcessor(controllerStage);
             Gdx.input.setInputProcessor(multiplexer);
         }

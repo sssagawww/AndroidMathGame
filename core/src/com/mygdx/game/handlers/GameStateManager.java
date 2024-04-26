@@ -24,7 +24,7 @@ public class GameStateManager {
     public GameStateManager(MyGdxGame game) {
         this.game = game;
         gameStates = new Stack<GameState>();
-        pushState(NEW_GAME);
+        pushState(MENU);
     }
 
     //peek - get верхний элемент
@@ -76,10 +76,6 @@ public class GameStateManager {
     //кидает в стэк тот стейт (обозначаются int переменными), который передан
     public void pushState(int state) {
         gameStates.push(getState(state));
-    }
-
-    public MazeState getMazeState() {
-        return mazeState;
     }
 
     public Play getPlay() {
