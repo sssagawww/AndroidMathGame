@@ -11,11 +11,10 @@ import com.mygdx.game.MyGdxGame;
 import java.util.ArrayList;
 
 public class PlayEntities {
-    public Texture tex;
+    public ArrayList<Texture> texs = new ArrayList<>();
     public TextureRegion[] sprites;
     private ArrayList<B2DSprite> list;
-    private int width;
-    private int height;
+    private int curEntity=0;
 
     public PlayEntities() {
         list = new ArrayList<>();
@@ -24,21 +23,44 @@ public class PlayEntities {
     public void addEntity(Body body, String texName) {
         B2DSprite sprite = new B2DSprite(body);
         body.setUserData(texName);
-        tex = MyGdxGame.res.getTexture(texName);
-        sprites = TextureRegion.split(tex, tex.getHeight(), tex.getHeight())[0];
+        Texture tex = MyGdxGame.res.getTexture(texName);
+        texs.add(tex);
+        if (tex.getHeight() > 58 * 2) { //??? изменить
+            sprites = TextureRegion.split(tex, 58, 58)[0];
+        } else {
+            sprites = TextureRegion.split(tex, tex.getHeight(), tex.getHeight())[0];
+        }
         sprite.setAnimation(sprites, 1 / 5f);
         list.add(sprite);
     }
 
     public void render(SpriteBatch sb, float width, float height) {
         for (B2DSprite i : list) {
-            i.render(sb, i.getHeight()*1.5f, i.getHeight()*1.5f);
+            if(i.isVisible()) i.render(sb, i.getHeight() * 1.5f, i.getHeight() * 1.5f);
         }
     }
 
     public void update(float dt) {
         for (B2DSprite i : list) {
-            i.update(dt);
+            if(i.isVisible()) i.update(dt);
         }
+    }
+
+    public void setNewAnimation(int entityID, int row, int width, int height) {
+        B2DSprite sprite = list.get(entityID);
+        TextureRegion[] sprites = TextureRegion.split(texs.get(entityID), width, height)[row];
+        sprite.setAnimation(sprites, 1 / 12f);
+    }
+
+    public B2DSprite getEntity(int id) {
+        return list.get(id);
+    }
+
+    public int getCurEntity() {
+        return curEntity;
+    }
+
+    public void setCurEntity(int curEntity) {
+        this.curEntity = curEntity;
     }
 }

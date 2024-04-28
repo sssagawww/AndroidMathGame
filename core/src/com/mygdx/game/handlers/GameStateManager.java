@@ -20,6 +20,7 @@ public class GameStateManager {
     public static final int FOREST = 5;
     public static final int MAZE = 6;
     public static final int RHYTHM = 8;
+    public static final int BLACK_SCREEN = 100;
 
     public GameStateManager(MyGdxGame game) {
         this.game = game;
@@ -57,6 +58,8 @@ public class GameStateManager {
         } else if (state == FOREST) {
             if (forest==null) return forest = new Forest(this);
             return forest;
+        } else if (state == BLACK_SCREEN) {
+            return new BlackScreen(this);
         }
         return null;
     }

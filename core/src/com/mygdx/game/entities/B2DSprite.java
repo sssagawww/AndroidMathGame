@@ -13,6 +13,7 @@ public class B2DSprite {
     protected float width;
     protected float height;
     protected float x, y, velx, vely, speed;
+    protected boolean visible = true;
 
     public B2DSprite(Body body){
         this.body = body;
@@ -50,5 +51,13 @@ public class B2DSprite {
     }
     public float getHeight() {
         return height;
+    }
+
+    public boolean isVisible() {
+        return visible;
+    }
+
+    public void setVisible(boolean visible) {
+        this.visible = visible;
     }
 }

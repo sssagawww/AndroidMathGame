@@ -51,6 +51,7 @@ import com.mygdx.game.UI.Controller;
 import com.mygdx.game.UI.DialogBox;
 import com.mygdx.game.UI.JoyStick;
 import com.mygdx.game.UI.OptionBox;
+import com.mygdx.game.UI.OptionBox2;
 import com.mygdx.game.entities.PlayEntities;
 import com.mygdx.game.entities.Player2;
 import com.mygdx.game.handlers.BoundedCamera;
@@ -89,7 +90,7 @@ public class MazeState extends GameState implements Controllable {
     private DialogBox dialogueBox;
     private int nextState;
     private Table dialogRoot;
-    private OptionBox optionBox;
+    private OptionBox2 optionBox;
     private boolean debug = false;
     //private ShaderProgram shader;
 
@@ -403,7 +404,7 @@ public class MazeState extends GameState implements Controllable {
         dialogueBox = new DialogBox(skin_this);
         dialogueBox.setVisible(false);
 
-        optionBox = new OptionBox(skin_this);
+        optionBox = new OptionBox2(skin_this);
         optionBox.setVisible(false);
 
         Table dialogTable = new Table();

@@ -29,6 +29,7 @@ import com.mygdx.game.Dialog.DialogController;
 import com.mygdx.game.Dialog.DialogNode;
 import com.mygdx.game.UI.DialogBox;
 import com.mygdx.game.UI.OptionBox;
+import com.mygdx.game.UI.OptionBox2;
 import com.mygdx.game.UI.PaintMenu;
 import com.mygdx.game.handlers.BoundedCamera;
 import com.mygdx.game.handlers.GameStateManager;
@@ -207,7 +208,7 @@ public class PaintState extends GameState implements InputProcessor {
         dialogueBox.setVisible(false);
 
         //уже не используется, но если переделать, то можно использовать в выборе из 2 варинтов
-        OptionBox optionBox = new OptionBox(game.getSkin());
+        OptionBox2 optionBox = new OptionBox2(game.getSkin());
         optionBox.setVisible(false);
 
         dialogRoot.add(dialogueBox).expand().align(Align.top).padTop(50f);
@@ -328,6 +329,11 @@ public class PaintState extends GameState implements InputProcessor {
         if (screenX < V_WIDTH / 1.55f && screenY < V_HEIGHT) {
             skippedPoints.add(points.size() - 1);
         }
+        return false;
+    }
+
+    @Override
+    public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
         return false;
     }
 

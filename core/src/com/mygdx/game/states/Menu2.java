@@ -110,7 +110,7 @@ public class Menu2 extends GameState {
         uiStage.addActor(root);
 
         btnBox = new BtnBox(game.getSkin());
-        btnBox.addBtn("Начать", MENU_TO_PLAY);
+        btnBox.addBtn("Новая игра", MENU_TO_PLAY);
         btnBox.addBtn("Продолжить", SAVE_GAME);
         btnBox.addBtn("Сохранить", SAVE);
         btnBox.addBtn("Выйти", EXIT);
@@ -127,7 +127,7 @@ public class Menu2 extends GameState {
     private void checkBtns() {
         switch (btnBox.getState()){
             case MENU_TO_PLAY:
-                gsm.setState(NEW_GAME);
+                gsm.setState(BLACK_SCREEN);
                 break;
             case EXIT:
                 Gdx.app.exit();
