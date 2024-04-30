@@ -57,7 +57,7 @@ public class B2DSprite {
         return visible;
     }
 
-    public void setVisible(boolean visible) {
+   /* public void setVisible(boolean visible) {
         this.visible = visible;
-    }
+    }*/
 }

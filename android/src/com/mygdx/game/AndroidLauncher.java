@@ -3,6 +3,7 @@ package com.mygdx.game;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.Window;
+import android.view.WindowManager;
 
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
@@ -16,6 +17,7 @@ public class AndroidLauncher extends AndroidApplication {
 		//передаёт размеры экрана для сета камеры (cam.setToOrtho), центровки элементов и т.д.
 		DisplayMetrics displaymetrics = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 
 		config.useImmersiveMode = true; //set fullScreen

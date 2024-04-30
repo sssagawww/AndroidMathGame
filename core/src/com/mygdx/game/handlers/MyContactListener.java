@@ -20,8 +20,10 @@ public class MyContactListener implements com.badlogic.gdx.physics.box2d.Contact
         //контакт с нпс, юзается
         if (fa.getUserData() != null) {
             state.loadStage((String) fb.getUserData());
+        } else if (fa.getUserData() == null && fb.getUserData() != "player"){
+            state.loadStage("null");
         }
-        System.out.println("contact with " + fb.getUserData());
+        System.out.println(fa.getUserData() + " contact with " + fb.getUserData());
     }
 
     @Override

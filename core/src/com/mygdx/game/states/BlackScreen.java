@@ -75,9 +75,10 @@ public class BlackScreen extends GameState {
     private void setLabelText() {
         curPhrase = (curPhrase + 1) % phrases.size();
         if (curPhrase == 0) {
+            label.clearActions();//фикс этой ошибки
             gsm.setState(NEW_GAME);
         } else if(curPhrase+1 == phrases.size()){
-            label.addAction(sequence(fadeOut(3f)));
+            label.addAction(sequence(fadeOut(3f)));//крашает игру, если прокликивать при первом запуске
         }
         label.restart(phrases.get(curPhrase));
         animatedTime = label.getTextSpeed() * phrases.get(curPhrase).length();

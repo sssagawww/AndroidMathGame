@@ -200,7 +200,7 @@ public class Forest extends GameState implements Controllable {
 
     @Override
     public void dispose() {
-
+        player.stopSounds();
     }
 
     private void createPlayer() {
