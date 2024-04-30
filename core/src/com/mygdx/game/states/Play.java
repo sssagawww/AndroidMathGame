@@ -60,8 +60,8 @@ public class Play extends GameState implements Controllable {
     private float tileSize;
     private int tileMapWidth;
     private int tileMapHeight;
-    private int[] backgroundLayers = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-    private int[] foregroundLayers = {11};
+    private int[] backgroundLayers = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11};
+    private int[] foregroundLayers = {12};
     private Stage uiStage;
     private Stage controllerStage;
     private Table dialogRoot;

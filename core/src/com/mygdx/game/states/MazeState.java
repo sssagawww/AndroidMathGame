@@ -11,14 +11,10 @@ import static com.mygdx.game.handlers.GameStateManager.BATTLE;
 import static com.mygdx.game.handlers.GameStateManager.MENU;
 import static com.mygdx.game.handlers.GameStateManager.PAINT;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.Preferences;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
@@ -26,7 +22,6 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -46,11 +41,9 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.Dialog.Dialog;
 import com.mygdx.game.Dialog.DialogController;
 import com.mygdx.game.Dialog.DialogNode;
-import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.UI.Controller;
 import com.mygdx.game.UI.DialogBox;
 import com.mygdx.game.UI.JoyStick;
-import com.mygdx.game.UI.OptionBox;
 import com.mygdx.game.UI.OptionBox2;
 import com.mygdx.game.entities.PlayEntities;
 import com.mygdx.game.entities.Player2;
@@ -91,8 +84,7 @@ public class MazeState extends GameState implements Controllable {
     private int nextState;
     private Table dialogRoot;
     private OptionBox2 optionBox;
-    private boolean debug = false;
-    //private ShaderProgram shader;
+    private boolean debug = true;
 
     public MazeState(GameStateManager gsm) {
         super(gsm);
@@ -108,7 +100,6 @@ public class MazeState extends GameState implements Controllable {
         initController();
         createPlayer();
         createTiles();
-        //createVignette();
         createNPC();
         initDarkness();
 
@@ -139,6 +130,14 @@ public class MazeState extends GameState implements Controllable {
 
         darkStage.act(dt);
 
+        if (Gdx.input.isTouched()) {
+            mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+            joyCam.unproject(mouse);
+            joyStick.update(mouse.x, mouse.y);
+        } else {
+            joyStick.setDefaultPos();
+        }
+
         if (canDraw) {
             uiStage.act(dt);
             dcontroller.update(dt);
@@ -151,14 +150,6 @@ public class MazeState extends GameState implements Controllable {
                     canDraw = false;
                 }
             }
-        }
-
-        if (Gdx.input.isTouched()) {
-            mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-            joyCam.unproject(mouse);
-            joyStick.update(mouse.x, mouse.y);
-        } else {
-            joyStick.setDefaultPos();
         }
     }
 
@@ -271,7 +262,7 @@ public class MazeState extends GameState implements Controllable {
         TiledMapTileLayer chest = (TiledMapTileLayer) tiledMap.getLayers().get("chest");
 
         createLayer(borders, BIT_TROPA);
-        //createLayer(walls, BIT_PENEK);
+        createLayer(walls, BIT_PENEK);
         createLayer(chest, BIT_TROPA);
 
         //borders = (TiledMapTileLayer) tiledMap.getLayers().get("grass");
@@ -311,12 +302,6 @@ public class MazeState extends GameState implements Controllable {
             }
         }
     }
-
-    /*private void createVignette(){
-        ShaderProgram.pedantic = false;
-        shader = new ShaderProgram("shaders/shader.vsh", "shaders/vignette.fsh");
-        tmr.getBatch().setShader(shader);
-    }*/
 
     private void initController() {
         controllerStage = new Stage(new ScreenViewport());
