@@ -48,6 +48,7 @@ import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.UI.Controller;
 import com.mygdx.game.UI.DialogBox;
 import com.mygdx.game.UI.JoyStick;
+import com.mygdx.game.UI.OptionBox;
 import com.mygdx.game.entities.B2DSprite;
 import com.mygdx.game.entities.PlayEntities;
 import com.mygdx.game.entities.Player2;
@@ -86,8 +87,12 @@ public class DungeonState extends GameState implements Controllable {
     private float time = 0;
     private DialogBox dialogueBox;
     private boolean debug = false;
-    private Dialog dialog;
+    private Dialog dialog = new Dialog();
     private int nextState;
+    private boolean earnedAmulet = false;
+    private Table dialogRoot;
+    private OptionBox optionBox;
+    private boolean reloading = false;
 
     public DungeonState(GameStateManager gsm) {
         super(gsm);
@@ -155,6 +160,13 @@ public class DungeonState extends GameState implements Controllable {
         }
     }
 
+    private void stop() {
+        gsm.setState(nextState);
+        music.dispose();
+        isStopped = true;
+        canDraw = false;
+    }
+
     @Override
     public void render() {
         Gdx.gl20.glClearColor(0, 0, 0, 1);
@@ -171,7 +183,10 @@ public class DungeonState extends GameState implements Controllable {
         sb.setProjectionMatrix(cam.combined); //https://stackoverflow.com/questions/33703663/understanding-the-libgdx-projection-matrix - объяснение
         player.render(sb, 80f, 86.6f);
         //boss.render(sb, 200f, 200f);
-        entities.render(sb, 4.5f, 4.5f);
+        if (!reloading) {
+            entities.render(sb, 4.5f, 4.5f);
+        }
+
 
         //draw collision
         if (debug) {
@@ -315,7 +330,34 @@ public class DungeonState extends GameState implements Controllable {
     }
 
     private void initFight() {
+        skin_this = game.getSkin();
+        uiStage = new Stage(new ScreenViewport());
+        uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
 
+        dialogRoot = new Table();
+        dialogRoot.setFillParent(true);
+        uiStage.addActor(dialogRoot);
+
+        dialogueBox = new DialogBox(skin_this);
+        dialogueBox.setVisible(false);
+
+        optionBox = new OptionBox(skin_this);
+        optionBox.setVisible(false);
+
+        Table dialogTable = new Table();
+        dialogTable.add(dialogueBox)
+                .expand().align(Align.bottom)
+                .space(8f)
+                .row();
+
+        dialogRoot.add(dialogTable).expand().align(Align.bottom).pad(15f);
+
+        dcontroller = new DialogController(dialogueBox, optionBox);
+        multiplexer.addProcessor(uiStage); //не нагружает ли большое кол-во процессов программу?
+        //multiplexer.addProcessor(dcontroller);
+        Gdx.input.setInputProcessor(multiplexer);
+
+        dialog = new Dialog();
     }
 
     @Override
@@ -323,12 +365,15 @@ public class DungeonState extends GameState implements Controllable {
         DialogNode node1;
         initFight();
         switch (s) {
-            case "enemy":
-                node1 = new DialogNode("Враг атакует!", 0);
+            case "door1":
+                node1 = new DialogNode("Дверь заперта... Ее нужно взломать!", 0);
                 dialog.addNode(node1);
                 dcontroller.startDialog(dialog);
-                nextState = BATTLE;
-                canDraw = true;
+//                nextState = PAINT;
+//                canDraw = true;
+                reloading = true;
+                openDoor(s);
+reloading = false;
                 break;
             case "npc":
                 node1 = new DialogNode("Начнем испытание!", 0);
@@ -350,6 +395,36 @@ public class DungeonState extends GameState implements Controllable {
                 break;
             default:
                 break;
+        }
+    }
+
+    private void openDoor(String s) {
+        MapLayer mlayer = tiledMap.getLayers().get("objects");
+        if (mlayer == null) return;
+        entities = new PlayEntities();
+
+        for (MapObject mo : mlayer.getObjects()) {
+            BodyDef bdef = new BodyDef();
+            bdef.type = BodyDef.BodyType.StaticBody;
+            float x = (float) mo.getProperties().get("x") / PPM * 4;
+            float y = (float) mo.getProperties().get("y") / PPM * 4;
+            bdef.position.set(x, y);
+
+            Body body = world.createBody(bdef);
+            FixtureDef cdef = new FixtureDef();
+            CircleShape cshape = new CircleShape();
+            cshape.setRadius(50f / PPM);
+            cdef.shape = cshape;
+            cdef.isSensor = true;
+            cdef.filter.categoryBits = BIT_TROPA;
+            cdef.filter.maskBits = BIT_PLAYER;
+            cshape.dispose();
+
+
+
+            body.createFixture(cdef).setUserData(mo.getName().equals(s) ? mo.getName() + "_opened" : mo.getName());
+            entities.addEntity(body, mo.getName().equals(s) ? mo.getName() + "_opened" : mo.getName());
+
         }
     }
 
