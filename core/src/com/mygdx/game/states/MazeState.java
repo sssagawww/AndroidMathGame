@@ -229,7 +229,11 @@ public class MazeState extends GameState implements Controllable {
         PolygonShape ps = new PolygonShape();
         FixtureDef fdef = new FixtureDef();
 
-        bdef.position.set(607f / PPM, 337f / PPM);
+        if(gsm.getLastState() == FOREST){
+            bdef.position.set(107f / PPM, 637f / PPM);
+        } else {
+            bdef.position.set(607f / PPM, 337f / PPM);
+        }
 
         bdef.type = BodyDef.BodyType.DynamicBody;
         Body body = world.createBody(bdef);

@@ -48,7 +48,7 @@ import java.util.Map;
 
 public class Play extends GameState implements Controllable {
     private MyGdxGame game;
-    private boolean debug = true;
+    private boolean debug = false;
     private World world;
     private Box2DDebugRenderer b2dr;
     private BoundedCamera b2dCam;
@@ -75,7 +75,6 @@ public class Play extends GameState implements Controllable {
     private Music music;
     private Preferences prefs;
     public boolean canDraw;
-    //private Image image = new Image(new Texture("UI/blackScreen.png"));
     public boolean savePlay;
     private float time = 0;
     public BodyDef bdef;

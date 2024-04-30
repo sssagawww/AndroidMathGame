@@ -240,7 +240,9 @@ public class Forest extends GameState implements Controllable {
         tileMapHeight = (int) tiledMap.getProperties().get("height");
 
         TiledMapTileLayer trees = (TiledMapTileLayer) tiledMap.getLayers().get("treescollision");
-        createLayer(trees, BIT_PENEK);
+        TiledMapTileLayer next = (TiledMapTileLayer) tiledMap.getLayers().get("next");
+        createLayer(trees, BIT_TROPA);
+        createLayer(next, BIT_TROPA);
     }
 
     private void createLayer(TiledMapTileLayer layer, short bits) {
@@ -272,7 +274,7 @@ public class Forest extends GameState implements Controllable {
                 fdef.filter.categoryBits = BIT_TROPA;
                 fdef.filter.maskBits = BIT_PLAYER;
                 fdef.isSensor = false;
-                world.createBody(bdef).createFixture(fdef);
+                world.createBody(bdef).createFixture(fdef).setUserData(layer.getName());
                 cs.dispose();
             }
         }
@@ -377,6 +379,7 @@ public class Forest extends GameState implements Controllable {
 
     public void loadStage(String s) {
         DialogNode node1;
+        gsm.setLastState(FOREST);
         initFight();
         switch (s) {
             case "enemy":
@@ -401,7 +404,7 @@ public class Forest extends GameState implements Controllable {
                 canDraw = true;
                 break;
             case "next":
-                nextState = PLAY;
+                nextState = MAZE;
                 stop();
                 break;
             default:
