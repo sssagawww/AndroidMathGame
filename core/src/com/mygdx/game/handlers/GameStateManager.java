@@ -9,9 +9,10 @@ import java.util.Stack;
 public class GameStateManager {
     private MyGdxGame game;
     private Play play;
-    private Forest forest;
     private Stack<GameState> gameStates;
+    private Forest forest;
     private MazeState mazeState;
+    private int lastState;
     public static final int PLAY = 912837;
     public static final int MENU = 0;
     public static final int PAINT = 1;
@@ -51,7 +52,7 @@ public class GameStateManager {
         } else if (state == PAINT) {
             return new PaintState(this);
         } else if (state == MAZE) {
-            mazeState = new MazeState(this);
+            if (mazeState==null) return mazeState = new MazeState(this);
             return mazeState;
         } else if (state == RHYTHM) {
             return new RhythmState(this);
@@ -87,5 +88,13 @@ public class GameStateManager {
 
     public MyGdxGame game() {
         return game;
+    }
+
+    public int getLastState() {
+        return lastState;
+    }
+
+    public void setLastState(int lastState) {
+        this.lastState = lastState;
     }
 }

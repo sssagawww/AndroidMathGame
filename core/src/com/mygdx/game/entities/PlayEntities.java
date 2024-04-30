@@ -1,7 +1,5 @@
 package com.mygdx.game.entities;
 
-import static com.mygdx.game.handlers.B2DVars.PPM;
-
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -52,6 +50,10 @@ public class PlayEntities {
         sprite.setAnimation(sprites, 1 / 12f);
     }
 
+    public int getEntityCount(){
+        return list.size();
+    }
+
     public B2DSprite getEntity(int id) {
         return list.get(id);
     }
@@ -62,5 +64,12 @@ public class PlayEntities {
 
     public void setCurEntity(int curEntity) {
         this.curEntity = curEntity;
+    }
+    public void removeEntity(Body body){
+        for (int i = 0; i < list.size(); i++) {
+            if(list.get(i).getBody().equals(body)){
+                list.remove(i);
+            }
+        }
     }
 }

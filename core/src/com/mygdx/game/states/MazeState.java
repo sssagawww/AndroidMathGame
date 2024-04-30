@@ -8,6 +8,8 @@ import static com.mygdx.game.handlers.B2DVars.BIT_PLAYER;
 import static com.mygdx.game.handlers.B2DVars.BIT_TROPA;
 import static com.mygdx.game.handlers.B2DVars.PPM;
 import static com.mygdx.game.handlers.GameStateManager.BATTLE;
+import static com.mygdx.game.handlers.GameStateManager.FOREST;
+import static com.mygdx.game.handlers.GameStateManager.MAZE;
 import static com.mygdx.game.handlers.GameStateManager.MENU;
 import static com.mygdx.game.handlers.GameStateManager.PAINT;
 
@@ -68,6 +70,7 @@ public class MazeState extends GameState implements Controllable {
     private Player2 player;
     private JoyStick joyStick;
     private BoundedCamera joyCam;
+    private BoundedCamera mazeCam;
     private ShapeRenderer shapeRenderer;
     private Vector3 mouse;
     private Stage controllerStage;
@@ -76,6 +79,7 @@ public class MazeState extends GameState implements Controllable {
     private PlayEntities entities;
     private boolean isStopped;
     private boolean canDraw;
+    private boolean hoodedRun;
     private Stage uiStage;
     private Dialog dialog;
     private DialogController dcontroller;
@@ -84,7 +88,8 @@ public class MazeState extends GameState implements Controllable {
     private int nextState;
     private Table dialogRoot;
     private OptionBox2 optionBox;
-    private boolean debug = true;
+    private Body removedBody;
+    private boolean debug = false;
 
     public MazeState(GameStateManager gsm) {
         super(gsm);
@@ -102,8 +107,11 @@ public class MazeState extends GameState implements Controllable {
         createTiles();
         createNPC();
         initDarkness();
+        initFight();
 
-        cam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
+        mazeCam = new BoundedCamera();
+        mazeCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
+        mazeCam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
         b2dCam = new BoundedCamera();
         b2dCam.setToOrtho(false, V_WIDTH / PPM, V_HEIGHT / PPM);
         b2dCam.setBounds(0, (tileMapWidth * tileSize) / PPM, 0, (tileMapHeight * tileSize) / PPM);
@@ -113,7 +121,6 @@ public class MazeState extends GameState implements Controllable {
     public void update(float dt) {
         handleInput();
         world.step(dt, 6, 2);
-        controllerStage.act(dt);
         player.update(dt);
         entities.update(dt);
         player.updatePL();
@@ -130,7 +137,7 @@ public class MazeState extends GameState implements Controllable {
 
         darkStage.act(dt);
 
-        if (Gdx.input.isTouched()) {
+        if (Gdx.input.isTouched() && !controller.isInventoryVisible() && !dialogueBox.isVisible()) {
             mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
             joyCam.unproject(mouse);
             joyStick.update(mouse.x, mouse.y);
@@ -141,29 +148,32 @@ public class MazeState extends GameState implements Controllable {
         if (canDraw) {
             uiStage.act(dt);
             dcontroller.update(dt);
-            if (dialogueBox.isFinished()) {
-                time += dt;
-                if (time > 2f) {
-                    time = 0;
-                    gsm.setState(nextState);
-                    isStopped = true;
-                    canDraw = false;
-                }
+            time += dt;
+            if(hoodedRun && dcontroller.isFinished()){
+                removeCollisionEntity(entities.getEntity(entities.getEntityCount()-1).getBody());
+                entities.getEntity(entities.getEntityCount()-1).getBody().getFixtureList().get(0).setUserData("collided");
+                //entities.getEntity(entities.getEntityCount()-1).getBody().setLinearVelocity(-1,1);
+            }
+            if (dialogueBox.isFinished() && time > 2f && dcontroller.isFinished()) {
+                time = 0;
+                entities.removeEntity(removedBody);
+                stop();
             }
         }
+        controllerStage.act(dt);
     }
 
     @Override
     public void render() {
         Gdx.gl20.glClearColor(0, 0, 0, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        cam.setPosition(player.getPosition().x * PPM + V_WIDTH / 35, player.getPosition().y * PPM + V_HEIGHT / 35);
-        cam.update();
+        mazeCam.setPosition(player.getPosition().x * PPM + V_WIDTH / 35, player.getPosition().y * PPM + V_HEIGHT / 35);
+        mazeCam.update();
 
-        tmr.setView(cam);
+        tmr.setView(mazeCam);
         tmr.render();
 
-        sb.setProjectionMatrix(cam.combined);
+        sb.setProjectionMatrix(mazeCam.combined);
         player.render(sb, 80f, 86.6f);
         entities.render(sb, 150f, 150f);
 
@@ -175,13 +185,13 @@ public class MazeState extends GameState implements Controllable {
 
         darkStage.draw();
 
+        joyStick.render(shapeRenderer);
+
         if (canDraw) {
             uiStage.draw();
         }
 
-        //shader.setUniformf("resolution", Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         controllerStage.draw();
-        joyStick.render(shapeRenderer);
     }
 
     private void createNPC() {
@@ -192,29 +202,25 @@ public class MazeState extends GameState implements Controllable {
         for (MapObject mo : mlayer.getObjects()) {
             BodyDef bdef = new BodyDef();
             bdef.type = BodyDef.BodyType.StaticBody;
-            float x = (float) mo.getProperties().get("x") / PPM * 4;
-            float y = (float) mo.getProperties().get("y") / PPM * 4;
+            float x = (float) mo.getProperties().get("x") / PPM * 4f;
+            float y = (float) mo.getProperties().get("y") / PPM * 4f;
             bdef.position.set(x, y);
-
 
             Body body = world.createBody(bdef);
             FixtureDef cdef = new FixtureDef();
             CircleShape cshape = new CircleShape();
             cshape.setRadius(50f / PPM);
+            if(mo.getName().equals("chest")){
+                cshape.setRadius(30f / PPM);
+            }
             cdef.shape = cshape;
             cdef.isSensor = true;
             cdef.filter.categoryBits = BIT_TROPA;
             cdef.filter.maskBits = BIT_PLAYER;
             cshape.dispose();
 
-            mo.setName("enemy");
-
             body.createFixture(cdef).setUserData(mo.getName());
             entities.addEntity(body, mo.getName());
-
-            /*boss = new Boss(body);
-            body.setUserData(boss);
-            System.out.println(body.getUserData());*/
         }
     }
 
@@ -225,24 +231,15 @@ public class MazeState extends GameState implements Controllable {
 
         bdef.position.set(607f / PPM, 337f / PPM);
 
-
         bdef.type = BodyDef.BodyType.DynamicBody;
         Body body = world.createBody(bdef);
 
-        ps.setAsBox(40f / PPM, 50f / PPM, new Vector2(-5.4f, -3.6f), 0);
+        ps.setAsBox(40f / PPM, 40f / PPM, new Vector2(-5.4f, -4.0f), 0);
         fdef.shape = ps;
         fdef.filter.categoryBits = BIT_PLAYER;
         fdef.filter.maskBits = BIT_TROPA;
         body.createFixture(fdef).setUserData("player");
         ps.dispose();
-
-        //create foot sensor - дополнительная коллизия внизу игрока
-        /*ps.setAsBox(10f / PPM, 10f / PPM, new Vector2(0, -50f/PPM), 0);
-        fdef.shape = ps;
-        fdef.filter.categoryBits = BIT_PLAYER;
-        fdef.filter.maskBits = BIT_BLOCK;
-        fdef.isSensor = true;
-        body.createFixture(fdef).setUserData("foot");*/
 
         player = new Player2(body);
         player.setState(this);
@@ -259,13 +256,13 @@ public class MazeState extends GameState implements Controllable {
 
         TiledMapTileLayer borders = (TiledMapTileLayer) tiledMap.getLayers().get("borders"); //слой с границами карты
         TiledMapTileLayer walls = (TiledMapTileLayer) tiledMap.getLayers().get("walls");
-        TiledMapTileLayer chest = (TiledMapTileLayer) tiledMap.getLayers().get("chest");
+        TiledMapTileLayer next = (TiledMapTileLayer) tiledMap.getLayers().get("next");
+        TiledMapTileLayer decor = (TiledMapTileLayer) tiledMap.getLayers().get("decor");
 
         createLayer(borders, BIT_TROPA);
-        createLayer(walls, BIT_PENEK);
-        createLayer(chest, BIT_TROPA);
-
-        //borders = (TiledMapTileLayer) tiledMap.getLayers().get("grass");
+        createLayer(walls, BIT_TROPA);
+        createLayer(next, BIT_TROPA);
+        createLayer(decor, BIT_TROPA);
     }
 
     private void createLayer(TiledMapTileLayer layer, short bits) {
@@ -297,7 +294,7 @@ public class MazeState extends GameState implements Controllable {
                 fdef.filter.categoryBits = BIT_TROPA;
                 fdef.filter.maskBits = BIT_PLAYER;
                 fdef.isSensor = false;
-                world.createBody(bdef).createFixture(fdef);
+                world.createBody(bdef).createFixture(fdef).setUserData(layer.getName());
                 cs.dispose();
             }
         }
@@ -346,12 +343,21 @@ public class MazeState extends GameState implements Controllable {
 
     @Override
     public void dispose() {
-
+        player.stopSounds();
+        isStopped = true;
     }
+
+    private void stop() {
+        if (nextState != -1) {
+            gsm.setState(nextState);
+        }
+        canDraw = false;
+    }
+
 
     public void loadStage(String s) {
         DialogNode node1;
-        initFight();
+        gsm.setLastState(MAZE);
         switch (s) {
             case "enemy":
                 node1 = new DialogNode("Враг атакует!", 0);
@@ -367,9 +373,46 @@ public class MazeState extends GameState implements Controllable {
                 nextState = PAINT;
                 canDraw = true;
                 break;
+            case "chest":
+                node1 = new DialogNode("Получено Кольцо мудрости.", 0);
+                controller.getInventory().setImgVisibility(0, true);
+                dialog.addNode(node1);
+                dcontroller.startDialog(dialog);
+                nextState = -1;
+                canDraw = true;
+                break;
+            case "hooded":
+                node1 = new DialogNode("Ты справился! Ведь было несложно?", 0);
+                DialogNode node2 = new DialogNode("Приключения ждут тебя впереди...", 1);
+                DialogNode node3 = new DialogNode("А мне уже пора уходить.", 2);
+                DialogNode node4 = new DialogNode("Пока!", 3);
+
+                node1.makeLinear(node2.getId());
+                node2.makeLinear(node3.getId());
+                node3.makeLinear(node4.getId());
+
+                dialog.addNode(node1);
+                dialog.addNode(node2);
+                dialog.addNode(node3);
+                dialog.addNode(node4);
+                dcontroller.startDialog(dialog);
+
+                nextState = -1;
+                canDraw = true;
+                hoodedRun = true;
+                break;
+            case "next":
+                nextState = FOREST;
+                stop();
+                break;
             default:
                 break;
         }
+    }
+
+    @Override
+    public void removeCollisionEntity(Body body) {
+        removedBody = body;
     }
 
     @Override

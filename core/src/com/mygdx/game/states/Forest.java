@@ -8,6 +8,7 @@ import static com.mygdx.game.handlers.B2DVars.BIT_TROPA;
 import static com.mygdx.game.handlers.B2DVars.PPM;
 import static com.mygdx.game.handlers.GameStateManager.BATTLE;
 import static com.mygdx.game.handlers.GameStateManager.FOREST;
+import static com.mygdx.game.handlers.GameStateManager.MAZE;
 import static com.mygdx.game.handlers.GameStateManager.MENU;
 import static com.mygdx.game.handlers.GameStateManager.PAINT;
 import static com.mygdx.game.handlers.GameStateManager.PLAY;
@@ -49,6 +50,7 @@ import com.mygdx.game.UI.DialogBox;
 import com.mygdx.game.UI.JoyStick;
 import com.mygdx.game.UI.OptionBox;
 import com.mygdx.game.UI.OptionBox2;
+import com.mygdx.game.entities.B2DSprite;
 import com.mygdx.game.entities.PlayEntities;
 import com.mygdx.game.entities.Player2;
 import com.mygdx.game.handlers.BoundedCamera;
@@ -208,7 +210,11 @@ public class Forest extends GameState implements Controllable {
         PolygonShape ps = new PolygonShape();
         FixtureDef fdef = new FixtureDef();
 
-        bdef.position.set(207f / PPM, 737f / PPM);
+        if(gsm.getLastState() == MAZE){
+            bdef.position.set(1107f / PPM, 137f / PPM);
+        } else {
+            bdef.position.set(207f / PPM, 737f / PPM);
+        }
 
         bdef.type = BodyDef.BodyType.DynamicBody;
         Body body = world.createBody(bdef);
@@ -330,10 +336,6 @@ public class Forest extends GameState implements Controllable {
         Gdx.input.setInputProcessor(multiplexer);
 
         dialog = new Dialog();
-        /*DialogNode node1 = new DialogNode("Враг атакует!", 0);
-
-        dialog.addNode(node1);
-        dcontroller.startDialog(dialog);*/
     }
 
     private void initController() {
@@ -405,6 +407,11 @@ public class Forest extends GameState implements Controllable {
             default:
                 break;
         }
+    }
+
+    @Override
+    public void removeCollisionEntity(Body body) {
+
     }
 
     private void stop() {

@@ -60,6 +60,10 @@ public class Controller extends Table {
         this.add(inventImg).width(inventImg.getWidth()*5).height(inventImg.getHeight()*5).align(Align.topRight);
     }
 
+    public Inventory getInventory() {
+        return inventory;
+    }
+
     public boolean isMenuPressed() {
         return menuPressed;
     }

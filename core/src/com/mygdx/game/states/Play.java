@@ -29,6 +29,7 @@ import com.mygdx.game.UI.Controller;
 import com.mygdx.game.UI.DialogBox;
 import com.mygdx.game.UI.JoyStick;
 import com.mygdx.game.UI.OptionBox2;
+import com.mygdx.game.entities.B2DSprite;
 import com.mygdx.game.entities.MovableNPC;
 import com.mygdx.game.entities.PlayEntities;
 import com.mygdx.game.entities.Player2;
@@ -47,7 +48,7 @@ import java.util.Map;
 
 public class Play extends GameState implements Controllable {
     private MyGdxGame game;
-    private boolean debug = false;
+    private boolean debug = true;
     private World world;
     private Box2DDebugRenderer b2dr;
     private BoundedCamera b2dCam;
@@ -277,6 +278,8 @@ public class Play extends GameState implements Controllable {
         createLayer(layer3, BIT_TROPA, BIT_PLAYER);
         TiledMapTileLayer layer4 = (TiledMapTileLayer) tiledMap.getLayers().get("water");
         createLayer(layer4, BIT_TROPA, BIT_PLAYER);
+        TiledMapTileLayer layer5 = (TiledMapTileLayer) tiledMap.getLayers().get("animated");
+        createLayer(layer5, BIT_TROPA, BIT_PLAYER);
     }
 
     //коллизия слоя на карте (слой создаётся в Tiled)
@@ -533,6 +536,7 @@ public class Play extends GameState implements Controllable {
 
     public void loadStage(String s) {
         DialogNode node1;
+        gsm.setLastState(PLAY);
         //initFight();
         switch (s) {
             case "enemy":
@@ -598,6 +602,11 @@ public class Play extends GameState implements Controllable {
             default:
                 break;
         }
+    }
+
+    @Override
+    public void removeCollisionEntity(Body body) {
+
     }
 
     private void stop() {

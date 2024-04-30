@@ -3,6 +3,7 @@ package com.mygdx.game.battle.render_controller;
 import com.badlogic.gdx.InputAdapter;
 import com.mygdx.game.UI.DialogBox;
 import com.mygdx.game.UI.OptionBox;
+import com.mygdx.game.UI.OptionBox2;
 import com.mygdx.game.UI.SelectionBtnBox;
 import com.mygdx.game.battle.Battle;
 import com.mygdx.game.battle.events.B_TextEvent;
@@ -13,7 +14,7 @@ import java.util.Queue;
 public class BattleScreenController extends InputAdapter {
     private Battle battle;
     private DialogBox dialogBox;
-    private OptionBox optionBox;
+    private OptionBox2 optionBox;
     private SelectionBtnBox selectionBox;
     private Queue<BattleEvent> queue;
 
@@ -26,7 +27,7 @@ public class BattleScreenController extends InputAdapter {
 
     private STATE state = STATE.DEACTIVATED;
 
-    public BattleScreenController(Battle battle, Queue queue, DialogBox dialogBox, OptionBox optionBox, SelectionBtnBox selectionBox) {
+    public BattleScreenController(Battle battle, Queue queue, DialogBox dialogBox, OptionBox2 optionBox, SelectionBtnBox selectionBox) {
         this.battle = battle;
         this.dialogBox = dialogBox;
         this.optionBox = optionBox;
@@ -37,8 +38,8 @@ public class BattleScreenController extends InputAdapter {
     public void update(float dt) {
         if (itsRun() && dialogBox.isFinished() && !optionBox.isVisible()) {
             optionBox.clearChoices();
-            optionBox.addOption("Да");
-            optionBox.addOption("Нет");
+            optionBox.addBtn("Да");
+            optionBox.addBtn("Нет");
             optionBox.setVisible(true);
         }
 

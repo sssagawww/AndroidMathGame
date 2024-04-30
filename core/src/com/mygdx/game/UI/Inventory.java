@@ -22,6 +22,7 @@ public class Inventory extends Table {
     private MyGdxGame game;
     private Table uiTable;
     private Label.LabelStyle lstyle;
+    private Image[] images;
     private Image playerImage;
     private Image ringImage;
     private Image swordImage;
@@ -59,7 +60,7 @@ public class Inventory extends Table {
         swordImage = new Image(new Texture("controller/star.png"));
         amuletImage = new Image(new Texture("controller/circle.png"));
 
-        Image[] images = new Image[]{ringImage, swordImage, amuletImage};
+        images = new Image[]{ringImage, swordImage, amuletImage};
 
         playerImage = new Image(new Texture("entitySprites/idle.png"));
 
@@ -74,6 +75,7 @@ public class Inventory extends Table {
             imageTable.setBackground("borders");
             imageTable.add(images[i]).width(V_WIDTH / 10f).height(V_WIDTH / 10f);
             imagesTable.add(imageTable).align(Align.bottom).expand().pad(15f);
+            images[i].setVisible(false);
         }
         rightTable.add(imagesTable).padLeft(25f);
 
@@ -83,5 +85,9 @@ public class Inventory extends Table {
         //uiTable.debug();
         uiTable.add(rightTable).right();
         uiTable.add(achievementsTable).width(getPrefWidth()/2.5f).height(getPrefHeight()/1.1f).align(Align.left).pad(10f).expand();
+    }
+
+    public void setImgVisibility(int num, boolean visibility){
+        images[num].setVisible(visibility);
     }
 }
