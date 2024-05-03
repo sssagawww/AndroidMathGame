@@ -11,13 +11,13 @@ import static com.mygdx.game.handlers.GameStateManager.FOREST;
 import static com.mygdx.game.handlers.GameStateManager.MAZE;
 import static com.mygdx.game.handlers.GameStateManager.MENU;
 import static com.mygdx.game.handlers.GameStateManager.PAINT;
-import static com.mygdx.game.handlers.GameStateManager.PLAY;
-import static com.mygdx.game.handlers.GameStateManager.RHYTHM;
+
+import static jdk.jfr.internal.consumer.EventLog.stop;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
@@ -36,7 +36,7 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.actions.AddAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
@@ -48,8 +48,6 @@ import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.UI.Controller;
 import com.mygdx.game.UI.DialogBox;
 import com.mygdx.game.UI.JoyStick;
-import com.mygdx.game.UI.OptionBox;
-import com.mygdx.game.UI.OptionBox2;
 import com.mygdx.game.entities.B2DSprite;
 import com.mygdx.game.entities.PlayEntities;
 import com.mygdx.game.entities.Player2;
@@ -58,80 +56,71 @@ import com.mygdx.game.handlers.Controllable;
 import com.mygdx.game.handlers.GameStateManager;
 import com.mygdx.game.handlers.MyContactListener;
 
-public class Forest extends GameState implements Controllable {
-    private MyGdxGame game;
-    private boolean debug = false;
+public class DungeonState extends GameState implements Controllable {
+
+    private Player2 player;
+    private float tileMapHeight;
+    private float tileSize;
+    private float tileMapWidth;
+    private Skin skin_this;
+    private BoundedCamera b2dCam;
     private World world;
     private Box2DDebugRenderer b2dr;
-    private BoundedCamera b2dCam;
+    private InputMultiplexer multiplexer;
     private MyContactListener cl;
-    private Player2 player;
+    private Music music;
     private PlayEntities entities;
-    private Body removedBody;
     private TiledMap tiledMap;
     private OrthogonalTiledMapRenderer tmr;
-    private float tileSize;
-    private int tileMapWidth;
-    private int tileMapHeight;
-    private Stage uiStage;
-    private Stage controllerStage;
-    private Stage darkStage;
-    private Table dialogRoot;
-    private DialogBox dialogueBox;
-    private OptionBox2 optionBox;
-    private Skin skin_this;
-    private InputMultiplexer multiplexer;
-    private Dialog dialog;
-    private DialogController dcontroller;
-    public boolean canDraw;
-    private float time = 0;
-    private Controller controller;
+    private BodyDef bdef;
     private JoyStick joyStick;
+    private BoundedCamera joyCam;
     private ShapeRenderer shapeRenderer;
     private Vector3 mouse;
-    private BoundedCamera joyCam;
-    private BoundedCamera forCam;
-    private boolean isStopped;
+    private Controller controller;
+    private Stage controllerStage;
+    private boolean isStopped = false;
+    private boolean canDraw = false;
+    private Stage uiStage;
+    private DialogController dcontroller;
+    private float time = 0;
+    private DialogBox dialogueBox;
+    private boolean debug = false;
+    private Dialog dialog;
     private int nextState;
-    private int[] backgroundLayers = {0, 1};
-    private int[] foregroundLayers = {2, 3, 4,5,6};
-    private int mushrooms = 0;
 
-    public Forest(GameStateManager gsm) {
+    public DungeonState(GameStateManager gsm) {
         super(gsm);
+
         world = new World(new Vector2(0, 0), true);
-        b2dr = new Box2DDebugRenderer();
+        b2dr = new Box2DDebugRenderer(); //отрисовщик дебаг коллизии
         game = gsm.game();
         multiplexer = new InputMultiplexer();
-        cl = new MyContactListener(this);
+        cl = new MyContactListener(this); //детектит коллизию
         world.setContactListener(cl);
+        music = Gdx.audio.newMusic(Gdx.files.internal("music/song.wav"));
         skin_this = game.getSkin();
 
+        //initUI();
         initJoyStick();
         initController();
         createPlayer();
         createTiles();
         createNPC();
-        initDarkness();
-        initFight();
 
-        forCam = new BoundedCamera();
-        forCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
-        forCam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
-        b2dCam = new BoundedCamera();
-        b2dCam.setToOrtho(false, V_WIDTH / PPM, V_HEIGHT / PPM);
+        //initFight();
+
+        cam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
+        b2dCam = new BoundedCamera(); //рисует дебаг коллизию?
+        b2dCam.setToOrtho(false, V_WIDTH / PPM, V_HEIGHT / PPM); // /2?
         b2dCam.setBounds(0, (tileMapWidth * tileSize) / PPM, 0, (tileMapHeight * tileSize) / PPM);
-    }
-
-    @Override
-    public void handleInput() {
-
     }
 
     @Override
     public void update(float dt) {
         handleInput();
         world.step(dt, 6, 2);
+        controllerStage.act(dt);
         player.update(dt);
         entities.update(dt);
         player.updatePL();
@@ -146,9 +135,7 @@ public class Forest extends GameState implements Controllable {
             gsm.setState(MENU);
         }
 
-        darkStage.act(dt);
-
-        if (Gdx.input.isTouched() && !controller.isInventoryVisible() && !dialogueBox.isVisible()) {
+        if (Gdx.input.isTouched()) {
             mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
             joyCam.unproject(mouse);
             joyStick.update(mouse.x, mouse.y);
@@ -156,96 +143,62 @@ public class Forest extends GameState implements Controllable {
             joyStick.setDefaultPos();
         }
 
+        //можно начать бой
         if (canDraw) {
             uiStage.act(dt);
             dcontroller.update(dt);
             time += dt;
-            if (dialogueBox.isFinished() && time > 2f && dcontroller.isFinished()) {
+            if (dialogueBox.isFinished() && time > 2f) {
                 time = 0;
                 stop();
             }
         }
-
-        controllerStage.act(dt);
     }
 
     @Override
     public void render() {
         Gdx.gl20.glClearColor(0, 0, 0, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        forCam.setPosition(player.getPosition().x * PPM + V_WIDTH / 35, player.getPosition().y * PPM + V_HEIGHT / 35);
-        forCam.update();
+        cam.setPosition(player.getPosition().x * PPM + V_WIDTH / 35, player.getPosition().y * PPM + V_HEIGHT / 35);
+        //cam.position.set(player.getPosition().x * PPM / 2, player.getPosition().y * PPM / 2, 0);
+        cam.update();
 
-        tmr.setView(forCam);
-        tmr.render(backgroundLayers);
+        //draw map
+        tmr.setView(cam);
+        tmr.render();
 
-        sb.setProjectionMatrix(forCam.combined);
+        //draw player and npc
+        sb.setProjectionMatrix(cam.combined); //https://stackoverflow.com/questions/33703663/understanding-the-libgdx-projection-matrix - объяснение
         player.render(sb, 80f, 86.6f);
-        entities.render(sb, 1.5f, 1.5f);
+        //boss.render(sb, 200f, 200f);
+        entities.render(sb, 4.5f, 4.5f);
 
-        tmr.render(foregroundLayers);
-
+        //draw collision
         if (debug) {
             b2dCam.position.set(player.getPosition().x, player.getPosition().y, 0);
             b2dCam.update();
             b2dr.render(world, b2dCam.combined);
         }
 
-        darkStage.draw();
-
-        joyStick.render(shapeRenderer);
-
+        //draw initFight() if battle begin
         if (canDraw) {
             uiStage.draw();
         }
 
         controllerStage.draw();
-    }
-
-    @Override
-    public void dispose() {
-        player.stopSounds();
-        isStopped = true;
-    }
-
-    private void createPlayer() {
-        BodyDef bdef = new BodyDef();
-        PolygonShape ps = new PolygonShape();
-        FixtureDef fdef = new FixtureDef();
-
-        if(gsm.getLastState() == MAZE){
-            bdef.position.set(1107f / PPM, 137f / PPM);
-        } else {
-            bdef.position.set(207f / PPM, 737f / PPM);
-        }
-
-        bdef.type = BodyDef.BodyType.DynamicBody;
-        Body body = world.createBody(bdef);
-
-        ps.setAsBox(40f / PPM, 50f / PPM, new Vector2(-5.4f, -3.6f), 0);
-        fdef.shape = ps;
-        fdef.filter.categoryBits = BIT_PLAYER;
-        fdef.filter.maskBits = BIT_TROPA;
-        body.createFixture(fdef).setUserData("player");
-        ps.dispose();
-
-        player = new Player2(body);
-        player.setState(this);
-        body.setUserData(player);
+        joyStick.render(shapeRenderer);
     }
 
     private void createTiles() {
-        tiledMap = new TmxMapLoader().load("sprites/mystic_woods_free_2.1/forest.tmx");
-        tmr = new OrthogonalTiledMapRenderer(tiledMap, 4f);
+        tiledMap = new TmxMapLoader().load("sprites/mystic_woods_free_2.1/dungeon.tmx");
+        tmr = new OrthogonalTiledMapRenderer(tiledMap, 4); // !!! размер карты
         tileSize = (int) tiledMap.getProperties().get("tilewidth");
 
         tileMapWidth = (int) tiledMap.getProperties().get("width");
         tileMapHeight = (int) tiledMap.getProperties().get("height");
 
-        TiledMapTileLayer trees = (TiledMapTileLayer) tiledMap.getLayers().get("treescollision");
-        TiledMapTileLayer next = (TiledMapTileLayer) tiledMap.getLayers().get("next");
-        createLayer(trees, BIT_TROPA);
-        createLayer(next, BIT_TROPA);
+        TiledMapTileLayer walls = (TiledMapTileLayer) tiledMap.getLayers().get("walls");
+        createLayer(walls, BIT_TROPA);
     }
 
     private void createLayer(TiledMapTileLayer layer, short bits) {
@@ -264,13 +217,13 @@ public class Forest extends GameState implements Controllable {
 
                 bdef.type = BodyDef.BodyType.StaticBody;
                 bdef.position.set(
-                        (col + 0.1f) * tileSize / 2.5f,
-                        (row + 0.2f) * tileSize / 2.5f);
+                        (col + 0.2f) * tileSize / 2.5f,
+                        (row + 0.4f) * tileSize / 2.5f);
                 ChainShape cs = new ChainShape();
                 Vector2[] v = new Vector2[3];
-                v[0] = new Vector2(-tileSize / 6, -tileSize / 10);
-                v[1] = new Vector2(-tileSize / 6, tileSize / 10);
-                v[2] = new Vector2(tileSize / 6, tileSize / 10);
+                v[0] = new Vector2(-tileSize / 6, -tileSize / 6);
+                v[1] = new Vector2(-tileSize / 6, tileSize / 6);
+                v[2] = new Vector2(tileSize / 6, tileSize / 6);
                 cs.createChain(v);
                 fdef.friction = 0;
                 fdef.shape = cs;
@@ -283,18 +236,39 @@ public class Forest extends GameState implements Controllable {
         }
     }
 
+    private void createPlayer() {
+        bdef = new BodyDef();
+        PolygonShape ps = new PolygonShape();
+        FixtureDef fdef = new FixtureDef();
+
+        bdef.position.set(607f / PPM, 337f / PPM);
+
+
+        bdef.type = BodyDef.BodyType.DynamicBody;
+        Body body = world.createBody(bdef);
+
+        ps.setAsBox(40f / PPM, 50f / PPM, new Vector2(-5.4f, -3.6f), 0);
+        fdef.shape = ps;
+        fdef.filter.categoryBits = BIT_PLAYER;
+        fdef.filter.maskBits = BIT_TROPA;
+        body.createFixture(fdef).setUserData("player");
+        ps.dispose();
+
+        player = new Player2(body);
+        player.setState(this);
+        body.setUserData(player);
+    }
+
     private void createNPC() {
-        MapLayer mlayer = tiledMap.getLayers().get("npcLayer");
+        MapLayer mlayer = tiledMap.getLayers().get("objects");
         if (mlayer == null) return;
         entities = new PlayEntities();
 
         for (MapObject mo : mlayer.getObjects()) {
             BodyDef bdef = new BodyDef();
             bdef.type = BodyDef.BodyType.StaticBody;
-          
-            float x = (float) mo.getProperties().get("x") / PPM * 4f;
-            float y = (float) mo.getProperties().get("y") / PPM * 4f;
-
+            float x = (float) mo.getProperties().get("x") / PPM * 4;
+            float y = (float) mo.getProperties().get("y") / PPM * 4;
             bdef.position.set(x, y);
 
             Body body = world.createBody(bdef);
@@ -309,38 +283,8 @@ public class Forest extends GameState implements Controllable {
 
             body.createFixture(cdef).setUserData(mo.getName());
             entities.addEntity(body, mo.getName());
+
         }
-    }
-
-    private void initFight() {
-        skin_this = game.getSkin();
-        uiStage = new Stage(new ScreenViewport());
-        uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
-
-        dialogRoot = new Table();
-        dialogRoot.setFillParent(true);
-        uiStage.addActor(dialogRoot);
-
-        dialogueBox = new DialogBox(skin_this);
-        dialogueBox.setVisible(false);
-
-        optionBox = new OptionBox2(skin_this);
-        optionBox.setVisible(false);
-
-        Table dialogTable = new Table();
-        dialogTable.add(dialogueBox)
-                .expand().align(Align.bottom)
-                .space(8f)
-                .row();
-
-        dialogRoot.add(dialogTable).expand().align(Align.bottom).pad(15f);
-
-        dcontroller = new DialogController(dialogueBox, optionBox);
-        multiplexer.addProcessor(uiStage); //не нагружает ли большое кол-во процессов программу?
-        //multiplexer.addProcessor(dcontroller);
-        Gdx.input.setInputProcessor(multiplexer);
-
-        dialog = new Dialog();
     }
 
     private void initController() {
@@ -362,27 +306,22 @@ public class Forest extends GameState implements Controllable {
     private void initJoyStick() {
         joyCam = new BoundedCamera();
         joyCam.setBounds(0, V_WIDTH, 0, V_HEIGHT);
-        joyCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
+        joyCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT)); //не хватало этой строчки
 
         joyStick = new JoyStick(200, 200, 200);
         shapeRenderer = new ShapeRenderer();
-        shapeRenderer.setProjectionMatrix(joyCam.combined);
+        shapeRenderer.setProjectionMatrix(cam.combined);
         mouse = new Vector3();
     }
 
-    private void initDarkness(){
-        Image image = new Image(new Texture("UI/darkness2.png"));
-        Table root = new Table();
-        root.setFillParent(true);
-        root.add(image).center();
-        darkStage = new Stage(new ScreenViewport());
-        darkStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
-        darkStage.addActor(root);
+    private void initFight() {
+
     }
 
+    @Override
     public void loadStage(String s) {
         DialogNode node1;
-        gsm.setLastState(FOREST);
+        initFight();
         switch (s) {
             case "enemy":
                 node1 = new DialogNode("Враг атакует!", 0);
@@ -398,34 +337,16 @@ public class Forest extends GameState implements Controllable {
                 nextState = PAINT;
                 canDraw = true;
                 break;
-            case "sword":
-                node1 = new DialogNode("Вы решили вытянуть меч силы.", 0);
+            case "hooded":
+                node1 = new DialogNode("Идем в руины.", 0);
                 dialog.addNode(node1);
                 dcontroller.startDialog(dialog);
-                nextState = RHYTHM;
+                nextState = MAZE;
                 canDraw = true;
-                break;
-            case "npcForest":
-                if(mushrooms == -1) break;
-                if(mushrooms>=6){
-                    node1 = new DialogNode("Ого! Ты все собрал!", 0);
-                    mushrooms = -1;
-                } else {
-                    node1 = new DialogNode("Ох, вот бы собрать побольше грибов...", 0);
-                }
-                dialog.addNode(node1);
-                dcontroller.startDialog(dialog);
-                nextState = -1;
-                canDraw = true;
-                break;
-            case "mushroom":
-                nextState = -1;
-                mushrooms++;
                 break;
             case "next":
-                if(player.getPosition().x < 800f / PPM) nextState = PLAY;
-                else nextState = MAZE;
                 stop();
+                gsm.setState(FOREST);
                 break;
             default:
                 break;
@@ -433,16 +354,12 @@ public class Forest extends GameState implements Controllable {
     }
 
     @Override
-    public void removeCollisionEntity(Body body) {
-        removedBody = body;
-        entities.removeEntity(removedBody);
+    public void handleInput() {
     }
 
-    private void stop() {
-        if (nextState != -1) {
-            gsm.setState(nextState);
-        }
-        canDraw = false;
+    @Override
+    public void dispose() {
+
     }
 
     @Override
@@ -450,3 +367,4 @@ public class Forest extends GameState implements Controllable {
         return joyStick;
     }
 }
+

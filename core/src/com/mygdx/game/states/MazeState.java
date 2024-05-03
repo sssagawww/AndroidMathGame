@@ -342,7 +342,32 @@ public class MazeState extends GameState implements Controllable {
     }
 
     @Override
-    public void handleInput() {
+    public void handleInput() {}
+    public void render() {
+        Gdx.gl20.glClearColor(0, 0, 0, 1);
+        Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        cam.setPosition(player.getPosition().x * PPM + V_WIDTH / 35, player.getPosition().y * PPM + V_HEIGHT / 35);
+        cam.update();
+
+        tmr.setView(cam);
+        tmr.render();
+
+        sb.setProjectionMatrix(cam.combined);
+        player.render(sb, 80f, 86.6f);
+        entities.render(sb, 1.5f, 1.5f);
+
+        if (debug) {
+            b2dCam.position.set(player.getPosition().x, player.getPosition().y, 0);
+            b2dCam.update();
+            b2dr.render(world, b2dCam.combined);
+        }
+
+        if (canDraw) {
+            uiStage.draw();
+        }
+
+        controllerStage.draw();
+        joyStick.render(shapeRenderer);
     }
 
     @Override

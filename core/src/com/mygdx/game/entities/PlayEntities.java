@@ -32,7 +32,7 @@ public class PlayEntities {
         list.add(sprite);
     }
 
-    public void render(SpriteBatch sb, float width, float height) {
+    public void render(SpriteBatch sb, float widthK, float heightK) {
         for (B2DSprite i : list) {
             if(i.isVisible()) i.render(sb, i.getHeight() * 1.5f, i.getHeight() * 1.5f);
         }

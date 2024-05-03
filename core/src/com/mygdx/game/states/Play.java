@@ -197,6 +197,7 @@ public class Play extends GameState implements Controllable {
         //draw player and npc
         sb.setProjectionMatrix(cam.combined); //https://stackoverflow.com/questions/33703663/understanding-the-libgdx-projection-matrix - объяснение
         player.render(sb, 80f, 86.6f);
+
         entities.render(sb, 150f, 150f);
 
         for (Map.Entry<String, MovableNPC> entry : movableNPCs.entrySet()) {

@@ -22,11 +22,12 @@ public class GameStateManager {
     public static final int MAZE = 6;
     public static final int RHYTHM = 8;
     public static final int BLACK_SCREEN = 100;
+    public static final int DUNGEON = 9;
 
     public GameStateManager(MyGdxGame game) {
         this.game = game;
         gameStates = new Stack<GameState>();
-        pushState(MENU);
+        pushState(DUNGEON);
     }
 
     //peek - get верхний элемент
@@ -61,6 +62,8 @@ public class GameStateManager {
             return forest;
         } else if (state == BLACK_SCREEN) {
             return new BlackScreen(this);
+        } else if (state == DUNGEON) {
+            return new DungeonState(this);
         }
         return null;
     }
