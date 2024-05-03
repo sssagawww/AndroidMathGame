@@ -5,14 +5,15 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.mygdx.game.UI.DialogBox;
 import com.mygdx.game.UI.OptionBox;
+import com.mygdx.game.UI.OptionBox2;
 
 public class DialogController extends InputAdapter {
     private DialogGo dialogGo;
     private DialogBox dialogBox;
-    private OptionBox optionBox;
+    private OptionBox2 optionBox;
     private float time = 0;
 
-    public DialogController(DialogBox dialogBox, OptionBox optionBox) {
+    public DialogController(DialogBox dialogBox, OptionBox2 optionBox) {
         this.dialogBox = dialogBox;
         this.optionBox = optionBox;
     }
@@ -25,7 +26,7 @@ public class DialogController extends InputAdapter {
         return false;
     }
 
-    @Override
+    /*@Override
     public boolean keyUp(int keycode) {
         if (optionBox.isVisible()) {
             if (keycode == Input.Keys.E) {
@@ -51,7 +52,7 @@ public class DialogController extends InputAdapter {
             return true;
         }
         return false;
-    }
+    }*/
 
     public void update(float dt) {
         if (dialogBox.isFinished() && dialogGo != null) {
@@ -62,16 +63,16 @@ public class DialogController extends InputAdapter {
 
         if (dialogGo != null && dialogBox.isFinished()) {
             time += dt;
-            if (time > 2f) {
+            if (dialogBox.isPressed() || time > 2f) {
                 time = 0;
                 if (dialogGo.getType() == DialogNode.NODE_TYPE.END) {
                     dialogGo = null;
                     dialogBox.setVisible(false);
                 } else if (dialogGo.getType() == DialogNode.NODE_TYPE.LINEAR) {
                     progress(0);
-                } else if (dialogGo.getType() == DialogNode.NODE_TYPE.MULTIPLE_CHOICE) {
-                    progress(optionBox.getID());
                 }
+            } else if (dialogGo.getType() == DialogNode.NODE_TYPE.MULTIPLE_CHOICE && optionBox.isClicked()) {
+                progress(optionBox.getBtnId());
             }
         }
     }
@@ -83,7 +84,7 @@ public class DialogController extends InputAdapter {
         if (dialogGo.getType() == DialogNode.NODE_TYPE.MULTIPLE_CHOICE) {
             optionBox.clearChoices();
             for (String s : dialog.getNode(dialog.getStart()).getLabels()) {
-                optionBox.addOption(s);
+                optionBox.addBtn(s);
             }
         }
     }
@@ -95,9 +96,15 @@ public class DialogController extends InputAdapter {
         if (nextNode.getType() == DialogNode.NODE_TYPE.MULTIPLE_CHOICE) {
             optionBox.clearChoices();
             for (String s : nextNode.getLabels()) {
-                optionBox.addOption(s);
+                optionBox.addBtn(s);
             }
         }
     }
-
+    public boolean isFinished() {
+        if (dialogGo == null) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

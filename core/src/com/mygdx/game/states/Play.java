@@ -5,6 +5,7 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
@@ -16,6 +17,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
@@ -25,9 +27,10 @@ import com.mygdx.game.Dialog.Dialog;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.UI.Controller;
 import com.mygdx.game.UI.DialogBox;
-import com.mygdx.game.UI.Inventory;
 import com.mygdx.game.UI.JoyStick;
-import com.mygdx.game.UI.OptionBox;
+import com.mygdx.game.UI.OptionBox2;
+import com.mygdx.game.entities.B2DSprite;
+import com.mygdx.game.entities.MovableNPC;
 import com.mygdx.game.entities.PlayEntities;
 import com.mygdx.game.entities.Player2;
 import com.mygdx.game.handlers.BoundedCamera;
@@ -35,15 +38,13 @@ import com.mygdx.game.handlers.Controllable;
 import com.mygdx.game.handlers.MyContactListener;
 import com.mygdx.game.handlers.GameStateManager;
 
-import static com.mygdx.game.MyGdxGame.V_HEIGHT;
-import static com.mygdx.game.MyGdxGame.V_WIDTH;
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.*;
+import static com.mygdx.game.MyGdxGame.*;
 import static com.mygdx.game.handlers.B2DVars.*;
-import static com.mygdx.game.handlers.GameStateManager.BATTLE;
-import static com.mygdx.game.handlers.GameStateManager.FOREST;
-import static com.mygdx.game.handlers.GameStateManager.MAZE;
-import static com.mygdx.game.handlers.GameStateManager.MENU;
-import static com.mygdx.game.handlers.GameStateManager.PAINT;
-import static com.mygdx.game.handlers.GameStateManager.RHYTHM;
+import static com.mygdx.game.handlers.GameStateManager.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class Play extends GameState implements Controllable {
     private MyGdxGame game;
@@ -54,19 +55,19 @@ public class Play extends GameState implements Controllable {
     private MyContactListener cl;
     private Player2 player;
     private PlayEntities entities;
-    //private Boss boss;
+    private HashMap<String, MovableNPC> movableNPCs;
     private TiledMap tiledMap;
     private OrthogonalTiledMapRenderer tmr;
     private float tileSize;
     private int tileMapWidth;
     private int tileMapHeight;
+    private int[] backgroundLayers = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11};
+    private int[] foregroundLayers = {12};
     private Stage uiStage;
     private Stage controllerStage;
-    private Stage inventoryStage;
-    private Inventory inventory;
     private Table dialogRoot;
     private DialogBox dialogueBox;
-    private OptionBox optionBox;
+    private OptionBox2 optionBox;
     private Skin skin_this;
     private InputMultiplexer multiplexer;
     private Dialog dialog;
@@ -86,6 +87,7 @@ public class Play extends GameState implements Controllable {
     // --------- END JoyStick ---------
     private boolean isStopped;
     private int nextState;
+    private int prevState = -123;
     private static final String PREF_NAME = "position";
     private static final String PREF_X = "x";
     private static final String PREF_Y = "y";
@@ -98,21 +100,21 @@ public class Play extends GameState implements Controllable {
         multiplexer = new InputMultiplexer();
         cl = new MyContactListener(this); //детектит коллизию
         world.setContactListener(cl);
-        music = Gdx.audio.newMusic(Gdx.files.internal("music/song.wav"));
+        //music = Gdx.audio.newMusic(Gdx.files.internal("music/song.wav"));
+        music = Gdx.audio.newMusic(Gdx.files.internal("music/birds.mp3"));
         prefs = Gdx.app.getPreferences(PREF_NAME);
         savePlay = game.save;
         skin_this = game.getSkin();
 
-        //initUI();
+        initFight();
         initJoyStick();
         initController();
-        initInventory();
         createPlayer();
         createTiles();
         createNPC();
-        //createMusic(); //отключено, чтобы не мешало при дебаггинге
-
-        //initFight();
+        createMovableNPC();
+        createKinematicNPC();
+        createMusic();
 
         cam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
         b2dCam = new BoundedCamera(); //рисует дебаг коллизию?
@@ -129,43 +131,37 @@ public class Play extends GameState implements Controllable {
     public void update(float dt) {
         handleInput();
         world.step(dt, 6, 2);
-        controllerStage.act(dt);
-        if (inventory.isVisible()) inventoryStage.act(dt);
         player.update(dt);
-        //boss.update(dt);
         entities.update(dt);
+        for (Map.Entry<String, MovableNPC> entry : movableNPCs.entrySet()) {
+            movableNPCs.get(entry.getKey()).update(dt);
+            movableNPCs.get(entry.getKey()).updatePos();
+        }
+
+        movableNPCs.get("rabbit").randomDirection(30, dt);
+
         player.updatePL();
 
         //нужно обновление размера экрана, и тогда будет resize всех компонентов?
 
         //если этот state был выгружен, то при запуске все процессы должны возобновиться (удаляются ли они в multiplexer при выгрузке или просто останавливаются?)
         if (isStopped) {
+            music.play();
             isStopped = false;
+            for (Map.Entry<String, MovableNPC> entry : movableNPCs.entrySet()) {
+                movableNPCs.get(entry.getKey()).setDirection(0, 0, 20);
+            }
+            cam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
             multiplexer.addProcessor(controllerStage);
-            multiplexer.addProcessor(inventoryStage);
             Gdx.input.setInputProcessor(multiplexer);
         }
 
         if (controller.isMenuPressed()) {
             gsm.setState(MENU);
-        } else if (controller.isInventoryPressed()) {
-            inventory.setVisible(true);
-            controller.setVisible(false);
-        }
-
-        //можно начать бой
-        if (canDraw) {
-            uiStage.act(dt);
-            dcontroller.update(dt);
-            time += dt;
-            if (dialogueBox.isFinished() && time > 2f) {
-                time = 0;
-                stop();
-            }
         }
 
         //обновление джойстика
-        if (Gdx.input.isTouched() && !inventory.isVisible()) {
+        if (Gdx.input.isTouched() && !controller.isInventoryVisible() && !dialogueBox.isVisible()) {
             mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
             joyCam.unproject(mouse);
             joyStick.update(mouse.x, mouse.y);
@@ -173,6 +169,17 @@ public class Play extends GameState implements Controllable {
             joyStick.setDefaultPos();
         }
 
+        //можно начать бой
+        if (canDraw) {
+            uiStage.act(dt);
+            dcontroller.update(dt);
+            time += dt;
+            if (dialogueBox.isFinished() && time > 2f && dcontroller.isFinished()) {
+                time = 0;
+                stop();
+            }
+        }
+        controllerStage.act(dt);
     }
 
     @Override
@@ -185,13 +192,20 @@ public class Play extends GameState implements Controllable {
 
         //draw map
         tmr.setView(cam);
-        tmr.render();
+        tmr.render(backgroundLayers);
 
         //draw player and npc
         sb.setProjectionMatrix(cam.combined); //https://stackoverflow.com/questions/33703663/understanding-the-libgdx-projection-matrix - объяснение
         player.render(sb, 80f, 86.6f);
-        //boss.render(sb, 200f, 200f);
-        entities.render(sb, 1.5f, 1.5f);
+
+        entities.render(sb, 150f, 150f);
+
+        for (Map.Entry<String, MovableNPC> entry : movableNPCs.entrySet()) {
+            MovableNPC npc = movableNPCs.get(entry.getKey());
+            npc.render(sb, npc.getWidth() * 1.5f, npc.getHeight() * 1.5f);
+        }
+
+        tmr.render(foregroundLayers);
 
         //draw collision
         if (debug) {
@@ -200,14 +214,17 @@ public class Play extends GameState implements Controllable {
             b2dr.render(world, b2dCam.combined);
         }
 
+        joyStick.render(shapeRenderer);
+
         //draw initFight() if battle begin
         if (canDraw) {
             uiStage.draw();
+            if (optionBox.getBtnId() == 0 && optionBox.isClicked()) {
+                movableNPCs.get("hooded").setDirection(1, -0.5f, 20);
+            }
         }
 
         controllerStage.draw();
-        joyStick.render(shapeRenderer);
-        if (inventory.isVisible()) inventoryStage.draw();
     }
 
     private void createPlayer() {
@@ -226,7 +243,7 @@ public class Play extends GameState implements Controllable {
         bdef.type = BodyDef.BodyType.DynamicBody;
         Body body = world.createBody(bdef);
 
-        ps.setAsBox(40f / PPM, 50f / PPM, new Vector2(-5.4f, -3.6f), 0);
+        ps.setAsBox(35f / PPM, 45f / PPM, new Vector2(-5.4f, -3.6f), 0);
         fdef.shape = ps;
         fdef.filter.categoryBits = BIT_PLAYER;
         fdef.filter.maskBits = BIT_TROPA;
@@ -255,12 +272,21 @@ public class Play extends GameState implements Controllable {
         tileMapHeight = (int) tiledMap.getProperties().get("height");
 
         TiledMapTileLayer layer = (TiledMapTileLayer) tiledMap.getLayers().get("borders"); //слой с границами карты
-        createLayer(layer, BIT_TROPA);
-        //layer = (TiledMapTileLayer) tiledMap.getLayers().get("grass");
+        createLayer(layer, BIT_TROPA, BIT_PLAYER, false);
+        TiledMapTileLayer layer2 = (TiledMapTileLayer) tiledMap.getLayers().get("col");
+        createLayer(layer2, BIT_PLAYER, BIT_TROPA, false);
+        TiledMapTileLayer layer3 = (TiledMapTileLayer) tiledMap.getLayers().get("playerInvCol");
+        createLayer(layer3, BIT_TROPA, BIT_PLAYER, false);
+        TiledMapTileLayer layer4 = (TiledMapTileLayer) tiledMap.getLayers().get("water");
+        createLayer(layer4, BIT_TROPA, BIT_PLAYER, false);
+        TiledMapTileLayer layer5 = (TiledMapTileLayer) tiledMap.getLayers().get("animated");
+        createLayer(layer5, BIT_TROPA, BIT_PLAYER, false);
+        TiledMapTileLayer nextForest = (TiledMapTileLayer) tiledMap.getLayers().get("nextForest");
+        createLayer(nextForest, BIT_TROPA, BIT_PLAYER, true);
     }
 
     //коллизия слоя на карте (слой создаётся в Tiled)
-    private void createLayer(TiledMapTileLayer layer, short bits) {
+    private void createLayer(TiledMapTileLayer layer, short categoryBits, short maskBits, boolean data) {
         BodyDef bdef = new BodyDef();
         FixtureDef fdef = new FixtureDef();
 
@@ -286,10 +312,14 @@ public class Play extends GameState implements Controllable {
                 cs.createChain(v);
                 fdef.friction = 0;
                 fdef.shape = cs;
-                fdef.filter.categoryBits = BIT_TROPA;
-                fdef.filter.maskBits = BIT_PLAYER;
+                fdef.filter.categoryBits = categoryBits;
+                fdef.filter.maskBits = maskBits;
                 fdef.isSensor = false;
-                world.createBody(bdef).createFixture(fdef);
+                if(data){
+                    world.createBody(bdef).createFixture(fdef).setUserData(layer.getName());
+                } else {
+                    world.createBody(bdef).createFixture(fdef);
+                }
                 cs.dispose();
             }
         }
@@ -303,8 +333,8 @@ public class Play extends GameState implements Controllable {
         for (MapObject mo : mlayer.getObjects()) {
             BodyDef bdef = new BodyDef();
             bdef.type = BodyDef.BodyType.StaticBody;
-            float x = (float) mo.getProperties().get("x") / PPM * 4;
-            float y = (float) mo.getProperties().get("y") / PPM * 4;
+            float x = (float) mo.getProperties().get("x") / PPM * 4f;
+            float y = (float) mo.getProperties().get("y") / PPM * 4f;
             bdef.position.set(x, y);
 
             Body body = world.createBody(bdef);
@@ -319,18 +349,68 @@ public class Play extends GameState implements Controllable {
 
             body.createFixture(cdef).setUserData(mo.getName());
             entities.addEntity(body, mo.getName());
+        }
+    }
 
-            /*boss = new Boss(body);
-            body.setUserData(boss);
-            System.out.println(body.getUserData());*/
+    private void createMovableNPC() {
+        MapLayer mlayer = tiledMap.getLayers().get("movableNpcs");
+        if (mlayer == null) return;
+        movableNPCs = new HashMap<>();
+
+        for (MapObject mo : mlayer.getObjects()) {
+            BodyDef bdef = new BodyDef();
+            bdef.type = BodyDef.BodyType.DynamicBody;
+            float x = (float) mo.getProperties().get("x") / PPM * 4f;
+            float y = (float) mo.getProperties().get("y") / PPM * 4f;
+            bdef.position.set(x, y);
+
+            Body body = world.createBody(bdef);
+            FixtureDef cdef = new FixtureDef();
+            CircleShape cshape = new CircleShape();
+            cshape.setRadius(50f / PPM);
+            cdef.shape = cshape;
+            cdef.isSensor = true;
+            cdef.filter.categoryBits = BIT_TROPA;
+            cdef.filter.maskBits = BIT_PLAYER;
+            cshape.dispose();
+
+            body.createFixture(cdef).setUserData(mo.getName());
+            MovableNPC npc = new MovableNPC(body, mo.getName());
+            movableNPCs.put(mo.getName(), npc);
+        }
+    }
+
+    private void createKinematicNPC() {
+        MapLayer mlayer = tiledMap.getLayers().get("kinematicNpc");
+        if (mlayer == null) return;
+
+        for (MapObject mo : mlayer.getObjects()) {
+            BodyDef bdef = new BodyDef();
+            bdef.type = BodyDef.BodyType.KinematicBody;
+            float x = (float) mo.getProperties().get("x") / PPM * 4f;
+            float y = (float) mo.getProperties().get("y") / PPM * 4f;
+            bdef.position.set(x, y);
+
+            Body body = world.createBody(bdef);
+            FixtureDef cdef = new FixtureDef();
+            CircleShape cshape = new CircleShape();
+            cshape.setRadius(50f / PPM);
+            cdef.shape = cshape;
+            cdef.isSensor = true;
+            cdef.filter.categoryBits = BIT_TROPA;
+            cdef.filter.maskBits = BIT_PLAYER;
+            cshape.dispose();
+
+            body.createFixture(cdef).setUserData(mo.getName());
+            MovableNPC npc = new MovableNPC(body, mo.getName());
+            movableNPCs.put(mo.getName(), npc);
         }
     }
 
     private void createMusic() {
-        music.setVolume(0.9f);
+        music.setVolume(0.3f);
         music.setLooping(true);
         music.play();
-        //music.dispose();
     }
 
     private void initFight() {
@@ -345,10 +425,14 @@ public class Play extends GameState implements Controllable {
         dialogueBox = new DialogBox(skin_this);
         dialogueBox.setVisible(false);
 
-        optionBox = new OptionBox(skin_this);
+        optionBox = new OptionBox2(skin_this);
         optionBox.setVisible(false);
 
         Table dialogTable = new Table();
+        dialogTable.add(optionBox)
+                .expand().align(Align.right)
+                .space(8f)
+                .row();
         dialogTable.add(dialogueBox)
                 .expand().align(Align.bottom)
                 .space(8f)
@@ -358,30 +442,10 @@ public class Play extends GameState implements Controllable {
 
         dcontroller = new DialogController(dialogueBox, optionBox);
         multiplexer.addProcessor(uiStage); //не нагружает ли большое кол-во процессов программу?
-        //multiplexer.addProcessor(dcontroller);
+        multiplexer.addProcessor(dcontroller);
         Gdx.input.setInputProcessor(multiplexer);
 
         dialog = new Dialog();
-        /*DialogNode node1 = new DialogNode("Враг атакует!", 0);
-
-        dialog.addNode(node1);
-        dcontroller.startDialog(dialog);*/
-    }
-
-    private void initInventory() {
-        inventoryStage = new Stage(new ScreenViewport());
-        inventoryStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
-
-        inventory = new Inventory(game.getSkin(), this);
-        inventory.setVisible(false);
-
-        Table controllerRoot = new Table();
-        controllerRoot.setFillParent(true);
-        controllerRoot.add(inventory).expand().align(Align.center);
-        inventoryStage.addActor(controllerRoot);
-
-        multiplexer.addProcessor(inventoryStage);
-        Gdx.input.setInputProcessor(multiplexer);
     }
 
     private void initController() {
@@ -394,7 +458,9 @@ public class Play extends GameState implements Controllable {
         Table controllerRoot = new Table();
         controllerRoot.setFillParent(true);
         controllerRoot.add(controller).expand().align(Align.bottomLeft);
+        //controllerStage.addActor(image);
         controllerStage.addActor(controllerRoot);
+        //.addAction(alpha(0));
 
         multiplexer.addProcessor(controllerStage);
         Gdx.input.setInputProcessor(multiplexer);
@@ -403,7 +469,7 @@ public class Play extends GameState implements Controllable {
     private void initJoyStick() {
         joyCam = new BoundedCamera();
         joyCam.setBounds(0, V_WIDTH, 0, V_HEIGHT);
-        joyCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT)); //не хватало этой строчки
+        joyCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
 
         joyStick = new JoyStick(200, 200, 200);
         shapeRenderer = new ShapeRenderer();
@@ -423,14 +489,9 @@ public class Play extends GameState implements Controllable {
 
         dialogueBox = new DialogBox(skin_this);
         dialogueBox.setVisible(false);
-        /*dialogueBox.animateText("RU font doesn't support!");
-        dialogueBox.isFinished();*/
 
-        optionBox = new OptionBox(skin_this);
+        optionBox = new OptionBox2(skin_this);
         optionBox.setVisible(false);
-        /*optionBox.addOption("option 1");
-        optionBox.addOption("option 2");
-        optionBox.addOption("option 3");*/
 
         Table dialogTable = new Table();
         dialogTable.add(optionBox)
@@ -462,12 +523,15 @@ public class Play extends GameState implements Controllable {
         dialog.addNode(node2);
         dialog.addNode(node3);
         dialog.addNode(node4);
-        dcontroller.startDialog(dialog);
+        multiplexer.addProcessor(uiStage);
     }
 
     @Override
     public void dispose() {
         save();
+        music.stop();
+        player.stopSounds();
+        isStopped = true;
     }
 
     public void save() {
@@ -475,9 +539,12 @@ public class Play extends GameState implements Controllable {
         prefs.putFloat(PREF_Y, player.getPosition().y).flush();
     }
 
+    private boolean contact = false;
+
     public void loadStage(String s) {
         DialogNode node1;
-        initFight();
+        gsm.setLastState(PLAY);
+        //initFight();
         switch (s) {
             case "enemy":
                 node1 = new DialogNode("Враг атакует!", 0);
@@ -491,28 +558,72 @@ public class Play extends GameState implements Controllable {
                 dialog.addNode(node1);
                 dcontroller.startDialog(dialog);
                 nextState = PAINT;
+                entities.setCurEntity(1);
                 canDraw = true;
                 break;
             case "hooded":
-                node1 = new DialogNode("Идем в руины.", 0);
+                if (contact) break;
+                else contact = true;
+                node1 = new DialogNode("Приветствую, путник!", 0);
+                DialogNode node2 = new DialogNode("Не ожидал встретить здесь кого-то.", 1);
+                DialogNode node3 = new DialogNode("Не хочешь исследовать со мной руины?", 2);
+                DialogNode node4 = new DialogNode("Тогда пойдем!", 3);
+                DialogNode node5 = new DialogNode("Ладно, если что...", 5);
+                DialogNode node6 = new DialogNode("Ты можешь присоединиться в любой момент.", 6);
+
+                node1.makeLinear(node2.getId());
+                node2.makeLinear(node3.getId());
+                node3.addChoice("Звучит интересно!", 3);
+                node3.addChoice("Нет, не хочу.", 5);
+                node5.makeLinear(node6.getId());
+
+                dialog.addNode(node1);
+                dialog.addNode(node2);
+                dialog.addNode(node3);
+                dialog.addNode(node4);
+                dialog.addNode(node5);
+                dialog.addNode(node6);
+                dcontroller.startDialog(dialog);
+
+                nextState = -1;
+                canDraw = true;
+                break;
+            case "nextForest":
+                nextState = FOREST;
+                /*if(prevState == nextState) break;
+                prevState = FOREST;*/
+                //entities.getEntity(entities.getCurEntity()).setVisible(true); //почему-то вылетает из-за этого
+                stop();
+                break;
+            case "null":
+                movableNPCs.get("hooded").setDirection(0, 0, 20);
+                node1 = new DialogNode("Вот мы и пришли.", 0);
                 dialog.addNode(node1);
                 dcontroller.startDialog(dialog);
+
                 nextState = MAZE;
                 canDraw = true;
                 break;
-            case "next":
-                nextState = FOREST;
-                stop();
+            case "rabbit":
+                movableNPCs.get("rabbit").setTime(0);
+                movableNPCs.get("rabbit").setDirection(-movableNPCs.get("rabbit").getVelx(), -movableNPCs.get("rabbit").getVely(), 50);
                 break;
             default:
                 break;
         }
     }
 
+    @Override
+    public void removeCollisionEntity(Body body) {
+
+    }
+
     private void stop() {
-        gsm.setState(nextState);
+        if (nextState != -1) {
+            gsm.setState(nextState);
+        }
+        //entities.getEntity(entities.getCurEntity()).setVisible(false);
         music.dispose();
-        isStopped = true;
         canDraw = false;
     }
 

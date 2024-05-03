@@ -11,7 +11,10 @@ import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -33,6 +36,9 @@ import java.util.Queue;
 import static com.mygdx.game.MyGdxGame.V_HEIGHT;
 import static com.mygdx.game.MyGdxGame.V_WIDTH;
 import static com.mygdx.game.handlers.B2DVars.*;
+import static com.mygdx.game.handlers.GameStateManager.FOREST;
+import static com.mygdx.game.handlers.GameStateManager.MAZE;
+import static com.mygdx.game.handlers.GameStateManager.MENU;
 
 public class BattleState2 extends GameState implements BattleEventPlayer {
     private MyGdxGame game;
@@ -44,9 +50,10 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
     private int tileMapHeight;
     // UI
     private Stage uiStage;
+    private Stage controllerStage;
     private Table dialogRoot;
     private DialogBox dialogBox;
-    private OptionBox optionBox;
+    private OptionBox2 optionBox;
     private Table selectionRoot;
     private Table statusBoxRoot;
     private SelectionBtnBox selectionBtnBox;
@@ -84,6 +91,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
         initUI();
         createLayers();
         createEnemy();
+        initController();
 
         bcontroller = new BattleScreenController(battle, queue, dialogBox, optionBox, selectionBtnBox);
         multiplexer.addProcessor(bcontroller);
@@ -111,13 +119,13 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
                     bcontroller.restart(); // <-----
                 } else if (battle.getState() == Battle.STATE.RUN) {
                     music.dispose();
-                    gsm.setState(GameStateManager.PLAY);
+                    gsm.setState(gsm.getLastState());
                 } else if (battle.getState() == Battle.STATE.WIN) {
                     music.dispose();
-                    gsm.setState(GameStateManager.PLAY);
+                    gsm.setState(gsm.getLastState());
                 } else if (battle.getState() == Battle.STATE.LOSE) {
                     music.dispose();
-                    gsm.setState(GameStateManager.PLAY);
+                    gsm.setState(gsm.getLastState());
                 }
                 break;
             } else {
@@ -133,6 +141,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
         uiStage.act(dt);
         boss.update(dt);
         bcontroller.update(dt);
+        controllerStage.act(dt);
     }
 
     @Override
@@ -156,6 +165,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
         sb.setProjectionMatrix(cam.combined);
 
         uiStage.draw();
+        controllerStage.draw();
     }
 
     private void initUI() {
@@ -177,7 +187,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
         dialogBox = new DialogBox(game.getSkin());
         dialogBox.setVisible(false);
 
-        optionBox = new OptionBox(game.getSkin());
+        optionBox = new OptionBox2(game.getSkin());
         optionBox.setVisible(false);
 
         /*selectionBox = new SelectionBox(game.getSkin());
@@ -234,6 +244,33 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
         body.setUserData(boss);
     }
 
+    private void initController() {
+        controllerStage = new Stage(new ScreenViewport());
+        controllerStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+
+        Image exitImg = new Image(new Texture("controller/x.png"));
+        exitImg.setScale(5, 5);
+        exitImg.addListener(new InputListener() {
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                return true;
+            }
+
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                gsm.setState(gsm.getLastState());
+            }
+        });
+
+        Table controllerRoot = new Table();
+        controllerRoot.setFillParent(true);
+        controllerRoot.add(exitImg).expand().align(Align.bottomLeft);
+        controllerStage.addActor(controllerRoot);
+
+        multiplexer.addProcessor(controllerStage);
+        Gdx.input.setInputProcessor(multiplexer);
+    }
+
     private void createMusic() {
         music = Gdx.audio.newMusic(Gdx.files.internal("music/battleTheme.mp3"));
         music.setVolume(0.9f);
@@ -243,6 +280,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
 
     @Override
     public void dispose() {
+        music.stop();
     }
 
     @Override

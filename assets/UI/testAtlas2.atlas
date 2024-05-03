@@ -67,3 +67,10 @@ borders
   orig: 256, 32
   offset: 0, 0
   index: -1
+point
+  rotate: false
+  xy: 270, 133
+  size: 8, 23
+  orig: 256, 32
+  offset: 0, 0
+  index: -1

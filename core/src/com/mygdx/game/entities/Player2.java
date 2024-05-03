@@ -2,6 +2,7 @@ package com.mygdx.game.entities;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -23,8 +24,12 @@ public class Player2 extends B2DSprite {
     private JoyStick joyStick;
     private int countIdle = 0;
     private int countMove = 1;
+    private Sound sound;
+    private long soundId;
+
     public Player2(Body body) {
         super(body);
+        sound = Gdx.audio.newSound(Gdx.files.internal("music/steps_grass2.mp3"));
         tex = MyGdxGame.res.getTexture("gnomik");
         tex2 = MyGdxGame.res.getTexture("gnomikrow");
         sprites = TextureRegion.split(tex2, 120, 130)[0];
@@ -165,10 +170,14 @@ public class Player2 extends B2DSprite {
             }
             prevDir = dir;
             if (countMove == 1) {
+                soundId = sound.play(1.0f);
+                sound.setVolume(soundId, 0.2f);
+                sound.setLooping(soundId, true);
                 countIdle = 1;
                 countMove = 0;
             }
         } else if (countIdle == 1) {
+            sound.stop();
             countIdle = 0;
             countMove = 1;
             switch (dir) {
@@ -208,6 +217,10 @@ public class Player2 extends B2DSprite {
     public void setState(Controllable state) {
         this.state = state;
         joyStick = state.getJoyStick();
+    }
+
+    public void stopSounds(){
+        sound.stop();
     }
 }
 

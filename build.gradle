@@ -101,6 +101,7 @@ project(":core") {
 
 
     dependencies {
+        implementation "com.github.tommyettinger:textratypist:0.10.0"
         implementation "space.earlygrey:shapedrawer:$shapedrawerVersion"
         api 'com.google.code.gson:gson:2.8.5'
         api "com.badlogicgames.gdx:gdx:$gdxVersion"

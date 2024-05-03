@@ -22,13 +22,14 @@ public class Inventory extends Table {
     private MyGdxGame game;
     private Table uiTable;
     private Label.LabelStyle lstyle;
+    private Image[] images;
     private Image playerImage;
     private Image ringImage;
     private Image swordImage;
     private Image amuletImage;
     private Image exitImage;
 
-    public Inventory(Skin skin, Play play) {
+    public Inventory(Skin skin, Controller controller) {
         super(skin);
         uiTable = new Table();
         this.add(uiTable).width(V_WIDTH / 1.2f).height(V_HEIGHT / 1.2f);
@@ -48,7 +49,7 @@ public class Inventory extends Table {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 setVisible(false);
-                play.getController().setVisible(true);
+                controller.setBtnsVisibility(true);
             }
         });
 
@@ -59,12 +60,12 @@ public class Inventory extends Table {
         swordImage = new Image(new Texture("controller/star.png"));
         amuletImage = new Image(new Texture("controller/circle.png"));
 
-        Image[] images = new Image[]{ringImage, swordImage, amuletImage};
+        images = new Image[]{ringImage, swordImage, amuletImage};
 
         playerImage = new Image(new Texture("entitySprites/idle.png"));
 
         Table rightTable = new Table(getSkin());
-        rightTable.add(exitImage).align(Align.topLeft).width(exitImage.getWidth()*5).height(exitImage.getHeight()*5).row();
+        uiTable.add(exitImage).align(Align.topLeft).width(exitImage.getWidth()*5).height(exitImage.getHeight()*5);
         rightTable.add(playerImage).width(playerImage.getWidth()*2).height(playerImage.getHeight()*2).align(Align.center).padLeft(25f).row();
 
         Table imagesTable = new Table();
@@ -74,14 +75,19 @@ public class Inventory extends Table {
             imageTable.setBackground("borders");
             imageTable.add(images[i]).width(V_WIDTH / 10f).height(V_WIDTH / 10f);
             imagesTable.add(imageTable).align(Align.bottom).expand().pad(15f);
+            images[i].setVisible(false);
         }
         rightTable.add(imagesTable).padLeft(25f);
 
         Table achievementsTable = new Table(getSkin());
         achievementsTable.setBackground("borders");
 
-        //rightTable.debug();
-        uiTable.add(rightTable).center();
-        uiTable.add(achievementsTable).width(getPrefWidth()/2.5f).height(getPrefHeight()/1.1f).align(Align.right).pad(10f).expand();
+        //uiTable.debug();
+        uiTable.add(rightTable).right();
+        uiTable.add(achievementsTable).width(getPrefWidth()/2.5f).height(getPrefHeight()/1.1f).align(Align.left).pad(10f).expand();
+    }
+
+    public void setImgVisibility(int num, boolean visibility){
+        images[num].setVisible(visibility);
     }
 }

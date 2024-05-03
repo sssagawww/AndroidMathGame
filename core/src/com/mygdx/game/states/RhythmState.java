@@ -102,7 +102,7 @@ public class RhythmState extends GameState {
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                gsm.setState(PLAY);
+                gsm.setState(FOREST);
             }
         });
 
