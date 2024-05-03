@@ -87,6 +87,7 @@ public class Play extends GameState implements Controllable {
     // --------- END JoyStick ---------
     private boolean isStopped;
     private int nextState;
+    private int prevState = -123;
     private static final String PREF_NAME = "position";
     private static final String PREF_X = "x";
     private static final String PREF_Y = "y";
@@ -270,19 +271,21 @@ public class Play extends GameState implements Controllable {
         tileMapHeight = (int) tiledMap.getProperties().get("height");
 
         TiledMapTileLayer layer = (TiledMapTileLayer) tiledMap.getLayers().get("borders"); //слой с границами карты
-        createLayer(layer, BIT_TROPA, BIT_PLAYER);
+        createLayer(layer, BIT_TROPA, BIT_PLAYER, false);
         TiledMapTileLayer layer2 = (TiledMapTileLayer) tiledMap.getLayers().get("col");
-        createLayer(layer2, BIT_PLAYER, BIT_TROPA);
+        createLayer(layer2, BIT_PLAYER, BIT_TROPA, false);
         TiledMapTileLayer layer3 = (TiledMapTileLayer) tiledMap.getLayers().get("playerInvCol");
-        createLayer(layer3, BIT_TROPA, BIT_PLAYER);
+        createLayer(layer3, BIT_TROPA, BIT_PLAYER, false);
         TiledMapTileLayer layer4 = (TiledMapTileLayer) tiledMap.getLayers().get("water");
-        createLayer(layer4, BIT_TROPA, BIT_PLAYER);
+        createLayer(layer4, BIT_TROPA, BIT_PLAYER, false);
         TiledMapTileLayer layer5 = (TiledMapTileLayer) tiledMap.getLayers().get("animated");
-        createLayer(layer5, BIT_TROPA, BIT_PLAYER);
+        createLayer(layer5, BIT_TROPA, BIT_PLAYER, false);
+        TiledMapTileLayer nextForest = (TiledMapTileLayer) tiledMap.getLayers().get("nextForest");
+        createLayer(nextForest, BIT_TROPA, BIT_PLAYER, true);
     }
 
     //коллизия слоя на карте (слой создаётся в Tiled)
-    private void createLayer(TiledMapTileLayer layer, short categoryBits, short maskBits) {
+    private void createLayer(TiledMapTileLayer layer, short categoryBits, short maskBits, boolean data) {
         BodyDef bdef = new BodyDef();
         FixtureDef fdef = new FixtureDef();
 
@@ -311,7 +314,11 @@ public class Play extends GameState implements Controllable {
                 fdef.filter.categoryBits = categoryBits;
                 fdef.filter.maskBits = maskBits;
                 fdef.isSensor = false;
-                world.createBody(bdef).createFixture(fdef);
+                if(data){
+                    world.createBody(bdef).createFixture(fdef).setUserData(layer.getName());
+                } else {
+                    world.createBody(bdef).createFixture(fdef);
+                }
                 cs.dispose();
             }
         }
@@ -580,8 +587,10 @@ public class Play extends GameState implements Controllable {
                 nextState = -1;
                 canDraw = true;
                 break;
-            case "next":
+            case "nextForest":
                 nextState = FOREST;
+                /*if(prevState == nextState) break;
+                prevState = FOREST;*/
                 //entities.getEntity(entities.getCurEntity()).setVisible(true); //почему-то вылетает из-за этого
                 stop();
                 break;

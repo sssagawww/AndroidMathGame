@@ -378,7 +378,7 @@ public class MazeState extends GameState implements Controllable {
                 canDraw = true;
                 break;
             case "chest":
-                node1 = new DialogNode("Получено Кольцо мудрости.", 0);
+                node1 = new DialogNode("Вы получили Кольцо Мудрости.", 0);
                 controller.getInventory().setImgVisibility(0, true);
                 dialog.addNode(node1);
                 dcontroller.startDialog(dialog);

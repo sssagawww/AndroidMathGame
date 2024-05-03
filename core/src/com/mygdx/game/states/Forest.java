@@ -67,6 +67,7 @@ public class Forest extends GameState implements Controllable {
     private MyContactListener cl;
     private Player2 player;
     private PlayEntities entities;
+    private Body removedBody;
     private TiledMap tiledMap;
     private OrthogonalTiledMapRenderer tmr;
     private float tileSize;
@@ -94,6 +95,7 @@ public class Forest extends GameState implements Controllable {
     private int nextState;
     private int[] backgroundLayers = {0, 1};
     private int[] foregroundLayers = {2, 3, 4,5,6};
+    private int mushrooms = 0;
 
     public Forest(GameStateManager gsm) {
         super(gsm);
@@ -111,6 +113,7 @@ public class Forest extends GameState implements Controllable {
         createTiles();
         createNPC();
         initDarkness();
+        initFight();
 
         forCam = new BoundedCamera();
         forCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
@@ -145,24 +148,22 @@ public class Forest extends GameState implements Controllable {
 
         darkStage.act(dt);
 
-        if (canDraw) {
-            uiStage.act(dt);
-            dcontroller.update(dt);
-            if (dialogueBox.isFinished()) {
-                time += dt;
-                if (time > 2f) {
-                    time = 0;
-                    stop();
-                }
-            }
-        }
-
-        if (Gdx.input.isTouched() && !controller.isInventoryVisible()) {
+        if (Gdx.input.isTouched() && !controller.isInventoryVisible() && !dialogueBox.isVisible()) {
             mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
             joyCam.unproject(mouse);
             joyStick.update(mouse.x, mouse.y);
         } else {
             joyStick.setDefaultPos();
+        }
+
+        if (canDraw) {
+            uiStage.act(dt);
+            dcontroller.update(dt);
+            time += dt;
+            if (dialogueBox.isFinished() && time > 2f && dcontroller.isFinished()) {
+                time = 0;
+                stop();
+            }
         }
 
         controllerStage.act(dt);
@@ -192,17 +193,19 @@ public class Forest extends GameState implements Controllable {
 
         darkStage.draw();
 
+        joyStick.render(shapeRenderer);
+
         if (canDraw) {
             uiStage.draw();
         }
 
-        joyStick.render(shapeRenderer);
         controllerStage.draw();
     }
 
     @Override
     public void dispose() {
         player.stopSounds();
+        isStopped = true;
     }
 
     private void createPlayer() {
@@ -380,7 +383,6 @@ public class Forest extends GameState implements Controllable {
     public void loadStage(String s) {
         DialogNode node1;
         gsm.setLastState(FOREST);
-        initFight();
         switch (s) {
             case "enemy":
                 node1 = new DialogNode("Враг атакует!", 0);
@@ -403,8 +405,26 @@ public class Forest extends GameState implements Controllable {
                 nextState = RHYTHM;
                 canDraw = true;
                 break;
+            case "npcForest":
+                if(mushrooms == -1) break;
+                if(mushrooms>=6){
+                    node1 = new DialogNode("Ого! Ты все собрал!", 0);
+                    mushrooms = -1;
+                } else {
+                    node1 = new DialogNode("Ох, вот бы собрать побольше грибов...", 0);
+                }
+                dialog.addNode(node1);
+                dcontroller.startDialog(dialog);
+                nextState = -1;
+                canDraw = true;
+                break;
+            case "mushroom":
+                nextState = -1;
+                mushrooms++;
+                break;
             case "next":
-                nextState = MAZE;
+                if(player.getPosition().x < 800f / PPM) nextState = PLAY;
+                else nextState = MAZE;
                 stop();
                 break;
             default:
@@ -414,12 +434,14 @@ public class Forest extends GameState implements Controllable {
 
     @Override
     public void removeCollisionEntity(Body body) {
-
+        removedBody = body;
+        entities.removeEntity(removedBody);
     }
 
     private void stop() {
-        gsm.setState(nextState);
-        isStopped = true;
+        if (nextState != -1) {
+            gsm.setState(nextState);
+        }
         canDraw = false;
     }
 
