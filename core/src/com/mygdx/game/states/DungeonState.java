@@ -42,6 +42,7 @@ import com.mygdx.game.UI.Controller;
 import com.mygdx.game.UI.DialogBox;
 import com.mygdx.game.UI.JoyStick;
 import com.mygdx.game.UI.OptionBox;
+import com.mygdx.game.UI.OptionBox2;
 import com.mygdx.game.entities.PlayEntities;
 import com.mygdx.game.entities.Player2;
 import com.mygdx.game.handlers.BoundedCamera;
@@ -83,7 +84,7 @@ public class DungeonState extends GameState implements Controllable {
     private int nextState;
     private boolean earnedAmulet = false;
     private Table dialogRoot;
-    private OptionBox optionBox;
+    private OptionBox2 optionBox;
     private boolean reloading = false;
     private boolean earnedKey = false;
 
@@ -336,7 +337,7 @@ public class DungeonState extends GameState implements Controllable {
         dialogueBox = new DialogBox(skin_this);
         dialogueBox.setVisible(false);
 
-        optionBox = new OptionBox(skin_this);
+        optionBox = new OptionBox2(skin_this);
         optionBox.setVisible(false);
 
         Table dialogTable = new Table();
@@ -427,6 +428,11 @@ public class DungeonState extends GameState implements Controllable {
             default:
                 break;
         }
+    }
+
+    @Override
+    public void removeCollisionEntity(Body body) {
+
     }
 
     private void openDoor(String s) {
