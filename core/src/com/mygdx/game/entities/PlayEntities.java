@@ -34,7 +34,7 @@ public class PlayEntities {
 
     public void render(SpriteBatch sb, float widthK, float heightK) {
         for (B2DSprite i : list) {
-            if(i.isVisible()) i.render(sb, i.getHeight() * 1.5f, i.getHeight() * 1.5f);
+            if(i.isVisible()) i.render(sb, i.getHeight() * widthK, i.getHeight() * widthK);
         }
     }
 

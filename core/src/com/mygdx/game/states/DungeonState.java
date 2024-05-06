@@ -2,17 +2,12 @@ package com.mygdx.game.states;
 
 import static com.mygdx.game.MyGdxGame.V_HEIGHT;
 import static com.mygdx.game.MyGdxGame.V_WIDTH;
-import static com.mygdx.game.handlers.B2DVars.BIT_PENEK;
 import static com.mygdx.game.handlers.B2DVars.BIT_PLAYER;
 import static com.mygdx.game.handlers.B2DVars.BIT_TROPA;
 import static com.mygdx.game.handlers.B2DVars.PPM;
-import static com.mygdx.game.handlers.GameStateManager.BATTLE;
-import static com.mygdx.game.handlers.GameStateManager.FOREST;
-import static com.mygdx.game.handlers.GameStateManager.MAZE;
 import static com.mygdx.game.handlers.GameStateManager.MENU;
 import static com.mygdx.game.handlers.GameStateManager.PAINT;
-
-import static jdk.jfr.internal.consumer.EventLog.stop;
+import static com.mygdx.game.handlers.GameStateManager.PLAY;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
@@ -36,7 +31,6 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.actions.AddAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
@@ -44,11 +38,11 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.Dialog.Dialog;
 import com.mygdx.game.Dialog.DialogController;
 import com.mygdx.game.Dialog.DialogNode;
-import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.UI.Controller;
 import com.mygdx.game.UI.DialogBox;
 import com.mygdx.game.UI.JoyStick;
-import com.mygdx.game.entities.B2DSprite;
+import com.mygdx.game.UI.OptionBox;
+import com.mygdx.game.UI.OptionBox2;
 import com.mygdx.game.entities.PlayEntities;
 import com.mygdx.game.entities.Player2;
 import com.mygdx.game.handlers.BoundedCamera;
@@ -86,8 +80,13 @@ public class DungeonState extends GameState implements Controllable {
     private float time = 0;
     private DialogBox dialogueBox;
     private boolean debug = false;
-    private Dialog dialog;
+    private Dialog dialog = new Dialog();
     private int nextState;
+    private boolean earnedAmulet = false;
+    private Table dialogRoot;
+    private OptionBox2 optionBox;
+    private boolean reloading = false;
+    private boolean earnedKey = false;
 
     public DungeonState(GameStateManager gsm) {
         super(gsm);
@@ -122,7 +121,9 @@ public class DungeonState extends GameState implements Controllable {
         world.step(dt, 6, 2);
         controllerStage.act(dt);
         player.update(dt);
-        entities.update(dt);
+        if (!reloading) {
+            entities.update(dt);
+        }
         player.updatePL();
 
         if (isStopped) {
@@ -155,6 +156,13 @@ public class DungeonState extends GameState implements Controllable {
         }
     }
 
+    private void stop() {
+        gsm.setState(nextState);
+        music.dispose();
+        isStopped = true;
+        canDraw = false;
+    }
+
     @Override
     public void render() {
         Gdx.gl20.glClearColor(0, 0, 0, 1);
@@ -171,7 +179,10 @@ public class DungeonState extends GameState implements Controllable {
         sb.setProjectionMatrix(cam.combined); //https://stackoverflow.com/questions/33703663/understanding-the-libgdx-projection-matrix - объяснение
         player.render(sb, 80f, 86.6f);
         //boss.render(sb, 200f, 200f);
-        entities.render(sb, 4.5f, 4.5f);
+        if (!reloading) {
+            entities.render(sb, 4.5f, 4.5f);
+        }
+
 
         //draw collision
         if (debug) {
@@ -315,7 +326,34 @@ public class DungeonState extends GameState implements Controllable {
     }
 
     private void initFight() {
+        skin_this = game.getSkin();
+        uiStage = new Stage(new ScreenViewport());
+        uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
 
+        dialogRoot = new Table();
+        dialogRoot.setFillParent(true);
+        uiStage.addActor(dialogRoot);
+
+        dialogueBox = new DialogBox(skin_this);
+        dialogueBox.setVisible(false);
+
+        optionBox = new OptionBox2(skin_this);
+        optionBox.setVisible(false);
+
+        Table dialogTable = new Table();
+        dialogTable.add(dialogueBox)
+                .expand().align(Align.bottom)
+                .space(8f)
+                .row();
+
+        dialogRoot.add(dialogTable).expand().align(Align.bottom).pad(15f);
+
+        dcontroller = new DialogController(dialogueBox, optionBox);
+        multiplexer.addProcessor(uiStage); //не нагружает ли большое кол-во процессов программу?
+        //multiplexer.addProcessor(dcontroller);
+        Gdx.input.setInputProcessor(multiplexer);
+
+        dialog = new Dialog();
     }
 
     @Override
@@ -323,33 +361,106 @@ public class DungeonState extends GameState implements Controllable {
         DialogNode node1;
         initFight();
         switch (s) {
-            case "enemy":
-                node1 = new DialogNode("Враг атакует!", 0);
-                dialog.addNode(node1);
-                dcontroller.startDialog(dialog);
-                nextState = BATTLE;
-                canDraw = true;
-                break;
-            case "npc":
-                node1 = new DialogNode("Начнем испытание!", 0);
+            case "door1":
+                node1 = new DialogNode("Дверь заперта... Ее нужно взломать!", 0);
                 dialog.addNode(node1);
                 dcontroller.startDialog(dialog);
                 nextState = PAINT;
                 canDraw = true;
+//                reloading = true;
+//                openDoor(s);
+//                reloading = false;
                 break;
-            case "hooded":
-                node1 = new DialogNode("Идем в руины.", 0);
+            case "amuletChest":
+                node1 = new DialogNode("Поздравляем! Вы получили Амулет Времени!", 0);
                 dialog.addNode(node1);
                 dcontroller.startDialog(dialog);
-                nextState = MAZE;
-                canDraw = true;
+                //add amulet to the inventory
+                earnedAmulet = true;
                 break;
-            case "next":
-                stop();
-                gsm.setState(FOREST);
+            case "keyChest":
+                node1 = new DialogNode("Вы получили ключ. Но от чего же он?", 0);
+                dialog.addNode(node1);
+                dcontroller.startDialog(dialog);
+                //add key to inventory
+                earnedKey = true;
+                break;
+            case "door2":
+                node1 = new DialogNode("Дверь заперта... Ее нужно взломать!", 0);
+                dialog.addNode(node1);
+                dcontroller.startDialog(dialog);
+                nextState = PAINT;
+                canDraw = true;
+//                reloading = true;
+//                openDoor(s);
+//                reloading = false;
+                break;
+            case "door3":
+                node1 = new DialogNode("Дверь заперта... Возможно, ключ от нее где-то рядом", 0);
+                dialog.addNode(node1);
+                dcontroller.startDialog(dialog);
+                nextState = PAINT;
+                canDraw = true;
+//                reloading = true;
+//                openDoor(s);
+//                reloading = false;
+                break;
+            case "keyDoor":
+                if (earnedKey) {
+                    openDoor(s);
+                    //delete key from the inventory
+                } else {
+                    node1 = new DialogNode("Дверь заперта... Возможно, ключ от нее где-то рядом", 0);
+                    dialog.addNode(node1);
+                    dcontroller.startDialog(dialog);
+                }
+                break;
+            case "ladder":
+                if (earnedAmulet) {
+                    nextState = PLAY;
+                    canDraw = true;
+                } else {
+                    node1 = new DialogNode("Вы не до конца исследовали локацию!", 0);
+                    dialog.addNode(node1);
+                    dcontroller.startDialog(dialog);
+                }
                 break;
             default:
                 break;
+        }
+    }
+
+    @Override
+    public void removeCollisionEntity(Body body) {
+
+    }
+
+    private void openDoor(String s) {
+        MapLayer mlayer = tiledMap.getLayers().get("objects");
+        if (mlayer == null) return;
+        entities = new PlayEntities();
+
+        for (MapObject mo : mlayer.getObjects()) {
+            BodyDef bdef = new BodyDef();
+            bdef.type = BodyDef.BodyType.StaticBody;
+            float x = (float) mo.getProperties().get("x") / PPM * 4;
+            float y = (float) mo.getProperties().get("y") / PPM * 4;
+            bdef.position.set(x, y);
+
+            Body body = world.createBody(bdef);
+            FixtureDef cdef = new FixtureDef();
+            CircleShape cshape = new CircleShape();
+            cshape.setRadius(50f / PPM);
+            cdef.shape = cshape;
+            cdef.isSensor = true;
+            cdef.filter.categoryBits = BIT_TROPA;
+            cdef.filter.maskBits = BIT_PLAYER;
+            cshape.dispose();
+
+
+            body.createFixture(cdef).setUserData(mo.getName().equals(s) ? mo.getName() + "_opened" : mo.getName());
+            entities.addEntity(body, mo.getName().equals(s) ? mo.getName() + "_opened" : mo.getName());
+
         }
     }
 
