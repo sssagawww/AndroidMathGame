@@ -5,7 +5,6 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
@@ -17,7 +16,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
@@ -29,7 +27,6 @@ import com.mygdx.game.UI.Controller;
 import com.mygdx.game.UI.DialogBox;
 import com.mygdx.game.UI.JoyStick;
 import com.mygdx.game.UI.OptionBox2;
-import com.mygdx.game.entities.B2DSprite;
 import com.mygdx.game.entities.MovableNPC;
 import com.mygdx.game.entities.PlayEntities;
 import com.mygdx.game.entities.Player2;
@@ -38,7 +35,6 @@ import com.mygdx.game.handlers.Controllable;
 import com.mygdx.game.handlers.MyContactListener;
 import com.mygdx.game.handlers.GameStateManager;
 
-import static com.badlogic.gdx.scenes.scene2d.actions.Actions.*;
 import static com.mygdx.game.MyGdxGame.*;
 import static com.mygdx.game.handlers.B2DVars.*;
 import static com.mygdx.game.handlers.GameStateManager.*;
@@ -66,7 +62,7 @@ public class Play extends GameState implements Controllable {
     private Stage uiStage;
     private Stage controllerStage;
     private Table dialogRoot;
-    private DialogBox dialogueBox;
+    private DialogBox dialogBox;
     private OptionBox2 optionBox;
     private Skin skin_this;
     private InputMultiplexer multiplexer;
@@ -146,10 +142,11 @@ public class Play extends GameState implements Controllable {
 
         //если этот state был выгружен, то при запуске все процессы должны возобновиться (удаляются ли они в multiplexer при выгрузке или просто останавливаются?)
         if (isStopped) {
+            player.getBody().setLinearVelocity(0,0);
             music.play();
             isStopped = false;
             for (Map.Entry<String, MovableNPC> entry : movableNPCs.entrySet()) {
-                movableNPCs.get(entry.getKey()).setDirection(0, 0, 20);
+                movableNPCs.get(entry.getKey()).setDirection(0, 0, 20, 58, 58);
             }
             cam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
             multiplexer.addProcessor(controllerStage);
@@ -161,7 +158,7 @@ public class Play extends GameState implements Controllable {
         }
 
         //обновление джойстика
-        if (Gdx.input.isTouched() && !controller.isInventoryVisible() && !dialogueBox.isVisible()) {
+        if (Gdx.input.isTouched() && !controller.isInventoryVisible() && !dialogBox.isVisible()) {
             mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
             joyCam.unproject(mouse);
             joyStick.update(mouse.x, mouse.y);
@@ -174,7 +171,7 @@ public class Play extends GameState implements Controllable {
             uiStage.act(dt);
             dcontroller.update(dt);
             time += dt;
-            if (dialogueBox.isFinished() && time > 2f && dcontroller.isFinished()) {
+            if (dialogBox.isFinished() && time > 2f && dcontroller.isFinished()) {
                 time = 0;
                 stop();
             }
@@ -220,7 +217,7 @@ public class Play extends GameState implements Controllable {
         if (canDraw) {
             uiStage.draw();
             if (optionBox.getBtnId() == 0 && optionBox.isClicked()) {
-                movableNPCs.get("hooded").setDirection(1, -0.5f, 20);
+                movableNPCs.get("hooded").setDirection(1, -0.5f, 20, 58, 58);
             }
         }
 
@@ -422,8 +419,8 @@ public class Play extends GameState implements Controllable {
         dialogRoot.setFillParent(true);
         uiStage.addActor(dialogRoot);
 
-        dialogueBox = new DialogBox(skin_this);
-        dialogueBox.setVisible(false);
+        dialogBox = new DialogBox(skin_this);
+        dialogBox.setVisible(false);
 
         optionBox = new OptionBox2(skin_this);
         optionBox.setVisible(false);
@@ -433,14 +430,14 @@ public class Play extends GameState implements Controllable {
                 .expand().align(Align.right)
                 .space(8f)
                 .row();
-        dialogTable.add(dialogueBox)
+        dialogTable.add(dialogBox)
                 .expand().align(Align.bottom)
                 .space(8f)
                 .row();
 
         dialogRoot.add(dialogTable).expand().align(Align.bottom).pad(15f);
 
-        dcontroller = new DialogController(dialogueBox, optionBox);
+        dcontroller = new DialogController(dialogBox, optionBox);
         multiplexer.addProcessor(uiStage); //не нагружает ли большое кол-во процессов программу?
         multiplexer.addProcessor(dcontroller);
         Gdx.input.setInputProcessor(multiplexer);
@@ -478,7 +475,7 @@ public class Play extends GameState implements Controllable {
     }
 
     //был тестовый метод, чтобы понять работает ли диалог, можно использовать в других местах
-    private void initUI() {
+   /* private void initUI() {
         skin_this = game.getSkin();
         uiStage = new Stage(new ScreenViewport());
         uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
@@ -524,7 +521,7 @@ public class Play extends GameState implements Controllable {
         dialog.addNode(node3);
         dialog.addNode(node4);
         multiplexer.addProcessor(uiStage);
-    }
+    }*/
 
     @Override
     public void dispose() {
@@ -596,7 +593,7 @@ public class Play extends GameState implements Controllable {
                 stop();
                 break;
             case "null":
-                movableNPCs.get("hooded").setDirection(0, 0, 20);
+                movableNPCs.get("hooded").setDirection(0, 0, 20, 58, 58);
                 node1 = new DialogNode("Вот мы и пришли.", 0);
                 dialog.addNode(node1);
                 dcontroller.startDialog(dialog);
@@ -606,7 +603,7 @@ public class Play extends GameState implements Controllable {
                 break;
             case "rabbit":
                 movableNPCs.get("rabbit").setTime(0);
-                movableNPCs.get("rabbit").setDirection(-movableNPCs.get("rabbit").getVelx(), -movableNPCs.get("rabbit").getVely(), 50);
+                movableNPCs.get("rabbit").setDirection(-movableNPCs.get("rabbit").getVelx(), -movableNPCs.get("rabbit").getVely(), 50, 58, 58);
                 break;
             default:
                 break;

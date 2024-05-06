@@ -34,24 +34,24 @@ public class MovableNPC extends B2DSprite {
         setAnimation(sprites, 1 / 5f);
     }
 
-    public void setDirection(float velx, float vely, float speed) {
+    public void setDirection(float velx, float vely, float speed, int width, int height) {
         this.velx = velx;
         this.vely = vely;
-        if(velx < 0 || vely < 0){
-            setNewAnimation(2, 58, 58);
-        } else if (velx == 0 && vely == 0){
-            setNewAnimation(0,58,58);
+        if (velx < 0 || vely < 0) {
+            setNewAnimation(2, width, height);
+        } else if (velx == 0 && vely == 0) {
+            setNewAnimation(0, width, height);
         } else {
-            setNewAnimation(1, 58, 58);
+            setNewAnimation(1, width, height);
         }
         body.setLinearVelocity(velx * speed, vely * speed);
     }
 
     public void randomDirection(int speed, float dt) {
-        time+=dt;
-        if(time >= 2){
+        time += dt;
+        if (time >= 2) {
             time = 0;
-            setDirection((float) (0.5f - Math.random()), (float) (0.5f - Math.random()), speed);
+            setDirection((float) (0.5f - Math.random()), (float) (0.5f - Math.random()), speed, 58, 58);
         }
     }
 

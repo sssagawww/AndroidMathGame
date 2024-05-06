@@ -27,7 +27,7 @@ public class GameStateManager {
     public GameStateManager(MyGdxGame game) {
         this.game = game;
         gameStates = new Stack<GameState>();
-        pushState(DUNGEON);
+        pushState(MENU);
     }
 
     //peek - get верхний элемент
@@ -42,6 +42,7 @@ public class GameStateManager {
     private GameState getState(int state) {
         //через switch?
         if (state == PLAY) {
+            if (play==null) return play = new Play(this);
             return play;
         } else if (state == MENU) {
             return new Menu2(this);

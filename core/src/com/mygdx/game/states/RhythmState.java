@@ -39,6 +39,7 @@ public class RhythmState extends GameState {
     private Stage uiStage;
     private DialogBox dialogBox;
     private RhythmMenu rhythmMenu;
+    private static boolean done;
 
     public RhythmState(GameStateManager gsm) {
         super(gsm);
@@ -61,7 +62,8 @@ public class RhythmState extends GameState {
         rhythmMenu.update(dt);
         if (rhythmMenu.isPercent100()) {
             rhythmMenu.setPercent100(false);
-            dialogBox.animateText("Готово! >>");
+            dialogBox.animateText("Готово!");
+            done = true;
             dialogBox.setVisible(true);
         }
         if (dialogBox.isPressed()) {
@@ -123,5 +125,13 @@ public class RhythmState extends GameState {
         dialogRoot.add(dialogBox).expand().align(Align.top).padTop(50f);
 
         multiplexer.addProcessor(uiStage);
+    }
+
+    public static boolean isDone() {
+        return done;
+    }
+
+    public static void setDone(boolean done) {
+        RhythmState.done = done;
     }
 }
