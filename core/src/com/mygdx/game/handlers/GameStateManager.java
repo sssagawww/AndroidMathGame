@@ -10,8 +10,9 @@ public class GameStateManager {
     private MyGdxGame game;
     private Play play;
     private Stack<GameState> gameStates;
-    private Forest forest;
     private MazeState mazeState;
+    private Forest forest;
+    private DungeonState dungeonState;
     private int lastState;
     public static final int PLAY = 912837;
     public static final int MENU = 0;
@@ -64,7 +65,8 @@ public class GameStateManager {
         } else if (state == BLACK_SCREEN) {
             return new BlackScreen(this);
         } else if (state == DUNGEON) {
-            return new DungeonState(this);
+            if (dungeonState==null) return dungeonState = new DungeonState(this);
+            return dungeonState;
         }
         return null;
     }

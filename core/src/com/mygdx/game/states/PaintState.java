@@ -190,7 +190,7 @@ public class PaintState extends GameState implements InputProcessor {
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                gsm.setState(PLAY);
+                gsm.setState(DUNGEON);
             }
         });
 

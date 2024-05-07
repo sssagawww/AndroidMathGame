@@ -22,7 +22,7 @@ public class Player2 extends B2DSprite {
     private boolean move = false;
     private Controllable state;
     private JoyStick joyStick;
-    private int countIdle = 0;
+    private int countIdle = 1;
     private int countMove = 1;
     private Sound sound;
     private long soundId;
@@ -212,6 +212,10 @@ public class Player2 extends B2DSprite {
 
     public void setMove(boolean move) {
         this.move = move;
+    }
+
+    public void setCountIdle(int countIdle) {
+        this.countIdle = countIdle;
     }
 
     public void setState(Controllable state) {

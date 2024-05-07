@@ -321,7 +321,7 @@ public class DungeonState extends GameState implements Controllable {
 
         joyStick = new JoyStick(200, 200, 200);
         shapeRenderer = new ShapeRenderer();
-        shapeRenderer.setProjectionMatrix(cam.combined);
+        shapeRenderer.setProjectionMatrix(joyCam.combined);
         mouse = new Vector3();
     }
 

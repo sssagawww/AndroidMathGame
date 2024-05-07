@@ -57,7 +57,7 @@ public class Play extends GameState implements Controllable {
     private float tileSize;
     private int tileMapWidth;
     private int tileMapHeight;
-    private int[] backgroundLayers = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11};
+    private int[] backgroundLayers = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
     private int[] foregroundLayers = {12};
     private Stage uiStage;
     private Stage controllerStage;
@@ -84,6 +84,7 @@ public class Play extends GameState implements Controllable {
     private boolean isStopped;
     private int nextState;
     private int prevState = -123;
+    private boolean contact = false;
     private static final String PREF_NAME = "position";
     private static final String PREF_X = "x";
     private static final String PREF_Y = "y";
@@ -142,7 +143,7 @@ public class Play extends GameState implements Controllable {
 
         //если этот state был выгружен, то при запуске все процессы должны возобновиться (удаляются ли они в multiplexer при выгрузке или просто останавливаются?)
         if (isStopped) {
-            player.getBody().setLinearVelocity(0,0);
+            player.getBody().setLinearVelocity(0, 0);
             music.play();
             isStopped = false;
             for (Map.Entry<String, MovableNPC> entry : movableNPCs.entrySet()) {
@@ -280,6 +281,8 @@ public class Play extends GameState implements Controllable {
         createLayer(layer5, BIT_TROPA, BIT_PLAYER, false);
         TiledMapTileLayer nextForest = (TiledMapTileLayer) tiledMap.getLayers().get("nextForest");
         createLayer(nextForest, BIT_TROPA, BIT_PLAYER, true);
+        TiledMapTileLayer signDungeon = (TiledMapTileLayer) tiledMap.getLayers().get("signDungeon");
+        createLayer(signDungeon, BIT_TROPA, BIT_PLAYER, true);
     }
 
     //коллизия слоя на карте (слой создаётся в Tiled)
@@ -312,7 +315,7 @@ public class Play extends GameState implements Controllable {
                 fdef.filter.categoryBits = categoryBits;
                 fdef.filter.maskBits = maskBits;
                 fdef.isSensor = false;
-                if(data){
+                if (data) {
                     world.createBody(bdef).createFixture(fdef).setUserData(layer.getName());
                 } else {
                     world.createBody(bdef).createFixture(fdef);
@@ -536,8 +539,6 @@ public class Play extends GameState implements Controllable {
         prefs.putFloat(PREF_Y, player.getPosition().y).flush();
     }
 
-    private boolean contact = false;
-
     public void loadStage(String s) {
         DialogNode node1;
         gsm.setLastState(PLAY);
@@ -583,6 +584,13 @@ public class Play extends GameState implements Controllable {
                 dcontroller.startDialog(dialog);
 
                 nextState = -1;
+                canDraw = true;
+                break;
+            case "signDungeon":
+                node1 = new DialogNode("dungeon", 0);
+                dialog.addNode(node1);
+                dcontroller.startDialog(dialog);
+                nextState = DUNGEON;
                 canDraw = true;
                 break;
             case "nextForest":
