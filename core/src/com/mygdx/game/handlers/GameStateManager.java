@@ -31,7 +31,7 @@ public class GameStateManager {
         pushState(MENU);
     }
 
-    //peek - get верхний элемент
+    //peek - возвращает верхний элемент
     public void update(float dt) {
         gameStates.peek().update(dt);
     }
@@ -71,7 +71,7 @@ public class GameStateManager {
         return null;
     }
 
-    //сначала удаляет самый верхний и вместо него закидывает новый
+    //сначала удаляет самый верхний и вместо него закидывает новый стейт
     public void setState(int state) {
         popState();
         pushState(state);

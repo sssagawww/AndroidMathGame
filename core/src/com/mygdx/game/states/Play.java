@@ -103,7 +103,7 @@ public class Play extends GameState implements Controllable {
         savePlay = game.save;
         skin_this = game.getSkin();
 
-        initFight();
+        initUI();
         initJoyStick();
         initController();
         createPlayer();
@@ -188,11 +188,11 @@ public class Play extends GameState implements Controllable {
         //cam.position.set(player.getPosition().x * PPM / 2, player.getPosition().y * PPM / 2, 0);
         cam.update();
 
-        //draw map
+        //рисует карту из Tiled
         tmr.setView(cam);
         tmr.render(backgroundLayers);
 
-        //draw player and npc
+        //рисует игрока и нпс
         sb.setProjectionMatrix(cam.combined); //https://stackoverflow.com/questions/33703663/understanding-the-libgdx-projection-matrix - объяснение
         player.render(sb, 80f, 86.6f);
 
@@ -205,7 +205,7 @@ public class Play extends GameState implements Controllable {
 
         tmr.render(foregroundLayers);
 
-        //draw collision
+        //рисует коллизию
         if (debug) {
             b2dCam.position.set(player.getPosition().x, player.getPosition().y, 0);
             b2dCam.update();
@@ -214,7 +214,7 @@ public class Play extends GameState implements Controllable {
 
         joyStick.render(shapeRenderer);
 
-        //draw initFight() if battle begin
+        //рисует UI, когда произошло взаимодействие
         if (canDraw) {
             uiStage.draw();
             if (optionBox.getBtnId() == 0 && optionBox.isClicked()) {
@@ -269,16 +269,16 @@ public class Play extends GameState implements Controllable {
         tileMapWidth = (int) tiledMap.getProperties().get("width");
         tileMapHeight = (int) tiledMap.getProperties().get("height");
 
-        TiledMapTileLayer layer = (TiledMapTileLayer) tiledMap.getLayers().get("borders"); //слой с границами карты
-        createLayer(layer, BIT_TROPA, BIT_PLAYER, false);
-        TiledMapTileLayer layer2 = (TiledMapTileLayer) tiledMap.getLayers().get("col");
-        createLayer(layer2, BIT_PLAYER, BIT_TROPA, false);
-        TiledMapTileLayer layer3 = (TiledMapTileLayer) tiledMap.getLayers().get("playerInvCol");
-        createLayer(layer3, BIT_TROPA, BIT_PLAYER, false);
-        TiledMapTileLayer layer4 = (TiledMapTileLayer) tiledMap.getLayers().get("water");
-        createLayer(layer4, BIT_TROPA, BIT_PLAYER, false);
-        TiledMapTileLayer layer5 = (TiledMapTileLayer) tiledMap.getLayers().get("animated");
-        createLayer(layer5, BIT_TROPA, BIT_PLAYER, false);
+        TiledMapTileLayer borders = (TiledMapTileLayer) tiledMap.getLayers().get("borders");
+        createLayer(borders, BIT_TROPA, BIT_PLAYER, false);
+        TiledMapTileLayer npcCollision = (TiledMapTileLayer) tiledMap.getLayers().get("col");
+        createLayer(npcCollision, BIT_PLAYER, BIT_TROPA, false);
+        TiledMapTileLayer playerInvCol = (TiledMapTileLayer) tiledMap.getLayers().get("playerInvCol");
+        createLayer(playerInvCol, BIT_TROPA, BIT_PLAYER, false);
+        TiledMapTileLayer water = (TiledMapTileLayer) tiledMap.getLayers().get("water");
+        createLayer(water, BIT_TROPA, BIT_PLAYER, false);
+        TiledMapTileLayer animated = (TiledMapTileLayer) tiledMap.getLayers().get("animated");
+        createLayer(animated, BIT_TROPA, BIT_PLAYER, false);
         TiledMapTileLayer nextForest = (TiledMapTileLayer) tiledMap.getLayers().get("nextForest");
         createLayer(nextForest, BIT_TROPA, BIT_PLAYER, true);
         TiledMapTileLayer signDungeon = (TiledMapTileLayer) tiledMap.getLayers().get("signDungeon");
@@ -413,7 +413,7 @@ public class Play extends GameState implements Controllable {
         music.play();
     }
 
-    private void initFight() {
+    private void initUI() {
         skin_this = game.getSkin();
         uiStage = new Stage(new ScreenViewport());
         uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
@@ -458,9 +458,7 @@ public class Play extends GameState implements Controllable {
         Table controllerRoot = new Table();
         controllerRoot.setFillParent(true);
         controllerRoot.add(controller).expand().align(Align.bottomLeft);
-        //controllerStage.addActor(image);
         controllerStage.addActor(controllerRoot);
-        //.addAction(alpha(0));
 
         multiplexer.addProcessor(controllerStage);
         Gdx.input.setInputProcessor(multiplexer);
@@ -542,7 +540,6 @@ public class Play extends GameState implements Controllable {
     public void loadStage(String s) {
         DialogNode node1;
         gsm.setLastState(PLAY);
-        //initFight();
         switch (s) {
             case "enemy":
                 node1 = new DialogNode("Враг атакует!", 0);
