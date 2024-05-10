@@ -40,6 +40,7 @@ public class RhythmState extends GameState {
     private DialogBox dialogBox;
     private RhythmMenu rhythmMenu;
     private static boolean done;
+    private static boolean strength100;
 
     public RhythmState(GameStateManager gsm) {
         super(gsm);
@@ -65,6 +66,7 @@ public class RhythmState extends GameState {
             dialogBox.animateText("Готово!");
             done = true;
             dialogBox.setVisible(true);
+            strength100 = rhythmMenu.isStrength100();
         }
         if (dialogBox.isPressed()) {
             gsm.setState(FOREST);
@@ -133,5 +135,9 @@ public class RhythmState extends GameState {
 
     public static void setDone(boolean done) {
         RhythmState.done = done;
+    }
+
+    public static boolean isStrength100() {
+        return strength100;
     }
 }

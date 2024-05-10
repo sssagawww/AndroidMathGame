@@ -607,6 +607,7 @@ public class Play extends GameState implements Controllable {
                 canDraw = true;
                 break;
             case "rabbit":
+                controller.getInventory().setAchievementVisibility(1);
                 movableNPCs.get("rabbit").setTime(0);
                 movableNPCs.get("rabbit").setDirection(-movableNPCs.get("rabbit").getVelx(), -movableNPCs.get("rabbit").getVely(), 50, 58, 58);
                 break;

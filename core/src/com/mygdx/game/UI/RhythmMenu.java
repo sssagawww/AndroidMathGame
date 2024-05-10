@@ -44,6 +44,7 @@ public class RhythmMenu extends Table {
     private int strength = 0;
     private boolean progressReverse;
     private boolean percent100;
+    private boolean strength100;
     private float speed = 1;
     private float size = V_HEIGHT / 1.5f * 1.34f;
     private float playerImageX;
@@ -100,7 +101,7 @@ public class RhythmMenu extends Table {
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                if(progressBar.getValue() < 100){
+                if (progressBar.getValue() < 100) {
                     setPlayerImage(0);
                 }
                 timeLabel.setText("0,00");
@@ -122,7 +123,7 @@ public class RhythmMenu extends Table {
         drawables.add(new TextureRegionDrawable(sprites[1]));
         playerImage = new Image(sprites[0]);
 
-        playerImageSize = size/1.65f;
+        playerImageSize = size / 1.65f;
 
         //стиль для label
         BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
@@ -227,6 +228,9 @@ public class RhythmMenu extends Table {
     private int checkStrength() {
         int i = Math.round(strengthBar.getValue());
         strengthLabel.setText("Сила: " + i);
+        if (i >= 100) {
+            strength100 = true;
+        }
         return i;
     }
 
@@ -236,5 +240,9 @@ public class RhythmMenu extends Table {
 
     public void setPercent100(boolean percent100) {
         this.percent100 = percent100;
+    }
+
+    public boolean isStrength100() {
+        return strength100;
     }
 }
