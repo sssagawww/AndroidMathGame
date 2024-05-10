@@ -10,8 +10,9 @@ public class GameStateManager {
     private MyGdxGame game;
     private Play play;
     private Stack<GameState> gameStates;
-    private Forest forest;
     private MazeState mazeState;
+    private Forest forest;
+    private DungeonState dungeonState;
     private int lastState;
     public static final int PLAY = 912837;
     public static final int MENU = 0;
@@ -27,10 +28,10 @@ public class GameStateManager {
     public GameStateManager(MyGdxGame game) {
         this.game = game;
         gameStates = new Stack<GameState>();
-        pushState(DUNGEON);
+        pushState(MENU);
     }
 
-    //peek - get верхний элемент
+    //peek - возвращает верхний элемент
     public void update(float dt) {
         gameStates.peek().update(dt);
     }
@@ -42,6 +43,7 @@ public class GameStateManager {
     private GameState getState(int state) {
         //через switch?
         if (state == PLAY) {
+            if (play==null) return play = new Play(this);
             return play;
         } else if (state == MENU) {
             return new Menu2(this);
@@ -63,12 +65,13 @@ public class GameStateManager {
         } else if (state == BLACK_SCREEN) {
             return new BlackScreen(this);
         } else if (state == DUNGEON) {
-            return new DungeonState(this);
+            if (dungeonState==null) return dungeonState = new DungeonState(this);
+            return dungeonState;
         }
         return null;
     }
 
-    //сначала удаляет самый верхний и вместо него закидывает новый
+    //сначала удаляет самый верхний и вместо него закидывает новый стейт
     public void setState(int state) {
         popState();
         pushState(state);
