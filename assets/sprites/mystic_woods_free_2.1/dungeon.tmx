@@ -50,8 +50,8 @@
 </data>
  </layer>
  <objectgroup id="15" name="objects">
-  <object id="1" name="keyChest" x="57.2477" y="88.7748" width="16" height="16"/>
-  <object id="2" name="amuletChest" x="575.424" y="192.729" width="16" height="16"/>
+  <object id="1" name="keyChest" x="62.9977" y="79.5248" width="16" height="16"/>
+  <object id="2" name="amuletChest" x="575.424" y="182.479" width="16" height="16"/>
   <object id="3" name="door2" x="320.516" y="80.1361" width="32" height="16"/>
   <object id="4" name="door1" x="191.543" y="207.448" width="16" height="32"/>
   <object id="5" name="door3" x="351.71" y="271.81" width="16" height="32"/>

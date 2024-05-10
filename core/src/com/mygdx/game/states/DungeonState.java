@@ -5,12 +5,7 @@ import static com.mygdx.game.MyGdxGame.V_WIDTH;
 import static com.mygdx.game.handlers.B2DVars.BIT_PLAYER;
 import static com.mygdx.game.handlers.B2DVars.BIT_TROPA;
 import static com.mygdx.game.handlers.B2DVars.PPM;
-import static com.mygdx.game.handlers.GameStateManager.DUNGEON;
-import static com.mygdx.game.handlers.GameStateManager.MENU;
-import static com.mygdx.game.handlers.GameStateManager.PAINT;
-import static com.mygdx.game.handlers.GameStateManager.PLAY;
-
-import static java.lang.Thread.sleep;
+import static com.mygdx.game.handlers.GameStateManager.*;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
@@ -47,7 +42,6 @@ import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.UI.Controller;
 import com.mygdx.game.UI.DialogBox;
 import com.mygdx.game.UI.JoyStick;
-import com.mygdx.game.UI.OptionBox;
 import com.mygdx.game.UI.OptionBox2;
 import com.mygdx.game.entities.B2DSprite;
 import com.mygdx.game.entities.PlayEntities;
@@ -58,7 +52,6 @@ import com.mygdx.game.handlers.GameStateManager;
 import com.mygdx.game.handlers.MyContactListener;
 
 public class DungeonState extends GameState implements Controllable {
-
     private Player2 player;
     private float tileMapHeight;
     private float tileSize;
@@ -85,7 +78,7 @@ public class DungeonState extends GameState implements Controllable {
     private Stage uiStage;
     private DialogController dcontroller;
     private float time = 0;
-    private DialogBox dialogueBox;
+    private DialogBox dialogBox;
     private boolean debug = false;
     private Dialog dialog = new Dialog();
     private int nextState;
@@ -102,7 +95,6 @@ public class DungeonState extends GameState implements Controllable {
 
     public DungeonState(GameStateManager gsm) {
         super(gsm);
-
         world = new World(new Vector2(0, 0), true);
         b2dr = new Box2DDebugRenderer(); //отрисовщик дебаг коллизии
         game = gsm.game();
@@ -112,6 +104,7 @@ public class DungeonState extends GameState implements Controllable {
         music = Gdx.audio.newMusic(Gdx.files.internal("music/song.wav"));
         skin_this = game.getSkin();
 
+        initFight();
         initJoyStick();
         initController();
         createPlayer();
@@ -119,8 +112,6 @@ public class DungeonState extends GameState implements Controllable {
         createNPC();
 
         openingDoorSound = Gdx.audio.newSound(Gdx.files.internal("music/door_opening.mp3"));
-
-        //initFight();
 
         cam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
         b2dCam = new BoundedCamera(); //рисует дебаг коллизию?
@@ -149,7 +140,7 @@ public class DungeonState extends GameState implements Controllable {
             gsm.setState(MENU);
         }
 
-        if (Gdx.input.isTouched()) {
+        if (Gdx.input.isTouched() && !controller.isInventoryVisible() && !dialogBox.isVisible()) {
             mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
             joyCam.unproject(mouse);
             joyStick.update(mouse.x, mouse.y);
@@ -157,18 +148,17 @@ public class DungeonState extends GameState implements Controllable {
             joyStick.setDefaultPos();
         }
 
-        //можно начать бой
         if (canDraw) {
             uiStage.act(dt);
             dcontroller.update(dt);
             time += dt;
-            if (dialogueBox.isFinished() && time > 2f) {
+            if (dialogBox.isFinished() && time > 2f && dcontroller.isFinished()) {
                 time = 0;
-                if (nextState != -1) {
-                    stop();
-                }
+                stop();
             }
         }
+
+        controllerStage.act(dt);
 
         if (opening) {
             openingTime += dt;
@@ -178,17 +168,6 @@ public class DungeonState extends GameState implements Controllable {
                 openingTime = 0;
             }
         }
-
-    }
-
-    private void stop() {
-        if (nextState != -1) {
-            gsm.setState(nextState);
-
-        }
-        music.dispose();
-        isStopped = true;
-        canDraw = false;
     }
 
     @Override
@@ -214,12 +193,23 @@ public class DungeonState extends GameState implements Controllable {
             b2dr.render(world, b2dCam.combined);
         }
 
+        joyStick.render(shapeRenderer);
+
         if (canDraw) {
             uiStage.draw();
         }
 
         controllerStage.draw();
-        joyStick.render(shapeRenderer);
+    }
+
+    private void stop() {
+        if (nextState != -1) {
+            gsm.setState(nextState);
+
+        }
+        music.dispose();
+        isStopped = true;
+        canDraw = false;
     }
 
     private void createTiles() {
@@ -279,7 +269,7 @@ public class DungeonState extends GameState implements Controllable {
         bdef.type = BodyDef.BodyType.DynamicBody;
         Body body = world.createBody(bdef);
 
-        ps.setAsBox(40f / PPM, 50f / PPM, new Vector2(-5.4f, -3.6f), 0);
+        ps.setAsBox(40f / PPM, 40f / PPM, new Vector2(-5.4f, -4.0f), 0);
         fdef.shape = ps;
         fdef.filter.categoryBits = BIT_PLAYER;
         fdef.filter.maskBits = BIT_TROPA;
@@ -354,21 +344,21 @@ public class DungeonState extends GameState implements Controllable {
         dialogRoot.setFillParent(true);
         uiStage.addActor(dialogRoot);
 
-        dialogueBox = new DialogBox(skin_this);
-        dialogueBox.setVisible(false);
+        dialogBox = new DialogBox(skin_this);
+        dialogBox.setVisible(false);
 
         optionBox = new OptionBox2(skin_this);
         optionBox.setVisible(false);
 
         Table dialogTable = new Table();
-        dialogTable.add(dialogueBox)
+        dialogTable.add(dialogBox)
                 .expand().align(Align.bottom)
                 .space(8f)
                 .row();
 
         dialogRoot.add(dialogTable).expand().align(Align.bottom).pad(15f);
 
-        dcontroller = new DialogController(dialogueBox, optionBox);
+        dcontroller = new DialogController(dialogBox, optionBox);
         multiplexer.addProcessor(uiStage); //не нагружает ли большое кол-во процессов программу?
         //multiplexer.addProcessor(dcontroller);
         Gdx.input.setInputProcessor(multiplexer);
@@ -379,78 +369,77 @@ public class DungeonState extends GameState implements Controllable {
     @Override
     public void loadStage(String s) {
         DialogNode node1;
-        initFight();
 
         gsm.setLastState(DUNGEON);
 
         switch (s) {
-            case "door1":
-                node1 = new DialogNode("Дверь заперта... Ее нужно взломать!", 0);
-                dialog.addNode(node1);
-                dcontroller.startDialog(dialog);
-//                nextState = PAINT;
-//                canDraw = true;
-
-                opening = true;
-                doorForOpen = s;
-
-                break;
             case "amuletChest":
                 if (!earnedAmulet) {
                     node1 = new DialogNode("Поздравляем! Вы получили Амулет Времени!", 0);
                     dialog.addNode(node1);
                     dcontroller.startDialog(dialog);
-                    //add amulet to the inventory
+                    controller.getInventory().setImgVisibility(2, true);
                     earnedAmulet = true;
+                    canDraw = true;
                 }
-
                 break;
             case "keyChest":
                 if (!earnedKey) {
                     node1 = new DialogNode("Вы получили ключ. Но от чего же он?", 0);
+                    controller.getInventory().setAchievementVisibility(3);
                     dialog.addNode(node1);
                     dcontroller.startDialog(dialog);
-                    //add key to inventory
+                    canDraw = true;
+                    controller.getInventory().addItem("Ключ");
                     earnedKey = true;
                 }
                 break;
-            case "door2":
-                node1 = new DialogNode("Дверь заперта... Ее нужно взломать!", 0);
+            case "door1":
+                node1 = new DialogNode("Дверь заперта. Ее нужно взломать!", 0);
                 dialog.addNode(node1);
                 dcontroller.startDialog(dialog);
-//                nextState = PAINT;
-//                canDraw = true;
+                nextState = -1; //PAINT
+                canDraw = true;
 
                 opening = true;
                 doorForOpen = s;
+                break;
+            case "door2":
+                node1 = new DialogNode("Эта тоже... Нужно взламывать!", 0);
+                dialog.addNode(node1);
+                dcontroller.startDialog(dialog);
+                nextState = -1; //PAINT
+                canDraw = true;
 
+                opening = true;
+                doorForOpen = s;
                 break;
             case "door3":
                 node1 = new DialogNode("Дверь заперта на ключ...", 0);
                 dialog.addNode(node1);
                 dcontroller.startDialog(dialog);
-//                nextState = PAINT;
-//                canDraw = true;
+                nextState = -1; //PAINT
+                canDraw = true;
 
                 opening = true;
                 doorForOpen = s;
-
                 break;
             case "keyDoor":
                 if (earnedKey) {
                     opening = true;
                     doorForOpen = s;
-                    //delete key from the inventory
+                    controller.getInventory().removeItem("Ключ");
                 } else {
-                    node1 = new DialogNode("Дверь заперта... Возможно, ключ от нее где-то рядом", 0);
+                    node1 = new DialogNode("Дверь заперта... Возможно, ключ от нее где-то рядом.", 0);
                     dialog.addNode(node1);
                     dcontroller.startDialog(dialog);
+                    canDraw = true;
                 }
                 break;
             case "ladder":
                 if (earnedAmulet) {
                     nextState = PLAY;
-                    canDraw = true;
+                    stop();
                 } else {
                     node1 = new DialogNode("Вы не до конца исследовали локацию!", 0);
                     dialog.addNode(node1);
@@ -465,7 +454,6 @@ public class DungeonState extends GameState implements Controllable {
     }
 
     private void openDoor(String s) {
-
         soundId = openingDoorSound.play(1.0f);
         openingDoorSound.setVolume(soundId, 0.2f);
         openingDoorSound.setLooping(soundId, false);
@@ -486,8 +474,6 @@ public class DungeonState extends GameState implements Controllable {
             TextureRegion[] regions = TextureRegion.split(MyGdxGame.res.getTexture(String.valueOf(sprite.getBody().getFixtureList().get(0).getUserData())), 32, 16)[0];
             sprite.setAnimation(regions, 1 / 12f);
         }
-
-
     }
 
     @Override

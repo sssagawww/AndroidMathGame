@@ -155,6 +155,7 @@ public class Forest extends GameState implements Controllable {
 
         if (RhythmState.isDone()) {
             RhythmState.setDone(false);
+            if(RhythmState.isStrength100()) controller.getInventory().setAchievementVisibility(2);
             controller.getInventory().setImgVisibility(1, true);
             npc.setDirection(1f, 0.35f, 100f, 64, 64);
             for (int i = 0; i < entities.getEntityCount(); i++) {
@@ -518,7 +519,16 @@ public class Forest extends GameState implements Controllable {
                 break;
             case "mushroom":
                 nextState = -1;
+                if(mushrooms == 0){
+                    controller.getInventory().addItem("Чудесный\nгриб");
+                    mushrooms++;
+                    break;
+                }
                 mushrooms++;
+                if(mushrooms >= 6){
+                    controller.getInventory().setAchievementVisibility(0);
+                }
+                controller.getInventory().getItem("Чудесный\nгриб").addItemCount();
                 break;
             case "next":
                 if (player.getPosition().x < 800f / PPM) nextState = PLAY;
@@ -528,8 +538,8 @@ public class Forest extends GameState implements Controllable {
             case "null":
                 npc.setDirection(0, 0, 40, 64, 64);
                 node1 = new DialogNode("Ты вытащил Меч Силы!?!?!?", 0);
-                node2 = new DialogNode("Ты обязан рассказать об этом.", 1);
-                node3 = new DialogNode("Пошли в деревню.", 2);
+                node2 = new DialogNode("Пошли в деревню.", 1);
+                node3 = new DialogNode("Ты обязан рассказать об этом.", 2);
                 node4 = new DialogNode("Давай быстрее.", 3);
                 node5 = new DialogNode("Все равно идем.", 4);
 
