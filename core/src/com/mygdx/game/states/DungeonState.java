@@ -109,7 +109,6 @@ public class DungeonState extends GameState implements Controllable {
         music = Gdx.audio.newMusic(Gdx.files.internal("music/song.wav"));
         skin_this = game.getSkin();
 
-        //initUI();
         initJoyStick();
         initController();
         createPlayer();
@@ -195,27 +194,21 @@ public class DungeonState extends GameState implements Controllable {
         //cam.position.set(player.getPosition().x * PPM / 2, player.getPosition().y * PPM / 2, 0);
         cam.update();
 
-        //draw map
         tmr.setView(cam);
         tmr.render();
 
-        //draw player and npc
         sb.setProjectionMatrix(cam.combined); //https://stackoverflow.com/questions/33703663/understanding-the-libgdx-projection-matrix - объяснение
         player.render(sb, 80f, 86.6f);
-        //boss.render(sb, 200f, 200f);
         if (!reloading) {
             entities.render(sb, 4.5f, 4.5f);
         }
 
-
-        //draw collision
         if (debug) {
             b2dCam.position.set(player.getPosition().x, player.getPosition().y, 0);
             b2dCam.update();
             b2dr.render(world, b2dCam.combined);
         }
 
-        //draw initFight() if battle begin
         if (canDraw) {
             uiStage.draw();
         }
@@ -278,7 +271,6 @@ public class DungeonState extends GameState implements Controllable {
 
         bdef.position.set(607f / PPM, 337f / PPM);
 
-
         bdef.type = BodyDef.BodyType.DynamicBody;
         Body body = world.createBody(bdef);
 
@@ -318,7 +310,6 @@ public class DungeonState extends GameState implements Controllable {
 
             body.createFixture(cdef).setUserData(mo.getName());
             entities.addEntity(body, mo.getName());
-
         }
     }
 
@@ -341,11 +332,11 @@ public class DungeonState extends GameState implements Controllable {
     private void initJoyStick() {
         joyCam = new BoundedCamera();
         joyCam.setBounds(0, V_WIDTH, 0, V_HEIGHT);
-        joyCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT)); //не хватало этой строчки
+        joyCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
 
         joyStick = new JoyStick(200, 200, 200);
         shapeRenderer = new ShapeRenderer();
-        shapeRenderer.setProjectionMatrix(cam.combined);
+        shapeRenderer.setProjectionMatrix(joyCam.combined);
         mouse = new Vector3();
     }
 
@@ -468,11 +459,6 @@ public class DungeonState extends GameState implements Controllable {
         }
     }
 
-    @Override
-    public void removeCollisionEntity(Body body) {
-
-    }
-
     private void openDoor(String s) {
 
         try {
@@ -498,6 +484,11 @@ public class DungeonState extends GameState implements Controllable {
             sprite.setAnimation(regions, 1 / 12f);
         }
 
+
+    }
+
+    @Override
+    public void removeCollisionEntity(Body body) {
 
     }
 

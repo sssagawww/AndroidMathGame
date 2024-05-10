@@ -17,7 +17,7 @@ public class MyContactListener implements com.badlogic.gdx.physics.box2d.Contact
         Fixture fa = c.getFixtureA();
         Fixture fb = c.getFixtureB();
 
-        //контакт с нпс
+        //контакт с коллизией
         if (fa.getUserData() != null) {
             if(fb.getUserData().equals("player")){
                 state.loadStage((String) fa.getUserData());

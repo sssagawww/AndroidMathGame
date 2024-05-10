@@ -5,7 +5,6 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
@@ -17,7 +16,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
@@ -29,7 +27,6 @@ import com.mygdx.game.UI.Controller;
 import com.mygdx.game.UI.DialogBox;
 import com.mygdx.game.UI.JoyStick;
 import com.mygdx.game.UI.OptionBox2;
-import com.mygdx.game.entities.B2DSprite;
 import com.mygdx.game.entities.MovableNPC;
 import com.mygdx.game.entities.PlayEntities;
 import com.mygdx.game.entities.Player2;
@@ -38,7 +35,6 @@ import com.mygdx.game.handlers.Controllable;
 import com.mygdx.game.handlers.MyContactListener;
 import com.mygdx.game.handlers.GameStateManager;
 
-import static com.badlogic.gdx.scenes.scene2d.actions.Actions.*;
 import static com.mygdx.game.MyGdxGame.*;
 import static com.mygdx.game.handlers.B2DVars.*;
 import static com.mygdx.game.handlers.GameStateManager.*;
@@ -61,12 +57,12 @@ public class Play extends GameState implements Controllable {
     private float tileSize;
     private int tileMapWidth;
     private int tileMapHeight;
-    private int[] backgroundLayers = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11};
+    private int[] backgroundLayers = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
     private int[] foregroundLayers = {12};
     private Stage uiStage;
     private Stage controllerStage;
     private Table dialogRoot;
-    private DialogBox dialogueBox;
+    private DialogBox dialogBox;
     private OptionBox2 optionBox;
     private Skin skin_this;
     private InputMultiplexer multiplexer;
@@ -88,6 +84,7 @@ public class Play extends GameState implements Controllable {
     private boolean isStopped;
     private int nextState;
     private int prevState = -123;
+    private boolean contact = false;
     private static final String PREF_NAME = "position";
     private static final String PREF_X = "x";
     private static final String PREF_Y = "y";
@@ -106,7 +103,7 @@ public class Play extends GameState implements Controllable {
         savePlay = game.save;
         skin_this = game.getSkin();
 
-        initFight();
+        initUI();
         initJoyStick();
         initController();
         createPlayer();
@@ -146,10 +143,11 @@ public class Play extends GameState implements Controllable {
 
         //если этот state был выгружен, то при запуске все процессы должны возобновиться (удаляются ли они в multiplexer при выгрузке или просто останавливаются?)
         if (isStopped) {
+            player.getBody().setLinearVelocity(0, 0);
             music.play();
             isStopped = false;
             for (Map.Entry<String, MovableNPC> entry : movableNPCs.entrySet()) {
-                movableNPCs.get(entry.getKey()).setDirection(0, 0, 20);
+                movableNPCs.get(entry.getKey()).setDirection(0, 0, 20, 58, 58);
             }
             cam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
             multiplexer.addProcessor(controllerStage);
@@ -161,7 +159,7 @@ public class Play extends GameState implements Controllable {
         }
 
         //обновление джойстика
-        if (Gdx.input.isTouched() && !controller.isInventoryVisible() && !dialogueBox.isVisible()) {
+        if (Gdx.input.isTouched() && !controller.isInventoryVisible() && !dialogBox.isVisible()) {
             mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
             joyCam.unproject(mouse);
             joyStick.update(mouse.x, mouse.y);
@@ -174,7 +172,7 @@ public class Play extends GameState implements Controllable {
             uiStage.act(dt);
             dcontroller.update(dt);
             time += dt;
-            if (dialogueBox.isFinished() && time > 2f && dcontroller.isFinished()) {
+            if (dialogBox.isFinished() && time > 2f && dcontroller.isFinished()) {
                 time = 0;
                 stop();
             }
@@ -190,11 +188,11 @@ public class Play extends GameState implements Controllable {
         //cam.position.set(player.getPosition().x * PPM / 2, player.getPosition().y * PPM / 2, 0);
         cam.update();
 
-        //draw map
+        //рисует карту из Tiled
         tmr.setView(cam);
         tmr.render(backgroundLayers);
 
-        //draw player and npc
+        //рисует игрока и нпс
         sb.setProjectionMatrix(cam.combined); //https://stackoverflow.com/questions/33703663/understanding-the-libgdx-projection-matrix - объяснение
         player.render(sb, 80f, 86.6f);
 
@@ -207,7 +205,7 @@ public class Play extends GameState implements Controllable {
 
         tmr.render(foregroundLayers);
 
-        //draw collision
+        //рисует коллизию
         if (debug) {
             b2dCam.position.set(player.getPosition().x, player.getPosition().y, 0);
             b2dCam.update();
@@ -216,11 +214,11 @@ public class Play extends GameState implements Controllable {
 
         joyStick.render(shapeRenderer);
 
-        //draw initFight() if battle begin
+        //рисует UI, когда произошло взаимодействие
         if (canDraw) {
             uiStage.draw();
             if (optionBox.getBtnId() == 0 && optionBox.isClicked()) {
-                movableNPCs.get("hooded").setDirection(1, -0.5f, 20);
+                movableNPCs.get("hooded").setDirection(1, -0.5f, 20, 58, 58);
             }
         }
 
@@ -271,18 +269,20 @@ public class Play extends GameState implements Controllable {
         tileMapWidth = (int) tiledMap.getProperties().get("width");
         tileMapHeight = (int) tiledMap.getProperties().get("height");
 
-        TiledMapTileLayer layer = (TiledMapTileLayer) tiledMap.getLayers().get("borders"); //слой с границами карты
-        createLayer(layer, BIT_TROPA, BIT_PLAYER, false);
-        TiledMapTileLayer layer2 = (TiledMapTileLayer) tiledMap.getLayers().get("col");
-        createLayer(layer2, BIT_PLAYER, BIT_TROPA, false);
-        TiledMapTileLayer layer3 = (TiledMapTileLayer) tiledMap.getLayers().get("playerInvCol");
-        createLayer(layer3, BIT_TROPA, BIT_PLAYER, false);
-        TiledMapTileLayer layer4 = (TiledMapTileLayer) tiledMap.getLayers().get("water");
-        createLayer(layer4, BIT_TROPA, BIT_PLAYER, false);
-        TiledMapTileLayer layer5 = (TiledMapTileLayer) tiledMap.getLayers().get("animated");
-        createLayer(layer5, BIT_TROPA, BIT_PLAYER, false);
+        TiledMapTileLayer borders = (TiledMapTileLayer) tiledMap.getLayers().get("borders");
+        createLayer(borders, BIT_TROPA, BIT_PLAYER, false);
+        TiledMapTileLayer npcCollision = (TiledMapTileLayer) tiledMap.getLayers().get("col");
+        createLayer(npcCollision, BIT_PLAYER, BIT_TROPA, false);
+        TiledMapTileLayer playerInvCol = (TiledMapTileLayer) tiledMap.getLayers().get("playerInvCol");
+        createLayer(playerInvCol, BIT_TROPA, BIT_PLAYER, false);
+        TiledMapTileLayer water = (TiledMapTileLayer) tiledMap.getLayers().get("water");
+        createLayer(water, BIT_TROPA, BIT_PLAYER, false);
+        TiledMapTileLayer animated = (TiledMapTileLayer) tiledMap.getLayers().get("animated");
+        createLayer(animated, BIT_TROPA, BIT_PLAYER, false);
         TiledMapTileLayer nextForest = (TiledMapTileLayer) tiledMap.getLayers().get("nextForest");
         createLayer(nextForest, BIT_TROPA, BIT_PLAYER, true);
+        TiledMapTileLayer signDungeon = (TiledMapTileLayer) tiledMap.getLayers().get("signDungeon");
+        createLayer(signDungeon, BIT_TROPA, BIT_PLAYER, true);
     }
 
     //коллизия слоя на карте (слой создаётся в Tiled)
@@ -315,7 +315,7 @@ public class Play extends GameState implements Controllable {
                 fdef.filter.categoryBits = categoryBits;
                 fdef.filter.maskBits = maskBits;
                 fdef.isSensor = false;
-                if(data){
+                if (data) {
                     world.createBody(bdef).createFixture(fdef).setUserData(layer.getName());
                 } else {
                     world.createBody(bdef).createFixture(fdef);
@@ -413,7 +413,7 @@ public class Play extends GameState implements Controllable {
         music.play();
     }
 
-    private void initFight() {
+    private void initUI() {
         skin_this = game.getSkin();
         uiStage = new Stage(new ScreenViewport());
         uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
@@ -422,8 +422,8 @@ public class Play extends GameState implements Controllable {
         dialogRoot.setFillParent(true);
         uiStage.addActor(dialogRoot);
 
-        dialogueBox = new DialogBox(skin_this);
-        dialogueBox.setVisible(false);
+        dialogBox = new DialogBox(skin_this);
+        dialogBox.setVisible(false);
 
         optionBox = new OptionBox2(skin_this);
         optionBox.setVisible(false);
@@ -433,14 +433,14 @@ public class Play extends GameState implements Controllable {
                 .expand().align(Align.right)
                 .space(8f)
                 .row();
-        dialogTable.add(dialogueBox)
+        dialogTable.add(dialogBox)
                 .expand().align(Align.bottom)
                 .space(8f)
                 .row();
 
         dialogRoot.add(dialogTable).expand().align(Align.bottom).pad(15f);
 
-        dcontroller = new DialogController(dialogueBox, optionBox);
+        dcontroller = new DialogController(dialogBox, optionBox);
         multiplexer.addProcessor(uiStage); //не нагружает ли большое кол-во процессов программу?
         multiplexer.addProcessor(dcontroller);
         Gdx.input.setInputProcessor(multiplexer);
@@ -458,9 +458,7 @@ public class Play extends GameState implements Controllable {
         Table controllerRoot = new Table();
         controllerRoot.setFillParent(true);
         controllerRoot.add(controller).expand().align(Align.bottomLeft);
-        //controllerStage.addActor(image);
         controllerStage.addActor(controllerRoot);
-        //.addAction(alpha(0));
 
         multiplexer.addProcessor(controllerStage);
         Gdx.input.setInputProcessor(multiplexer);
@@ -478,7 +476,7 @@ public class Play extends GameState implements Controllable {
     }
 
     //был тестовый метод, чтобы понять работает ли диалог, можно использовать в других местах
-    private void initUI() {
+   /* private void initUI() {
         skin_this = game.getSkin();
         uiStage = new Stage(new ScreenViewport());
         uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
@@ -524,7 +522,7 @@ public class Play extends GameState implements Controllable {
         dialog.addNode(node3);
         dialog.addNode(node4);
         multiplexer.addProcessor(uiStage);
-    }
+    }*/
 
     @Override
     public void dispose() {
@@ -539,12 +537,9 @@ public class Play extends GameState implements Controllable {
         prefs.putFloat(PREF_Y, player.getPosition().y).flush();
     }
 
-    private boolean contact = false;
-
     public void loadStage(String s) {
         DialogNode node1;
         gsm.setLastState(PLAY);
-        //initFight();
         switch (s) {
             case "enemy":
                 node1 = new DialogNode("Враг атакует!", 0);
@@ -588,6 +583,13 @@ public class Play extends GameState implements Controllable {
                 nextState = -1;
                 canDraw = true;
                 break;
+            case "signDungeon":
+                node1 = new DialogNode("dungeon", 0);
+                dialog.addNode(node1);
+                dcontroller.startDialog(dialog);
+                nextState = DUNGEON;
+                canDraw = true;
+                break;
             case "nextForest":
                 nextState = FOREST;
                 /*if(prevState == nextState) break;
@@ -596,7 +598,7 @@ public class Play extends GameState implements Controllable {
                 stop();
                 break;
             case "null":
-                movableNPCs.get("hooded").setDirection(0, 0, 20);
+                movableNPCs.get("hooded").setDirection(0, 0, 20, 58, 58);
                 node1 = new DialogNode("Вот мы и пришли.", 0);
                 dialog.addNode(node1);
                 dcontroller.startDialog(dialog);
@@ -606,7 +608,7 @@ public class Play extends GameState implements Controllable {
                 break;
             case "rabbit":
                 movableNPCs.get("rabbit").setTime(0);
-                movableNPCs.get("rabbit").setDirection(-movableNPCs.get("rabbit").getVelx(), -movableNPCs.get("rabbit").getVely(), 50);
+                movableNPCs.get("rabbit").setDirection(-movableNPCs.get("rabbit").getVelx(), -movableNPCs.get("rabbit").getVely(), 50, 58, 58);
                 break;
             default:
                 break;
