@@ -5,14 +5,18 @@ import static com.mygdx.game.MyGdxGame.V_WIDTH;
 import static com.mygdx.game.handlers.B2DVars.BIT_PLAYER;
 import static com.mygdx.game.handlers.B2DVars.BIT_TROPA;
 import static com.mygdx.game.handlers.B2DVars.PPM;
+import static com.mygdx.game.handlers.GameStateManager.DUNGEON;
 import static com.mygdx.game.handlers.GameStateManager.MENU;
 import static com.mygdx.game.handlers.GameStateManager.PAINT;
 import static com.mygdx.game.handlers.GameStateManager.PLAY;
+
+import static java.lang.Thread.sleep;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
@@ -38,11 +42,13 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.Dialog.Dialog;
 import com.mygdx.game.Dialog.DialogController;
 import com.mygdx.game.Dialog.DialogNode;
+import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.UI.Controller;
 import com.mygdx.game.UI.DialogBox;
 import com.mygdx.game.UI.JoyStick;
 import com.mygdx.game.UI.OptionBox;
 import com.mygdx.game.UI.OptionBox2;
+import com.mygdx.game.entities.B2DSprite;
 import com.mygdx.game.entities.PlayEntities;
 import com.mygdx.game.entities.Player2;
 import com.mygdx.game.handlers.BoundedCamera;
@@ -87,6 +93,9 @@ public class DungeonState extends GameState implements Controllable {
     private OptionBox2 optionBox;
     private boolean reloading = false;
     private boolean earnedKey = false;
+    private boolean opening;
+    private String doorForOpen;
+    private float openingTime = 0;
 
     public DungeonState(GameStateManager gsm) {
         super(gsm);
@@ -150,13 +159,28 @@ public class DungeonState extends GameState implements Controllable {
             time += dt;
             if (dialogueBox.isFinished() && time > 2f) {
                 time = 0;
-                stop();
+                if (nextState != -1) {
+                    stop();
+                }
             }
         }
+
+        if (opening) {
+            openingTime += dt;
+            if (openingTime > 0.6) {
+                openDoor(doorForOpen);
+                opening = false;
+                openingTime = 0;
+            }
+        }
+
     }
 
     private void stop() {
-        gsm.setState(nextState);
+        if (nextState != -1) {
+            gsm.setState(nextState);
+
+        }
         music.dispose();
         isStopped = true;
         canDraw = false;
@@ -279,7 +303,7 @@ public class DungeonState extends GameState implements Controllable {
             CircleShape cshape = new CircleShape();
             cshape.setRadius(50f / PPM);
             cdef.shape = cshape;
-            cdef.isSensor = true;
+            cdef.isSensor = false;
             cdef.filter.categoryBits = BIT_TROPA;
             cdef.filter.maskBits = BIT_PLAYER;
             cshape.dispose();
@@ -351,54 +375,66 @@ public class DungeonState extends GameState implements Controllable {
     public void loadStage(String s) {
         DialogNode node1;
         initFight();
+
+        gsm.setLastState(DUNGEON);
+
         switch (s) {
             case "door1":
                 node1 = new DialogNode("Дверь заперта... Ее нужно взломать!", 0);
                 dialog.addNode(node1);
                 dcontroller.startDialog(dialog);
-                nextState = PAINT;
-                canDraw = true;
-//                reloading = true;
-//                openDoor(s);
-//                reloading = false;
+//                nextState = PAINT;
+//                canDraw = true;
+
+                opening = true;
+                doorForOpen = s;
+
                 break;
             case "amuletChest":
-                node1 = new DialogNode("Поздравляем! Вы получили Амулет Времени!", 0);
-                dialog.addNode(node1);
-                dcontroller.startDialog(dialog);
-                //add amulet to the inventory
-                earnedAmulet = true;
+                if (!earnedAmulet) {
+                    node1 = new DialogNode("Поздравляем! Вы получили Амулет Времени!", 0);
+                    dialog.addNode(node1);
+                    dcontroller.startDialog(dialog);
+                    //add amulet to the inventory
+                    earnedAmulet = true;
+                }
+
                 break;
             case "keyChest":
-                node1 = new DialogNode("Вы получили ключ. Но от чего же он?", 0);
-                dialog.addNode(node1);
-                dcontroller.startDialog(dialog);
-                //add key to inventory
-                earnedKey = true;
+                if (!earnedKey) {
+                    node1 = new DialogNode("Вы получили ключ. Но от чего же он?", 0);
+                    dialog.addNode(node1);
+                    dcontroller.startDialog(dialog);
+                    //add key to inventory
+                    earnedKey = true;
+                }
                 break;
             case "door2":
                 node1 = new DialogNode("Дверь заперта... Ее нужно взломать!", 0);
                 dialog.addNode(node1);
                 dcontroller.startDialog(dialog);
-                nextState = PAINT;
-                canDraw = true;
-//                reloading = true;
-//                openDoor(s);
-//                reloading = false;
+//                nextState = PAINT;
+//                canDraw = true;
+
+                opening = true;
+                doorForOpen = s;
+
                 break;
             case "door3":
-                node1 = new DialogNode("Дверь заперта... Возможно, ключ от нее где-то рядом", 0);
+                node1 = new DialogNode("Дверь заперта на ключ...", 0);
                 dialog.addNode(node1);
                 dcontroller.startDialog(dialog);
-                nextState = PAINT;
-                canDraw = true;
-//                reloading = true;
-//                openDoor(s);
-//                reloading = false;
+//                nextState = PAINT;
+//                canDraw = true;
+
+                opening = true;
+                doorForOpen = s;
+
                 break;
             case "keyDoor":
                 if (earnedKey) {
-                    openDoor(s);
+                    opening = true;
+                    doorForOpen = s;
                     //delete key from the inventory
                 } else {
                     node1 = new DialogNode("Дверь заперта... Возможно, ключ от нее где-то рядом", 0);
@@ -414,6 +450,8 @@ public class DungeonState extends GameState implements Controllable {
                     node1 = new DialogNode("Вы не до конца исследовали локацию!", 0);
                     dialog.addNode(node1);
                     dcontroller.startDialog(dialog);
+                    nextState = -1;
+                    canDraw = true;
                 }
                 break;
             default:
@@ -422,32 +460,31 @@ public class DungeonState extends GameState implements Controllable {
     }
 
     private void openDoor(String s) {
+
+        try {
+            sleep(2000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
         MapLayer mlayer = tiledMap.getLayers().get("objects");
         if (mlayer == null) return;
-        entities = new PlayEntities();
 
-        for (MapObject mo : mlayer.getObjects()) {
-            BodyDef bdef = new BodyDef();
-            bdef.type = BodyDef.BodyType.StaticBody;
-            float x = (float) mo.getProperties().get("x") / PPM * 4;
-            float y = (float) mo.getProperties().get("y") / PPM * 4;
-            bdef.position.set(x, y);
+        for (int i = 0; i < entities.getEntityCount(); i++) {
+            B2DSprite sprite = entities.getEntity(i);
 
-            Body body = world.createBody(bdef);
-            FixtureDef cdef = new FixtureDef();
-            CircleShape cshape = new CircleShape();
-            cshape.setRadius(50f / PPM);
-            cdef.shape = cshape;
-            cdef.isSensor = true;
-            cdef.filter.categoryBits = BIT_TROPA;
-            cdef.filter.maskBits = BIT_PLAYER;
-            cshape.dispose();
+            if (!sprite.getBody().getUserData().equals(s)) {
+                continue;
+            }
 
+            sprite.getBody().getFixtureList().get(0).setSensor(true);
+            sprite.getBody().getFixtureList().get(0).setUserData(sprite.getBody().getFixtureList().get(0).getUserData() + "_opened");
 
-            body.createFixture(cdef).setUserData(mo.getName().equals(s) ? mo.getName() + "_opened" : mo.getName());
-            entities.addEntity(body, mo.getName().equals(s) ? mo.getName() + "_opened" : mo.getName());
-
+            TextureRegion[] regions = TextureRegion.split(MyGdxGame.res.getTexture(String.valueOf(sprite.getBody().getFixtureList().get(0).getUserData())), 32, 16)[0];
+            sprite.setAnimation(regions, 1 / 12f);
         }
+
+
     }
 
     @Override
