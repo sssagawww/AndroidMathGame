@@ -518,14 +518,16 @@ public class Forest extends GameState implements Controllable {
                 canDraw = true;
                 break;
             case "mushroom":
+                nextState = -1;
                 if(mushrooms == 0){
                     controller.getInventory().addItem("Чудесный\nгриб");
+                    mushrooms++;
+                    break;
                 }
                 mushrooms++;
                 if(mushrooms >= 6){
                     controller.getInventory().setAchievementVisibility(0);
                 }
-                nextState = -1;
                 controller.getInventory().getItem("Чудесный\nгриб").addItemCount();
                 break;
             case "next":

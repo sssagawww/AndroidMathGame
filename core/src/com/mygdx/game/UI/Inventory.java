@@ -99,8 +99,8 @@ public class Inventory extends Table {
     }
 
     private Table createAchievements() {
-        ArrayList<String> achievements = new ArrayList<>(Arrays.asList("Соберите все\nчудесные грибы.", "Вспугните зайца.", "Вытяните меч\n с силой 100.", "Вытяните меч\n с силой 100.", "Вытяните меч\n с силой 100."));
-        titles = new ArrayList<>(Arrays.asList("Грибной повелитель", "Охотник\nза мгновениями", "Легендарный воин", "Легендарный воин", "Легендарный воин"));
+        ArrayList<String> achievements = new ArrayList<>(Arrays.asList("Соберите все\nчудесные грибы.", "Вспугните зайца.", "Вытяните меч\n с силой 100.", "Как он\nтуда поместился?"));
+        titles = new ArrayList<>(Arrays.asList("Грибной повелитель", "Охотник\nза мгновениями", "Легендарный воин", "Сундук XXL"));
 
         scrollContent = new Table();
         for (int i = 0; i < achievements.size(); i++) {
@@ -152,6 +152,15 @@ public class Inventory extends Table {
         Item actor = new Item(name);
         itemsList.put(name, actor);
         items.add(actor).padRight(15f).padLeft(15f);
+    }
+
+    public void removeItem(String name){
+        items.removeActor(itemsList.get(name));
+        itemsList.remove(name);
+        System.out.println(itemsList);
+        if (itemsList == null) {
+            items.add(nothingLabel);
+        }
     }
 
     public Item getItem(String name) {
@@ -216,7 +225,7 @@ public class Inventory extends Table {
         private Label textLabel;
         private Image image;
         private String name;
-        private int count = 0;
+        private int count = 1;
 
         public Item(String name) {
             super(skin);

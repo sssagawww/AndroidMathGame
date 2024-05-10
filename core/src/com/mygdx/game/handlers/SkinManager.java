@@ -67,6 +67,7 @@ public class SkinManager {
         skin.add("Ромб", new Texture("controller/rhombus.png"));
 
         skin.add("Чудесный\nгриб", new Texture("UI/mushroom.png"));
+        skin.add("Ключ", new Texture("dungeon/key.png"));
 
         Label.LabelStyle lstyle = new Label.LabelStyle();
         lstyle.font = skin.getFont("font");
