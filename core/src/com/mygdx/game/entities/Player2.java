@@ -120,8 +120,8 @@ public class Player2 extends B2DSprite {
         }
         if (joyStick.getState() == 2) {
             move = true;
-            vely = 1; //up and right
-            velx = 1;
+            vely = (float) Math.sqrt(0.5); //up and right
+            velx = (float) Math.sqrt(0.5);
         }
         if (joyStick.getState() == 3) {
             move = true;
@@ -129,8 +129,8 @@ public class Player2 extends B2DSprite {
         }
         if (joyStick.getState() == 4) {
             move = true;
-            velx = 1; // right and down
-            vely = -1;
+            velx = (float) Math.sqrt(0.5); // right and down
+            vely = -(float) Math.sqrt(0.5);
         }
         if (joyStick.getState() == 5) {
             move = true; // down
@@ -138,8 +138,8 @@ public class Player2 extends B2DSprite {
         }
         if (joyStick.getState() == 6) {
             move = true;
-            velx = -1; // down and left
-            vely = -1;
+            velx = -(float) Math.sqrt(0.5); // down and left
+            vely = -(float) Math.sqrt(0.5);
         }
         if (joyStick.getState() == 7) {
             move = true; //left
@@ -147,8 +147,8 @@ public class Player2 extends B2DSprite {
         }
         if (joyStick.getState() == 8) {
             move = true;
-            velx = -1; //up and left
-            vely = 1;
+            velx = -(float) Math.sqrt(0.5); //up and left
+            vely = (float) Math.sqrt(0.5);
         }
 
         if (move) {

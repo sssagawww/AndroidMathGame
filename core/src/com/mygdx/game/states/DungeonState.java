@@ -15,6 +15,7 @@ import static java.lang.Thread.sleep;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -96,6 +97,8 @@ public class DungeonState extends GameState implements Controllable {
     private boolean opening;
     private String doorForOpen;
     private float openingTime = 0;
+    private Sound openingDoorSound;
+    private long soundId;
 
     public DungeonState(GameStateManager gsm) {
         super(gsm);
@@ -114,6 +117,8 @@ public class DungeonState extends GameState implements Controllable {
         createPlayer();
         createTiles();
         createNPC();
+
+        openingDoorSound = Gdx.audio.newSound(Gdx.files.internal("music/door_opening.mp3"));
 
         //initFight();
 
@@ -461,11 +466,9 @@ public class DungeonState extends GameState implements Controllable {
 
     private void openDoor(String s) {
 
-        try {
-            sleep(2000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        soundId = openingDoorSound.play(1.0f);
+        openingDoorSound.setVolume(soundId, 0.2f);
+        openingDoorSound.setLooping(soundId, false);
 
         MapLayer mlayer = tiledMap.getLayers().get("objects");
         if (mlayer == null) return;
