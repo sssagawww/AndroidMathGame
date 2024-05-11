@@ -455,7 +455,8 @@ public class Forest extends GameState implements Controllable {
         darkStage.addActor(root);
     }
 
-    public void loadStage(String s) {
+    @Override
+    public void loadStage(String s, Body contactBody) {
         DialogNode node1;
         gsm.setLastState(FOREST);
         switch (s) {

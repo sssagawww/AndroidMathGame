@@ -39,6 +39,7 @@ public class Inventory extends Table {
     private Image exitImage;
     private ArrayList<String> titles;
     private HashMap<String, Item> itemsList = new HashMap<>();
+    private int artefacts = 0;
 
     public Inventory(Skin skin, Controller controller) {
         super(skin);
@@ -69,10 +70,9 @@ public class Inventory extends Table {
         ringImage = new Image(new Texture("controller/square.png"));
 
         //картинки 3 предметов
-        ringImage = new Image(new Texture("controller/square.png"));
-        swordImage = new Image(new Texture("controller/star.png"));
-        amuletImage = new Image(new Texture("controller/circle.png"));
-
+        ringImage = new Image(new Texture("UI/ring.png"));
+        swordImage = new Image(new Texture("UI/sword.png"));
+        amuletImage = new Image(new Texture("UI/amulet.png"));
         images = new Image[]{ringImage, swordImage, amuletImage};
 
         playerImage = new Image(new Texture("entitySprites/idle.png"));
@@ -91,7 +91,11 @@ public class Inventory extends Table {
             images[i].setVisible(false);
         }
         rightTable.add(createItems()).row();
-        rightTable.add(imagesTable).padLeft(25f);
+        rightTable.add(imagesTable).padLeft(25f).row();
+
+        Label artifacts = new Label("\n", titleStyle);
+        artifacts.setText("Артефакты");
+        rightTable.add(artifacts);
 
         //uiTable.debug();
         uiTable.add(rightTable).right();
@@ -119,6 +123,10 @@ public class Inventory extends Table {
         scrollPane.setCancelTouchFocus(false);
 
         Table achievementsTable = new Table(getSkin());
+        Label label = new Label("\n", titleStyle);
+        label.setText("Достижения");
+
+        achievementsTable.add(label).row();
         achievementsTable.add(scrollPane).width(getPrefWidth() / 2.5f).height(getPrefHeight() / 1.1f).align(Align.left).pad(10f);
         return achievementsTable;
     }
@@ -169,6 +177,15 @@ public class Inventory extends Table {
 
     public void setImgVisibility(int num, boolean visibility) {
         images[num].setVisible(visibility);
+        artefacts++;
+    }
+
+    public int getArtefacts() {
+        return artefacts;
+    }
+
+    public void setArtefacts(int artefacts) {
+        this.artefacts = artefacts;
     }
 
     public void setAchievementVisibility(int num) {

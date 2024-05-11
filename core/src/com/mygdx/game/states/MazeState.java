@@ -358,7 +358,8 @@ public class MazeState extends GameState implements Controllable {
     }
 
 
-    public void loadStage(String s) {
+    @Override
+    public void loadStage(String s, Body contactBody) {
         DialogNode node1;
         gsm.setLastState(MAZE);
         switch (s) {

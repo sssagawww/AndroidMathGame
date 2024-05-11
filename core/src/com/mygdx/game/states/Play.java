@@ -57,8 +57,8 @@ public class Play extends GameState implements Controllable {
     private float tileSize;
     private int tileMapWidth;
     private int tileMapHeight;
-    private int[] backgroundLayers = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
-    private int[] foregroundLayers = {12};
+    private int[] backgroundLayers = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+    private int[] foregroundLayers = {13};
     private Stage uiStage;
     private Stage controllerStage;
     private Table dialogRoot;
@@ -143,6 +143,11 @@ public class Play extends GameState implements Controllable {
 
         //если этот state был выгружен, то при запуске все процессы должны возобновиться (удаляются ли они в multiplexer при выгрузке или просто останавливаются?)
         if (isStopped) {
+            //игрок выходит из подземелья не там, где зашёл
+            if (nextState == DUNGEON) {
+                player.getBody().setTransform(205f, 80f, 0);
+            }
+
             player.getBody().setLinearVelocity(0, 0);
             music.play();
             isStopped = false;
@@ -152,6 +157,8 @@ public class Play extends GameState implements Controllable {
             cam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
             multiplexer.addProcessor(controllerStage);
             Gdx.input.setInputProcessor(multiplexer);
+
+            storyNext();
         }
 
         if (controller.isMenuPressed()) {
@@ -172,8 +179,19 @@ public class Play extends GameState implements Controllable {
             uiStage.act(dt);
             dcontroller.update(dt);
             time += dt;
+            //активация ловушки
+            if (nextState == DUNGEON && time > 1f) {
+                player.getBody().setLinearVelocity(0, -1.5f);
+                TiledMapTileLayer layer = (TiledMapTileLayer) tiledMap.getLayers().get("trap");
+                layer.setVisible(true);
+            }
             if (dialogBox.isFinished() && time > 2f && dcontroller.isFinished()) {
                 time = 0;
+                //коллизия ловушки
+                if (nextState == DUNGEON) {
+                    TiledMapTileLayer layer = (TiledMapTileLayer) tiledMap.getLayers().get("trap");
+                    createLayer(layer, BIT_TROPA, BIT_PLAYER, false);
+                }
                 stop();
             }
         }
@@ -537,7 +555,8 @@ public class Play extends GameState implements Controllable {
         prefs.putFloat(PREF_Y, player.getPosition().y).flush();
     }
 
-    public void loadStage(String s) {
+    @Override
+    public void loadStage(String s, Body contactBody) {
         DialogNode node1;
         gsm.setLastState(PLAY);
         switch (s) {
@@ -584,7 +603,9 @@ public class Play extends GameState implements Controllable {
                 canDraw = true;
                 break;
             case "signDungeon":
-                node1 = new DialogNode("dungeon", 0);
+                contactBody.getFixtureList().get(0).setUserData("collided");
+                entities.removeEntity(contactBody);
+                node1 = new DialogNode("Осторожно! Провал грунта!", 0);
                 dialog.addNode(node1);
                 dcontroller.startDialog(dialog);
                 nextState = DUNGEON;
@@ -613,6 +634,23 @@ public class Play extends GameState implements Controllable {
                 break;
             default:
                 break;
+        }
+    }
+
+    private void storyNext() {
+        if (controller.isAllArtefacts()) {
+            controller.setAllArtefacts(5);
+            DialogNode node1 = new DialogNode("Все артефакты собраны.", 0);
+            DialogNode node2 = new DialogNode("Пора победить зло.", 1);
+            DialogNode node3 = new DialogNode("Нужно найти убежище Азрота Поглотителя.", 2);
+            node1.makeLinear(1);
+            node2.makeLinear(2);
+            dialog.addNode(node1);
+            dialog.addNode(node2);
+            dialog.addNode(node3);
+            dcontroller.startDialog(dialog);
+            nextState = -1;
+            canDraw = true;
         }
     }
 

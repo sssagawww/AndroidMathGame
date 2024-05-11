@@ -367,7 +367,7 @@ public class DungeonState extends GameState implements Controllable {
     }
 
     @Override
-    public void loadStage(String s) {
+    public void loadStage(String s, Body contactBody) {
         DialogNode node1;
 
         gsm.setLastState(DUNGEON);
@@ -487,7 +487,8 @@ public class DungeonState extends GameState implements Controllable {
 
     @Override
     public void dispose() {
-
+        player.stopSounds();
+        isStopped = true;
     }
 
     @Override

@@ -5,6 +5,6 @@ import com.mygdx.game.UI.JoyStick;
 
 public interface Controllable {
     public JoyStick getJoyStick();
-    public void loadStage(String s);
+    public void loadStage(String s, Body contactBody);
     public void removeCollisionEntity(Body body);
 }
