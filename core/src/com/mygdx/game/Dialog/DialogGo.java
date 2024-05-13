@@ -21,6 +21,11 @@ public class DialogGo {
     public String getText(){
         return currentNode.getText();
     }
+
+    public DialogNode getCurrentNode() {
+        return currentNode;
+    }
+
     public DialogNode.NODE_TYPE getType(){
         return currentNode.getType();
     }

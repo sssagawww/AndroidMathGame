@@ -72,7 +72,7 @@ public class Inventory extends Table {
         //картинки 3 предметов
         ringImage = new Image(new Texture("UI/ring.png"));
         swordImage = new Image(new Texture("UI/sword.png"));
-        amuletImage = new Image(new Texture("UI/amulet.png"));
+        amuletImage = new Image(new Texture("UI/amulet2.png"));
         images = new Image[]{ringImage, swordImage, amuletImage};
 
         playerImage = new Image(new Texture("entitySprites/idle.png"));
@@ -271,6 +271,7 @@ public class Inventory extends Table {
 
         public void setCount(int count) {
             this.count = count;
+            textLabel.setText(name + " " + count + " шт.");
         }
 
         public Label getTextLabel() {

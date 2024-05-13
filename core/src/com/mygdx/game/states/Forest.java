@@ -76,7 +76,6 @@ public class Forest extends GameState implements Controllable {
     private int tileMapWidth;
     private int tileMapHeight;
     private Stage uiStage;
-    private Stage controllerStage;
     private Stage darkStage;
     private Table dialogRoot;
     private DialogBox dialogBox;
@@ -87,7 +86,8 @@ public class Forest extends GameState implements Controllable {
     private DialogController dcontroller;
     public boolean canDraw;
     private float time = 0;
-    private Controller controller;
+    //private Stage controllerStage;
+    //private Controller controller;
     private JoyStick joyStick;
     private ShapeRenderer shapeRenderer;
     private Vector3 mouse;
@@ -419,16 +419,16 @@ public class Forest extends GameState implements Controllable {
     }
 
     private void initController() {
-        controllerStage = new Stage(new ScreenViewport());
+        /*controllerStage = new Stage(new ScreenViewport());
         controllerStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
 
-        controller = new Controller(skin_this);
+        //controller = new Controller(skin_this);
         controller.setVisible(true);
 
         Table controllerRoot = new Table();
         controllerRoot.setFillParent(true);
         controllerRoot.add(controller).expand().align(Align.bottomLeft);
-        controllerStage.addActor(controllerRoot);
+        controllerStage.addActor(controllerRoot);*/
 
         multiplexer.addProcessor(controllerStage);
         Gdx.input.setInputProcessor(multiplexer);

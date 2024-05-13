@@ -60,7 +60,6 @@ public class Play extends GameState implements Controllable {
     private int[] backgroundLayers = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
     private int[] foregroundLayers = {13};
     private Stage uiStage;
-    private Stage controllerStage;
     private Table dialogRoot;
     private DialogBox dialogBox;
     private OptionBox2 optionBox;
@@ -74,7 +73,9 @@ public class Play extends GameState implements Controllable {
     public boolean savePlay;
     private float time = 0;
     public BodyDef bdef;
-    private Controller controller;
+    public Body contactBody;
+    //private Stage controllerStage;
+    //private Controller controller;
     // -------- JoyStick ----------
     private JoyStick joyStick;
     private ShapeRenderer shapeRenderer;
@@ -156,6 +157,8 @@ public class Play extends GameState implements Controllable {
             }
             cam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
             multiplexer.addProcessor(controllerStage);
+            multiplexer.addProcessor(dcontroller);
+            multiplexer.addProcessor(uiStage);
             Gdx.input.setInputProcessor(multiplexer);
 
             storyNext();
@@ -235,8 +238,10 @@ public class Play extends GameState implements Controllable {
         //рисует UI, когда произошло взаимодействие
         if (canDraw) {
             uiStage.draw();
-            if (optionBox.getBtnId() == 0 && optionBox.isClicked()) {
+            if (optionBox.getBtnId() == 0 && optionBox.isClicked() && contactBody.getUserData().equals("hooded")) {
                 movableNPCs.get("hooded").setDirection(1, -0.5f, 20, 58, 58);
+            } else if(contactBody.getUserData().equals("npc")){
+                checkDeal();
             }
         }
 
@@ -467,17 +472,22 @@ public class Play extends GameState implements Controllable {
     }
 
     private void initController() {
-        controllerStage = new Stage(new ScreenViewport());
+        /*controllerStage = new Stage(new ScreenViewport());
         controllerStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
 
-        controller = new Controller(skin_this);
+        //controller = new Controller(skin_this);
         controller.setVisible(true);
 
         Table controllerRoot = new Table();
         controllerRoot.setFillParent(true);
         controllerRoot.add(controller).expand().align(Align.bottomLeft);
-        controllerStage.addActor(controllerRoot);
+        controllerStage.addActor(controllerRoot);*/
 
+        //тест
+        /*controller.getInventory().addItem("Чудесный\nгриб");
+        for (int i = 0; i < 6; i++) {
+            controller.getInventory().getItem("Чудесный\nгриб").setCount(6);
+        }*/
         multiplexer.addProcessor(controllerStage);
         Gdx.input.setInputProcessor(multiplexer);
     }
@@ -557,6 +567,7 @@ public class Play extends GameState implements Controllable {
 
     @Override
     public void loadStage(String s, Body contactBody) {
+        this.contactBody = contactBody;
         DialogNode node1;
         gsm.setLastState(PLAY);
         switch (s) {
@@ -568,22 +579,49 @@ public class Play extends GameState implements Controllable {
                 canDraw = true;
                 break;
             case "npc":
-                node1 = new DialogNode("Начнем испытание!", 0);
+                node1 = new DialogNode("Мое зелье — настоящее чудо!", 0);
+                DialogNode node2 = new DialogNode("И оно станет твоим всего за 42 гриба!", 1);
+                DialogNode node3 = new DialogNode("Ну, что скажешь?", 2);
+                DialogNode node4 = new DialogNode("Как!? Тогда ради тебя сделаю скидку.\n6 грибов и по рукам.\n", 3);
+                DialogNode node5 = new DialogNode("Сначала принеси грибы!", 5);
+                DialogNode node6 = new DialogNode("Ладно, приходи еще.", 6);
+                DialogNode node8 = new DialogNode("Все равно загляни ко мне еще!", 8);
+                if (controller.getInventory().getItem("Чудесный\nгриб") != null && controller.getInventory().getItem("Чудесный\nгриб").getCount() >= 6) {
+                    node5 = new DialogNode("Отлично! Забирай.", 5);
+                    node6 = new DialogNode("Оно тебе точно поможет в приключениях!", 6);
+                    DialogNode node7 = new DialogNode("Возьми хотя бы за 5!\nБольше скидок не будет.\n", 7);
+                    node7.addChoice("Беру.", 5);
+                    node6.makeLinear(7);
+                    dialog.addNode(node7);
+                }
+                node1.makeLinear(node2.getId());
+                node2.makeLinear(node3.getId());
+                node3.addChoice("Слишком дорого!", 3);
+                node3.addChoice("Спасибо, откажусь.", 8);
+                node4.addChoice("Беру.", 5);
+                node4.addChoice("Снова откажусь.", 6);
+
                 dialog.addNode(node1);
+                dialog.addNode(node2);
+                dialog.addNode(node3);
+                dialog.addNode(node4);
+                dialog.addNode(node5);
+                dialog.addNode(node6);
+                dialog.addNode(node8);
                 dcontroller.startDialog(dialog);
-                nextState = PAINT;
-                entities.setCurEntity(1);
+
+                nextState = -1;
                 canDraw = true;
                 break;
             case "hooded":
                 if (contact) break;
                 else contact = true;
                 node1 = new DialogNode("Приветствую, путник!", 0);
-                DialogNode node2 = new DialogNode("Не ожидал встретить здесь кого-то.", 1);
-                DialogNode node3 = new DialogNode("Не хочешь исследовать со мной руины?", 2);
-                DialogNode node4 = new DialogNode("Тогда пойдем!", 3);
-                DialogNode node5 = new DialogNode("Ладно, если что...", 5);
-                DialogNode node6 = new DialogNode("Ты можешь присоединиться в любой момент.", 6);
+                node2 = new DialogNode("Не ожидал встретить здесь кого-то.", 1);
+                node3 = new DialogNode("Не хочешь исследовать со мной руины?", 2);
+                node4 = new DialogNode("Тогда пойдем!", 3);
+                node5 = new DialogNode("Ладно, если что...", 5);
+                node6 = new DialogNode("Ты можешь присоединиться в любой момент.", 6);
 
                 node1.makeLinear(node2.getId());
                 node2.makeLinear(node3.getId());
@@ -634,6 +672,25 @@ public class Play extends GameState implements Controllable {
                 break;
             default:
                 break;
+        }
+    }
+
+    private void checkDeal(){
+        if (optionBox.getBtnId() == 0 && optionBox.isClicked() && dcontroller.getCurNode().getId() == 3) {
+            System.out.println(optionBox.getBtnId() + " nodeID, " +  controller.getInventory().getItem("Чудесный\nгриб").getCount());
+            if (controller.getInventory().getItem("Чудесный\nгриб") != null && controller.getInventory().getItem("Чудесный\nгриб").getCount() >= 6) {
+                controller.getInventory().removeItem("Чудесный\nгриб");
+                controller.getInventory().addItem("Волшебное\nзелье");
+                contactBody.getFixtureList().get(0).setUserData("collided");
+                entities.removeEntity(contactBody);
+            }
+        } else if (optionBox.getBtnId() == 0 && optionBox.isClicked() && dcontroller.getCurNode().getId() == 7) {
+            if (controller.getInventory().getItem("Чудесный\nгриб") != null && controller.getInventory().getItem("Чудесный\nгриб").getCount() >= 6) {
+                controller.getInventory().getItem("Чудесный\nгриб").setCount(1);
+                controller.getInventory().addItem("Волшебное\nзелье");
+                contactBody.getFixtureList().get(0).setUserData("collided");
+                entities.removeEntity(contactBody);
+            }
         }
     }
 

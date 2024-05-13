@@ -7,7 +7,12 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.mygdx.game.UI.Controller;
 import com.mygdx.game.battle.examples.ExampleDatabase;
 import com.mygdx.game.battle.steps.StepDatabase;
 import com.mygdx.game.db.DbWrapper;
@@ -28,6 +33,8 @@ public class MyGdxGame implements ApplicationListener {
     private SpriteBatch sb;
     private AssetManager assetManager;
     private BoundedCamera cam;
+    private Controller controller;
+    private Stage controllerStage;
     private GameStateManager gsm;
 
     //public static final float STEP = 1 / 60f;
@@ -101,6 +108,16 @@ public class MyGdxGame implements ApplicationListener {
         exampleDatabase = new ExampleDatabase();
         figuresDatabase = new FiguresDatabase(this);
         gsm = new GameStateManager(this);
+
+        controllerStage = new Stage(new ScreenViewport());
+        controllerStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+        controller = new Controller(skin);
+        controller.setVisible(true);
+
+        Table controllerRoot = new Table();
+        controllerRoot.setFillParent(true);
+        controllerRoot.add(controller).expand().align(Align.bottomLeft);
+        controllerStage.addActor(controllerRoot);
     }
 
     @Override
@@ -181,5 +198,13 @@ public class MyGdxGame implements ApplicationListener {
 
     public DbWrapper getDbWrapper() {
         return dbWrapper;
+    }
+
+    public Controller getController() {
+        return controller;
+    }
+
+    public Stage getControllerStage() {
+        return controllerStage;
     }
 }
