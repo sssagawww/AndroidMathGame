@@ -103,8 +103,8 @@ public class Inventory extends Table {
     }
 
     private Table createAchievements() {
-        ArrayList<String> achievements = new ArrayList<>(Arrays.asList("Соберите все\nчудесные грибы.", "Вспугните зайца.", "Вытяните меч\n с силой 100.", "Как он\nтуда поместился?"));
-        titles = new ArrayList<>(Arrays.asList("Грибной повелитель", "Охотник\nза мгновениями", "Легендарный воин", "Сундук XXL"));
+        ArrayList<String> achievements = new ArrayList<>(Arrays.asList("Соберите все\nчудесные грибы.", "Вспугните зайца.", "Вытяните меч\n с силой 100.", "Как он\nтуда поместился?", "Сбейте цену\nдо 5 грибов."));
+        titles = new ArrayList<>(Arrays.asList("Грибной повелитель", "Охотник\nза мгновениями", "Легендарный воин", "Сундук XXL", "Красноречие 100"));
 
         scrollContent = new Table();
         for (int i = 0; i < achievements.size(); i++) {

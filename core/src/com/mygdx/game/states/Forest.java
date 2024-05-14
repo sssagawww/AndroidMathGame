@@ -15,6 +15,7 @@ import static com.mygdx.game.handlers.GameStateManager.RHYTHM;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -99,6 +100,7 @@ public class Forest extends GameState implements Controllable {
     private int[] foregroundLayers = {3, 4, 5, 6, 7, 8};
     private int mushrooms = 0;
     private MovableNPC npc;
+    private Sound mushroomSound;
 
     public Forest(GameStateManager gsm) {
         super(gsm);
@@ -109,6 +111,7 @@ public class Forest extends GameState implements Controllable {
         cl = new MyContactListener(this);
         world.setContactListener(cl);
         skin_this = game.getSkin();
+        mushroomSound = Gdx.audio.newSound(Gdx.files.internal("music/pick_up_mushroom2.mp3"));
 
         initJoyStick();
         initController();
@@ -519,6 +522,7 @@ public class Forest extends GameState implements Controllable {
                 canDraw = true;
                 break;
             case "mushroom":
+                mushroomSound.play(1f);
                 nextState = -1;
                 if(mushrooms == 0){
                     controller.getInventory().addItem("Чудесный\nгриб");
