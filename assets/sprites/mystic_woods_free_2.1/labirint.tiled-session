@@ -29,10 +29,10 @@
         },
         "bosslocation.tmx": {
             "scale": 3,
-            "selectedLayer": 0,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 107.33333333333331,
-                "y": 132
+                "x": 106.99999999999999,
+                "y": 131.66666666666663
             }
         },
         "darkDecor.tsx": {

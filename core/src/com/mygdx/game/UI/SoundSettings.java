@@ -62,6 +62,8 @@ public class SoundSettings extends Table {
         sliderBG = new Slider(0, 100, 1, false, sliderStyle);
         sliderSoundEff = new Slider(0, 100, 1, false, sliderStyle);
 
+
+
         uiTable.add(titleLable).left().top();
         uiTable.add(bgSoundsLbl);
         uiTable.add(soundEffLbl);
