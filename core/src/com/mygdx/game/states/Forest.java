@@ -569,6 +569,11 @@ public class Forest extends GameState implements Controllable {
         entities.removeEntity(removedBody);
     }
 
+    @Override
+    public Controller getController() {
+        return controller;
+    }
+
     private void stop() {
         if (nextState != -1) {
             gsm.setState(nextState);

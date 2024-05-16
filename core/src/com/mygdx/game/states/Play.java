@@ -139,6 +139,8 @@ public class Play extends GameState implements Controllable {
 
         player.updatePL();
 
+        music.setVolume(getBgVolume());
+
         //нужно обновление размера экрана, и тогда будет resize всех компонентов?
 
         //если этот state был выгружен, то при запуске все процессы должны возобновиться (удаляются ли они в multiplexer при выгрузке или просто останавливаются?)
@@ -178,6 +180,10 @@ public class Play extends GameState implements Controllable {
             }
         }
         controllerStage.act(dt);
+    }
+
+    private float getBgVolume() {
+        return controller.getSoundSettings().getSliderBgPercent();
     }
 
     @Override

@@ -3,7 +3,7 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "dungeon.tmx",
+    "activeFile": "bosslocation.tmx",
     "expandedProjectPaths": [
         "."
     ],
@@ -12,6 +12,9 @@
         "": {
             "scaleInDock": 1
         },
+        "AdventureBegins_Demo.tsx": {
+            "scaleInDock": 1.5
+        },
         "Dungeon_Tileset.tsx": {
             "scaleInDock": 1
         },
@@ -19,6 +22,20 @@
             "scaleInDock": 1
         },
         "Water.tsx": {
+            "scaleInDock": 1
+        },
+        "bird.tsx": {
+            "scaleInDock": 1
+        },
+        "bosslocation.tmx": {
+            "scale": 3,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 107.33333333333331,
+                "y": 132
+            }
+        },
+        "darkDecor.tsx": {
             "scaleInDock": 1
         },
         "darkGrass.tsx": {
@@ -42,8 +59,8 @@
             "scale": 1.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 308.66666666666663,
-                "y": 184.66666666666669
+                "x": 299.66666666666663,
+                "y": 159.99999999999997
             }
         },
         "fences.tsx": {
@@ -55,19 +72,25 @@
             "selectedLayer": 1,
             "viewCenter": {
                 "x": 151.86960690316397,
-                "y": 87.74688398849474
+                "y": 88.05369127516778
             }
         },
         "forest.tmx": {
             "scale": 1.9460156249999998,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 319.6274438957807,
+                "x": 297.53101288690834,
                 "y": 160.32759243646876
             }
         },
+        "fox32.tsx": {
+            "scaleInDock": 1
+        },
         "grass.tsx": {
             "scaleInDock": 3
+        },
+        "houses.tsx": {
+            "scaleInDock": 1
         },
         "labirint.tmx": {
             "expandedObjectLayers": [
@@ -76,8 +99,8 @@
             "scale": 8,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 320,
-                "y": 302.25
+                "x": 316.875,
+                "y": 320
             }
         },
         "labirint.tmx#chest": {
@@ -110,14 +133,31 @@
                 "y": 134.0263410203361
             }
         },
+        "menu2.tmx": {
+            "scale": 2.188392857142857,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 223.90860873113013,
+                "y": 152.16646266829866
+            }
+        },
         "plains2.tsx": {
             "scaleInDock": 2
+        },
+        "ruins.tsx": {
+            "scaleInDock": 1
         },
         "setGui.tsx": {
             "scaleInDock": 1
         },
+        "signs.tsx": {
+            "scaleInDock": 1
+        },
         "trees.tsx": {
             "scaleInDock": 2
+        },
+        "waterPlains.tsx": {
+            "scaleInDock": 1
         }
     },
     "last.externalTilesetPath": "C:/Users/andre/AndroidStudioProjects/AndroidMathGame/assets/sprites/mystic_woods_free_2.1/tilesets/walls",
@@ -132,15 +172,19 @@
         "labirint.tmx",
         "fightmap.tmx",
         "dungeon.tmx",
-        "forest.tmx"
+        "forest.tmx",
+        "menu2.tmx",
+        "bosslocation.tmx"
     ],
     "project": "labirint.tiled-project",
     "recentFiles": [
         "map.tmx",
         "labirint.tmx",
         "fightmap.tmx",
-        "forest.tmx",
         "dungeon.tmx",
+        "forest.tmx",
+        "menu2.tmx",
+        "bosslocation.tmx",
         "menu.tmx",
         "map2.tmx"
     ],

@@ -482,6 +482,11 @@ public class DungeonState extends GameState implements Controllable {
     }
 
     @Override
+    public Controller getController() {
+        return controller;
+    }
+
+    @Override
     public void handleInput() {
     }
 
