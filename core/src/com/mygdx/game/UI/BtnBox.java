@@ -20,6 +20,7 @@ public class BtnBox extends Table {
         MENU_TO_PLAY,
         EXIT,
         SAVE,
+        STATISTICS,
         SAVE_GAME,
         NON,
         CLEAR,

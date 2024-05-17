@@ -46,6 +46,7 @@ public class MyGdxGame implements ApplicationListener {
     private FiguresDatabase figuresDatabase;
     private DbWrapper dbWrapper;
     public boolean save = false;
+    public static float gameTime = 0;
 
     public MyGdxGame() {
     }
@@ -59,6 +60,7 @@ public class MyGdxGame implements ApplicationListener {
         if (Gdx.app.getType() == Application.ApplicationType.Android) {
             V_WIDTH = width; //Gdx.graphics.getWidth();
             V_HEIGHT = height; //Gdx.graphics.getHeight();
+            if(dbWrapper.getProgress().size() != 0) gameTime = dbWrapper.getProgress().get(dbWrapper.getProgress().size()-1).getTime();
         }
 
         //V_WIDTH = (int) ((Gdx.graphics.getWidth()/1216f)*1216);
@@ -135,6 +137,7 @@ public class MyGdxGame implements ApplicationListener {
         MathUtils.clamp(Gdx.graphics.getDeltaTime(),-1f,0.0168f);???
         System.out.println(Gdx.graphics.getDeltaTime()-0.01f);*/
 
+        gameTime += Gdx.graphics.getDeltaTime();
         gsm.update(Gdx.graphics.getDeltaTime()); // ???
         gsm.render();
     }

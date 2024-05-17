@@ -4,17 +4,22 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.UI.*;
+import com.mygdx.game.battle.examples.TrueExample;
+import com.mygdx.game.handlers.Animation;
 import com.mygdx.game.handlers.GameStateManager;
 
 import static com.mygdx.game.MyGdxGame.V_HEIGHT;
@@ -34,13 +39,12 @@ public class Menu2 extends GameState {
     // UI
     private Table root;
     private Stage uiStage;
-    //private MenuBtn2 btn;
+    private Statistics statistics;
     private BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
     private GlyphLayout layout;
-    /*private MenuBtn btn;
-    private MenuBtn btn2;
-    private MenuBtn btn3;*/
     private BtnBox btnBox;
+    private Texture bgImg;
+    private Animation animation;
     // END UI
 
     public Menu2(GameStateManager gsm) {
@@ -48,6 +52,11 @@ public class Menu2 extends GameState {
         game = gsm.game();
         play = gsm.getPlay();
         multiplexer = new InputMultiplexer();
+
+        /*Texture tex = MyGdxGame.res.getTexture("gnomik");
+        TextureRegion[] sprites = TextureRegion.split(tex, 120, 129)[3];
+        animation = new Animation(sprites, 1/10f);
+        bgImg = new Texture("UI/bg.png");*/
 
         font.setColor(Color.BLACK);
         layout = new GlyphLayout(font, "MathGame");
@@ -66,7 +75,7 @@ public class Menu2 extends GameState {
     @Override
     public void update(float dt) {
         uiStage.act(dt);
-
+        //animation.update(dt);
         checkBtns();
     }
 
@@ -83,6 +92,10 @@ public class Menu2 extends GameState {
         sb.setProjectionMatrix(cam.combined);
 
         sb.begin();
+
+        /*sb.draw(bgImg, 0, 0, V_WIDTH, V_HEIGHT);
+        sb.draw(animation.getFrame(), V_WIDTH - V_WIDTH/3f, 0);*/
+
         font.getData().setScale(2);
         layout.setText(font, "MathGame");
         font.draw(sb, layout, V_WIDTH/2f-layout.width/2, V_HEIGHT/2f+layout.height);
@@ -113,12 +126,17 @@ public class Menu2 extends GameState {
         btnBox.addBtn("Новая игра", MENU_TO_PLAY);
         btnBox.addBtn("Продолжить", SAVE_GAME);
         btnBox.addBtn("Сохранить", SAVE);
+        btnBox.addBtn("Статистика", STATISTICS);
         btnBox.addBtn("Выйти", EXIT);
+
+        statistics = new Statistics(game.getSkin());
+        statistics.setVisible(false);
 
         Table table = new Table();
 
         table.add(btnBox);
-        root.add(table).expand().align(Align.bottom).padBottom(100f);
+        root.add(table).expand().align(Align.bottom).padBottom(100f).expand();
+        root.add(statistics).right().padRight(25f);
 
         multiplexer.addProcessor(uiStage);
         Gdx.input.setInputProcessor(multiplexer);
@@ -139,8 +157,12 @@ public class Menu2 extends GameState {
                 break;
             case SAVE:
                 play.save();
-                btnBox.setState(NON);
+                break;
+            case STATISTICS:
+                statistics.setVisible(!statistics.isVisible());
+                break;
         }
+        btnBox.setState(NON);
     }
 
     @Override

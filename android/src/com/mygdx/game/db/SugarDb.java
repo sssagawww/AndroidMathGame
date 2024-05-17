@@ -47,7 +47,7 @@ public class SugarDb implements DbWrapper {
         List<SugarProgress> list = SugarProgress.listAll(SugarProgress.class);
         ArrayList<Progress> progresses = new ArrayList<>();
         for (SugarProgress sf : list) {
-            progresses.add(new Progress(sf.isRingImage(), sf.isSwordImage(), sf.isAmuletImage(), sf.getArtefactsCount(), sf.getAchievements(), sf.getItems()));
+            progresses.add(new Progress(sf.isRingImage(), sf.isSwordImage(), sf.isAmuletImage(), sf.getArtefactsCount(), sf.getAchievements(), sf.getItems(), sf.getTime()));
         }
         return progresses;
     }

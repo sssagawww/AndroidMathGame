@@ -15,6 +15,7 @@ public class SugarProgress extends SugarRecord {
     private int artefactsCount;
     private String achievements;
     private String items;
+    private float time;
     @Ignore
     private Type achievementsType =  new TypeToken<ArrayList<Integer>>(){}.getType();
     @Ignore
@@ -30,6 +31,7 @@ public class SugarProgress extends SugarRecord {
         this.artefactsCount = progress.getArtefactsCount();
         this.achievements = getJsonAchievements(progress.getAchievements());
         this.items = getJsonItems(progress.getItems());
+        this.time = progress.getTime();
     }
 
     public boolean isSwordImage() {
@@ -62,5 +64,9 @@ public class SugarProgress extends SugarRecord {
 
     public String getJsonItems(HashMap<String, Integer> list) {
         return SugarDb.getGson().toJson(list, itemsType);
+    }
+
+    public float getTime() {
+        return time;
     }
 }

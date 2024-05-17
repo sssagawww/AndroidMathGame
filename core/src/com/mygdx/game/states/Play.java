@@ -571,7 +571,7 @@ public class Play extends GameState implements Controllable {
         //сохранение прогресса (инвентаря)
         Inventory inventory = controller.getInventory();
         Progress progress = new Progress(inventory.getImgVisibility(0),inventory.getImgVisibility(1), inventory.getImgVisibility(2), inventory.getArtefacts(),
-                inventory.getAchievementsVisibility(), inventory.getItems());
+                inventory.getAchievementsVisibility(), inventory.getItems(), gameTime);
         game.getDbWrapper().saveProgress(progress);
     }
 
