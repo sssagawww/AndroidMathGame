@@ -24,11 +24,12 @@ public class GameStateManager {
     public static final int RHYTHM = 8;
     public static final int BLACK_SCREEN = 100;
     public static final int DUNGEON = 9;
+    public static final int BOSSFIGHT = 10;
 
     public GameStateManager(MyGdxGame game) {
         this.game = game;
         gameStates = new Stack<GameState>();
-        pushState(MENU);
+        pushState(NEW_GAME);
     }
 
     //peek - возвращает верхний элемент
@@ -67,6 +68,11 @@ public class GameStateManager {
         } else if (state == DUNGEON) {
             if (dungeonState==null) return dungeonState = new DungeonState(this);
             return dungeonState;
+        } else if (state == BOSSFIGHT) {
+            return
+                    new BossFightState
+                            (this
+            );
         }
         return null;
     }
