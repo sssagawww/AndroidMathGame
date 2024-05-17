@@ -21,7 +21,7 @@ public class SoundSettings extends Table {
     private Skin skin;
     private Label.LabelStyle lstyle;
     private Label.LabelStyle titleStyle;
-    private Label titleLable, bgSoundsLbl, soundEffLbl;
+    private Label titleLabel, bgSoundsLbl, soundEffLbl;
     private Slider.SliderStyle sliderStyle;
     private Slider sliderBG, sliderSoundEff;
 
@@ -29,7 +29,7 @@ public class SoundSettings extends Table {
         super(skin);
         this.skin = skin;
         uiTable = new Table();
-        this.add(uiTable).width(V_WIDTH / 1.2f).height(V_HEIGHT / 1.2f);
+        this.add(uiTable).width(V_WIDTH / 3f).height(V_HEIGHT / 2f);
         this.setBackground("menuBtn_up");
 
         BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
@@ -37,7 +37,7 @@ public class SoundSettings extends Table {
         lstyle = new Label.LabelStyle(font, Color.DARK_GRAY);
         titleStyle = new Label.LabelStyle(font, Color.BLACK);
 
-        titleLable = new Label("Настройки звука", titleStyle);
+        titleLabel = new Label("Настройки звука", titleStyle);
         bgSoundsLbl = new Label("Фоновые звуки", lstyle);
         soundEffLbl = new Label("Звуковые эффекты", lstyle);
 
@@ -60,17 +60,16 @@ public class SoundSettings extends Table {
         sliderStyle.background = skin.getDrawable("menuBtn_up");
 
         sliderBG = new Slider(0, 100, 1, false, sliderStyle);
+        sliderBG.setVisualPercent(1);
         sliderSoundEff = new Slider(0, 100, 1, false, sliderStyle);
+        sliderSoundEff.setVisualPercent(1);
 
-
-
-        uiTable.add(titleLable).left().top();
+        uiTable.add(titleLabel).center();
+        uiTable.add(exitImage).align(Align.topRight).width(exitImage.getWidth() * 3).height(exitImage.getHeight() * 3).row();
         uiTable.add(bgSoundsLbl);
+        uiTable.add(sliderBG).align(Align.topLeft).row();
         uiTable.add(soundEffLbl);
-        uiTable.add(sliderBG).align(Align.topLeft);
         uiTable.add(sliderSoundEff);
-        uiTable.add(exitImage).setActorBounds(0, 0, exitImage.getWidth() * 5, exitImage.getHeight() * 5);
-
     }
 
     public float getSliderBgPercent() {

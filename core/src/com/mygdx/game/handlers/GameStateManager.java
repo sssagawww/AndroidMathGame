@@ -29,7 +29,7 @@ public class GameStateManager {
     public GameStateManager(MyGdxGame game) {
         this.game = game;
         gameStates = new Stack<GameState>();
-        pushState(BOSSFIGHT);
+        pushState(NEW_GAME);
     }
 
     //peek - возвращает верхний элемент

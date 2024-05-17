@@ -6,6 +6,7 @@ import static com.mygdx.game.MyGdxGame.V_WIDTH;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -20,6 +21,7 @@ public class Controller extends Table {
     private Image inventImg;
     private Inventory inventory;
     private SoundSettings soundSettings;
+    private Cell cell;
 
     public Controller(Skin skin) {
         super(skin);
@@ -55,29 +57,33 @@ public class Controller extends Table {
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 setBtnsVisibility(false);
                 inventory.setVisible(true);
+                cell.setActor(inventory);
                 return true;
             }
         });
 
-        settingsImg = new Image(new Texture("controller/star.png"));
-        settingsImg.addListener(new InputListener(){
+        settingsImg = new Image(new Texture("controller/settings.png"));
+        settingsImg.addListener(new InputListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 setBtnsVisibility(false);
                 soundSettings.setVisible(true);
+                cell.setActor(soundSettings);
                 return true;
             }
         });
 
         //добавление в таблицу и выравнивание
-        this.add(menuImg).width(menuImg.getWidth() * 5).height(menuImg.getHeight() * 5).align(Align.topLeft);
+        Table table = new Table();
+        table.add(menuImg).width(menuImg.getWidth() * 5).height(menuImg.getHeight() * 5).align(Align.topLeft).row();
+        table.add(settingsImg).width(settingsImg.getWidth() * 5).height(settingsImg.getHeight() * 5).align(Align.topRight);
+        this.add(table).top();
         this.add(inventory).expand().align(Align.center);
         this.add(inventImg).width(inventImg.getWidth() * 5).height(inventImg.getHeight() * 5).align(Align.topRight);
-        this.add(soundSettings).expand().align(Align.center);
-        this.add(settingsImg).width(settingsImg.getWidth()*5).height(settingsImg.getHeight()*5).align(Align.topRight);
+        cell = getCell(inventory);
     }
 
-    public SoundSettings getSoundSettings(){
+    public SoundSettings getSoundSettings() {
         return soundSettings;
     }
 
@@ -92,9 +98,10 @@ public class Controller extends Table {
     public void setBtnsVisibility(boolean visibility) {
         menuImg.setVisible(visibility);
         inventImg.setVisible(visibility);
+        settingsImg.setVisible(visibility);
     }
 
     public boolean isInventoryVisible() {
-        return inventory.isVisible();
+        return inventory.isVisible() || soundSettings.isVisible();
     }
 }
