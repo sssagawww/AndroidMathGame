@@ -25,8 +25,10 @@ import com.mygdx.game.Dialog.Dialog;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.UI.Controller;
 import com.mygdx.game.UI.DialogBox;
+import com.mygdx.game.UI.Inventory;
 import com.mygdx.game.UI.JoyStick;
 import com.mygdx.game.UI.OptionBox2;
+import com.mygdx.game.db.Progress;
 import com.mygdx.game.entities.MovableNPC;
 import com.mygdx.game.entities.PlayEntities;
 import com.mygdx.game.entities.Player2;
@@ -483,11 +485,13 @@ public class Play extends GameState implements Controllable {
         controllerRoot.add(controller).expand().align(Align.bottomLeft);
         controllerStage.addActor(controllerRoot);*/
 
-        //тест
-        controller.getInventory().addItem("Чудесный\nгриб");
-        for (int i = 0; i < 6; i++) {
-            controller.getInventory().getItem("Чудесный\nгриб").setCount(6);
+        if(savePlay){
+            controller.getInventory().reload(game.getDbWrapper());
+        } else{
+            game.getDbWrapper().clearAll();
         }
+
+        System.out.println(game.getDbWrapper().getProgress() + " saved progress");
         multiplexer.addProcessor(controllerStage);
         Gdx.input.setInputProcessor(multiplexer);
     }
@@ -563,6 +567,12 @@ public class Play extends GameState implements Controllable {
     public void save() {
         prefs.putFloat(PREF_X, player.getPosition().x).flush();
         prefs.putFloat(PREF_Y, player.getPosition().y).flush();
+
+        //сохранение прогресса (инвентаря)
+        Inventory inventory = controller.getInventory();
+        Progress progress = new Progress(inventory.getImgVisibility(0),inventory.getImgVisibility(1), inventory.getImgVisibility(2), inventory.getArtefacts(),
+                inventory.getAchievementsVisibility(), inventory.getItems());
+        game.getDbWrapper().saveProgress(progress);
     }
 
     @Override

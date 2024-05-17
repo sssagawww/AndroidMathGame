@@ -139,6 +139,7 @@ public class Menu2 extends GameState {
                 break;
             case SAVE:
                 play.save();
+                btnBox.setState(NON);
         }
     }
 

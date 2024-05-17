@@ -153,6 +153,7 @@ public class MyGdxGame implements ApplicationListener {
     @Override
     public void dispose() {
         sb.dispose();
+        gsm.dispose();
     }
 
     @Override

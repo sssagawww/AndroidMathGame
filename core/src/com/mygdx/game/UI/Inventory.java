@@ -17,11 +17,14 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Sort;
 import com.mygdx.game.MyGdxGame;
+import com.mygdx.game.db.DbWrapper;
+import com.mygdx.game.db.Progress;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
 public class Inventory extends Table {
     private Table uiTable;
@@ -153,6 +156,22 @@ public class Inventory extends Table {
         return itemsTable;
     }
 
+    public void reload(DbWrapper dbWrapper){
+        Progress progress = dbWrapper.getProgress().get(dbWrapper.getProgress().size()-1);
+        setImgVisibility(0, progress.isRingImageVisible());
+        setImgVisibility(1, progress.isSwordImageVisible());
+        setImgVisibility(2, progress.isAmuletImageVisible());
+        setArtefacts(progress.getArtefactsCount());
+        for (int i = 0; i < progress.getAchievements().size(); i++) {
+            setAchievementVisibility(progress.getAchievements().get(i));
+        }
+        HashMap<String, Integer> items = progress.getItems();
+        for (String item : items.keySet()) {
+            addItem(item);
+            getItem(item).setCount(items.get(item));
+        }
+    }
+
     public void addItem(String name) {
         if (items.findActor("nothing") != null) {
             items.removeActor(nothingLabel);
@@ -165,7 +184,7 @@ public class Inventory extends Table {
     public void removeItem(String name){
         items.removeActor(itemsList.get(name));
         itemsList.remove(name);
-        System.out.println(itemsList);
+        System.out.println(itemsList + " itemsList");
         if (itemsList == null) {
             items.add(nothingLabel);
         }
@@ -175,9 +194,21 @@ public class Inventory extends Table {
         return itemsList.get(name);
     }
 
+    public HashMap<String, Integer> getItems() {
+        HashMap<String, Integer>  items = new HashMap<>();
+        for (String item : itemsList.keySet()) {
+            items.put(item, itemsList.get(item).getCount());
+        }
+        return items;
+    }
+
     public void setImgVisibility(int num, boolean visibility) {
         images[num].setVisible(visibility);
         artefacts++;
+    }
+
+    public boolean getImgVisibility(int num) {
+        return images[num].isVisible();
     }
 
     public int getArtefacts() {
@@ -192,6 +223,17 @@ public class Inventory extends Table {
         Achievement i = scrollContent.findActor(titles.get(num));
         i.setTextVisibility(true);
         i.changeImage();
+    }
+
+    public ArrayList<Integer> getAchievementsVisibility() {
+        ArrayList<Integer> acs = new ArrayList<>();
+        for (int i = 0; i < titles.size(); i++) {
+            Achievement actor = scrollContent.findActor(titles.get(i));
+            if(actor.getTextVisibility()){
+                acs.add(i);
+            }
+        }
+        return acs;
     }
 
     public class Achievement extends Table {
@@ -235,6 +277,9 @@ public class Inventory extends Table {
 
         public void setTextVisibility(boolean visibility) {
             textLabel.setVisible(visibility);
+        }
+        public boolean getTextVisibility() {
+            return textLabel.isVisible();
         }
     }
 
