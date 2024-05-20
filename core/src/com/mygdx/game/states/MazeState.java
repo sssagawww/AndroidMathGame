@@ -420,6 +420,11 @@ public class MazeState extends GameState implements Controllable {
     }
 
     @Override
+    public Controller getController() {
+        return controller;
+    }
+
+    @Override
     public JoyStick getJoyStick() {
         return joyStick;
     }

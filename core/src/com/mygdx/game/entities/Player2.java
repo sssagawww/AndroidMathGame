@@ -29,7 +29,8 @@ public class Player2 extends B2DSprite {
 
     public Player2(Body body) {
         super(body);
-        sound = Gdx.audio.newSound(Gdx.files.internal("music/steps_grass2.mp3"));
+//        sound = Gdx.audio.newSound(Gdx.files.internal("music/steps_grass3.mp3"));
+        sound = Gdx.audio.newSound(Gdx.files.internal("music/steps_dun_and_maze.mp3"));
         tex = MyGdxGame.res.getTexture("gnomik");
         tex2 = MyGdxGame.res.getTexture("gnomikrow");
         sprites = TextureRegion.split(tex2, 120, 130)[0];
@@ -41,7 +42,13 @@ public class Player2 extends B2DSprite {
         x = body.getPosition().x * PPM;
         y = body.getPosition().y * PPM;
 
+        if(state.getController().getSoundSettings().getSliderSoundEff().isDragging()) sound.setVolume(soundId, getSoundEffVolume());
+
         checkJoyStick();
+    }
+
+    private float getSoundEffVolume() {
+        return state.getController().getSoundSettings().getSliderSoundEff().getPercent();
     }
 
     //новый метод с анимацией гнома для клавиатуры (не самый оптимальный способ)
@@ -171,7 +178,7 @@ public class Player2 extends B2DSprite {
             prevDir = dir;
             if (countMove == 1) {
                 soundId = sound.play(1.0f);
-                sound.setVolume(soundId, 0.2f);
+                sound.setVolume(soundId, 0.5f);
                 sound.setLooping(soundId, true);
                 countIdle = 1;
                 countMove = 0;
