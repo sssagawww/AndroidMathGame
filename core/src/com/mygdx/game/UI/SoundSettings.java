@@ -72,12 +72,12 @@ public class SoundSettings extends Table {
         uiTable.add(sliderSoundEff);
     }
 
-    public float getSliderBgPercent() {
-        return sliderBG.getPercent();
+    public Slider getSliderBg() {
+        return sliderBG;
     }
 
-    public float getSliderSoundEffPercent() {
-        return sliderSoundEff.getPercent();
+    public Slider getSliderSoundEff() {
+        return sliderSoundEff;
     }
 
 

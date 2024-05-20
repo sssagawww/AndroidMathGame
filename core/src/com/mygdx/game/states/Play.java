@@ -142,7 +142,7 @@ public class Play extends GameState implements Controllable {
 
         player.updatePL();
 
-        music.setVolume(getBgVolume());
+        if(controller.getSoundSettings().getSliderBg().isDragging()) music.setVolume(getBgVolume());
 
         //нужно обновление размера экрана, и тогда будет resize всех компонентов?
 
@@ -206,7 +206,7 @@ public class Play extends GameState implements Controllable {
     }
 
     private float getBgVolume() {
-        return controller.getSoundSettings().getSliderBgPercent();
+        return controller.getSoundSettings().getSliderBg().getPercent();
     }
 
     @Override

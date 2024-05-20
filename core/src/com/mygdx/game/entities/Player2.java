@@ -42,13 +42,13 @@ public class Player2 extends B2DSprite {
         x = body.getPosition().x * PPM;
         y = body.getPosition().y * PPM;
 
-        sound.setVolume(soundId, getSoundEffVolume());
+        if(state.getController().getSoundSettings().getSliderSoundEff().isDragging()) sound.setVolume(soundId, getSoundEffVolume());
 
         checkJoyStick();
     }
 
     private float getSoundEffVolume() {
-        return state.getController().getSoundSettings().getSliderSoundEffPercent();
+        return state.getController().getSoundSettings().getSliderSoundEff().getPercent();
     }
 
     //новый метод с анимацией гнома для клавиатуры (не самый оптимальный способ)

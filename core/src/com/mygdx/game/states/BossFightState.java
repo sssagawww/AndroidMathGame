@@ -62,7 +62,7 @@ public class BossFightState extends GameState implements Controllable {
     private JoyStick joyStick;
     private ShapeRenderer shapeRenderer;
     private Vector3 mouse;
-    private Stage controllerStage;
+    //private Stage controllerStage;
     private Controller controller;
     private Player2 player;
     private TiledMap tiledMap;
@@ -242,7 +242,7 @@ public class BossFightState extends GameState implements Controllable {
     }
 
     private void initController() {
-        controllerStage = new Stage(new ScreenViewport());
+        /*controllerStage = new Stage(new ScreenViewport());
         controllerStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
 
         controller = new Controller(skin_this);
@@ -251,7 +251,7 @@ public class BossFightState extends GameState implements Controllable {
         Table controllerRoot = new Table();
         controllerRoot.setFillParent(true);
         controllerRoot.add(controller).expand().align(Align.bottomLeft);
-        controllerStage.addActor(controllerRoot);
+        controllerStage.addActor(controllerRoot);*/
 
         multiplexer.addProcessor(controllerStage);
         Gdx.input.setInputProcessor(multiplexer);
@@ -275,7 +275,7 @@ public class BossFightState extends GameState implements Controllable {
     }
 
     @Override
-    public void loadStage(String s) {
+    public void loadStage(String s, Body contactBody) {
 
     }
 
