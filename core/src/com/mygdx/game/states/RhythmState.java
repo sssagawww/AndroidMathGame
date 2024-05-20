@@ -7,6 +7,7 @@ import static com.mygdx.game.handlers.GameStateManager.PLAY;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -41,11 +42,13 @@ public class RhythmState extends GameState {
     private RhythmMenu rhythmMenu;
     private static boolean done;
     private static boolean strength100;
+    private Sound doneSound;
 
     public RhythmState(GameStateManager gsm) {
         super(gsm);
         game = gsm.game();
         multiplexer = new InputMultiplexer();
+        doneSound = Gdx.audio.newSound(Gdx.files.internal("music/swordShort.mp3"));
 
         initUI();
 
@@ -67,6 +70,7 @@ public class RhythmState extends GameState {
             done = true;
             dialogBox.setVisible(true);
             strength100 = rhythmMenu.isStrength100();
+            doneSound.play(0.7f);
         }
         if (dialogBox.isPressed()) {
             gsm.setState(FOREST);

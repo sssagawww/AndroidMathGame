@@ -10,6 +10,7 @@ import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
 import com.mygdx.game.db.SugarDb;
 
 public class AndroidLauncher extends AndroidApplication {
+	private MyGdxGame game;
 	@Override
 	protected void onCreate (Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -20,8 +21,9 @@ public class AndroidLauncher extends AndroidApplication {
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-		config.useImmersiveMode = true; //set fullScreen
-		initialize(new MyGdxGame(new SugarDb()), config);
+		config.useImmersiveMode = true; //fullScreen
+		game = new MyGdxGame(new SugarDb());
+		initialize(game, config);
 
 		MyGdxGame.setWidth(displaymetrics.widthPixels);
 		MyGdxGame.setHeight(displaymetrics.heightPixels);
@@ -38,5 +40,11 @@ public class AndroidLauncher extends AndroidApplication {
 				| View.SYSTEM_UI_FLAG_FULLSCREEN
 				| View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);*/
 		//getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_FULLSCREEN);
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		game.dispose();
 	}
 }

@@ -7,7 +7,12 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.mygdx.game.UI.Controller;
 import com.mygdx.game.battle.examples.ExampleDatabase;
 import com.mygdx.game.battle.steps.StepDatabase;
 import com.mygdx.game.db.DbWrapper;
@@ -28,6 +33,8 @@ public class MyGdxGame implements ApplicationListener {
     private SpriteBatch sb;
     private AssetManager assetManager;
     private BoundedCamera cam;
+    private Controller controller;
+    private Stage controllerStage;
     private GameStateManager gsm;
 
     //public static final float STEP = 1 / 60f;
@@ -39,6 +46,7 @@ public class MyGdxGame implements ApplicationListener {
     private FiguresDatabase figuresDatabase;
     private DbWrapper dbWrapper;
     public boolean save = false;
+    public static float gameTime = 0;
 
     public MyGdxGame() {
     }
@@ -52,6 +60,7 @@ public class MyGdxGame implements ApplicationListener {
         if (Gdx.app.getType() == Application.ApplicationType.Android) {
             V_WIDTH = width; //Gdx.graphics.getWidth();
             V_HEIGHT = height; //Gdx.graphics.getHeight();
+            if(dbWrapper.getProgress().size() != 0) gameTime = dbWrapper.getProgress().get(dbWrapper.getProgress().size()-1).getTime();
         }
 
         //V_WIDTH = (int) ((Gdx.graphics.getWidth()/1216f)*1216);
@@ -101,6 +110,16 @@ public class MyGdxGame implements ApplicationListener {
         exampleDatabase = new ExampleDatabase();
         figuresDatabase = new FiguresDatabase(this);
         gsm = new GameStateManager(this);
+
+        controllerStage = new Stage(new ScreenViewport());
+        controllerStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+        controller = new Controller(skin);
+        controller.setVisible(true);
+
+        Table controllerRoot = new Table();
+        controllerRoot.setFillParent(true);
+        controllerRoot.add(controller).expand().align(Align.bottomLeft);
+        controllerStage.addActor(controllerRoot);
     }
 
     @Override
@@ -118,6 +137,7 @@ public class MyGdxGame implements ApplicationListener {
         MathUtils.clamp(Gdx.graphics.getDeltaTime(),-1f,0.0168f);???
         System.out.println(Gdx.graphics.getDeltaTime()-0.01f);*/
 
+        gameTime += Gdx.graphics.getDeltaTime();
         gsm.update(Gdx.graphics.getDeltaTime()); // ???
         gsm.render();
     }
@@ -136,6 +156,7 @@ public class MyGdxGame implements ApplicationListener {
     @Override
     public void dispose() {
         sb.dispose();
+        gsm.dispose();
     }
 
     @Override
@@ -181,5 +202,13 @@ public class MyGdxGame implements ApplicationListener {
 
     public DbWrapper getDbWrapper() {
         return dbWrapper;
+    }
+
+    public Controller getController() {
+        return controller;
+    }
+
+    public Stage getControllerStage() {
+        return controllerStage;
     }
 }

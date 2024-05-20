@@ -1,10 +1,7 @@
 package com.mygdx.game.Dialog;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.mygdx.game.UI.DialogBox;
-import com.mygdx.game.UI.OptionBox;
 import com.mygdx.game.UI.OptionBox2;
 
 public class DialogController extends InputAdapter {
@@ -12,6 +9,7 @@ public class DialogController extends InputAdapter {
     private DialogBox dialogBox;
     private OptionBox2 optionBox;
     private float time = 0;
+    private DialogNode curNode;
 
     public DialogController(DialogBox dialogBox, OptionBox2 optionBox) {
         this.dialogBox = dialogBox;
@@ -106,5 +104,9 @@ public class DialogController extends InputAdapter {
         } else {
             return false;
         }
+    }
+
+    public DialogNode getCurNode() {
+        return dialogGo.getCurrentNode();
     }
 }

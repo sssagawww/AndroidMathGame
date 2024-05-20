@@ -89,6 +89,11 @@ public class GameStateManager {
         gs.dispose();
     }
 
+    public void dispose(){
+        GameState gs = gameStates.peek();
+        gs.dispose();
+    }
+
     //кидает в стэк тот стейт (обозначаются int переменными), который передан
     public void pushState(int state) {
         gameStates.push(getState(state));

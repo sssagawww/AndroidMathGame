@@ -15,6 +15,7 @@ import static com.mygdx.game.handlers.GameStateManager.RHYTHM;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -76,7 +77,6 @@ public class Forest extends GameState implements Controllable {
     private int tileMapWidth;
     private int tileMapHeight;
     private Stage uiStage;
-    private Stage controllerStage;
     private Stage darkStage;
     private Table dialogRoot;
     private DialogBox dialogBox;
@@ -87,7 +87,8 @@ public class Forest extends GameState implements Controllable {
     private DialogController dcontroller;
     public boolean canDraw;
     private float time = 0;
-    private Controller controller;
+    //private Stage controllerStage;
+    //private Controller controller;
     private JoyStick joyStick;
     private ShapeRenderer shapeRenderer;
     private Vector3 mouse;
@@ -99,6 +100,7 @@ public class Forest extends GameState implements Controllable {
     private int[] foregroundLayers = {3, 4, 5, 6, 7, 8};
     private int mushrooms = 0;
     private MovableNPC npc;
+    private Sound mushroomSound;
 
     public Forest(GameStateManager gsm) {
         super(gsm);
@@ -109,6 +111,7 @@ public class Forest extends GameState implements Controllable {
         cl = new MyContactListener(this);
         world.setContactListener(cl);
         skin_this = game.getSkin();
+        mushroomSound = Gdx.audio.newSound(Gdx.files.internal("music/pick_up_mushroom2.mp3"));
 
         initJoyStick();
         initController();
@@ -419,16 +422,16 @@ public class Forest extends GameState implements Controllable {
     }
 
     private void initController() {
-        controllerStage = new Stage(new ScreenViewport());
+        /*controllerStage = new Stage(new ScreenViewport());
         controllerStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
 
-        controller = new Controller(skin_this);
+        //controller = new Controller(skin_this);
         controller.setVisible(true);
 
         Table controllerRoot = new Table();
         controllerRoot.setFillParent(true);
         controllerRoot.add(controller).expand().align(Align.bottomLeft);
-        controllerStage.addActor(controllerRoot);
+        controllerStage.addActor(controllerRoot);*/
 
         multiplexer.addProcessor(controllerStage);
         Gdx.input.setInputProcessor(multiplexer);
@@ -455,7 +458,8 @@ public class Forest extends GameState implements Controllable {
         darkStage.addActor(root);
     }
 
-    public void loadStage(String s) {
+    @Override
+    public void loadStage(String s, Body contactBody) {
         DialogNode node1;
         gsm.setLastState(FOREST);
         switch (s) {
@@ -518,6 +522,7 @@ public class Forest extends GameState implements Controllable {
                 canDraw = true;
                 break;
             case "mushroom":
+                mushroomSound.play(1f);
                 nextState = -1;
                 if(mushrooms == 0){
                     controller.getInventory().addItem("Чудесный\nгриб");

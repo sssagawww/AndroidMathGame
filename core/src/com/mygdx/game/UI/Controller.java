@@ -104,4 +104,16 @@ public class Controller extends Table {
     public boolean isInventoryVisible() {
         return inventory.isVisible() || soundSettings.isVisible();
     }
+
+    public boolean isAllArtefacts() {
+        if(inventory.getArtefacts() == 3){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public void setAllArtefacts(int i) {
+        inventory.setArtefacts(i);
+    }
 }

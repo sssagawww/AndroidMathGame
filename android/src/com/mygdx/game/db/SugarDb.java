@@ -14,7 +14,6 @@ public class SugarDb implements DbWrapper {
     public SugarDb() {
         builder = new GsonBuilder();
         gson = builder.create();
-        //SugarFigure.deleteAll(SugarFigure.class);
     }
 
     @Override
@@ -35,5 +34,26 @@ public class SugarDb implements DbWrapper {
 
     public static Gson getGson() {
         return gson;
+    }
+
+    @Override
+    public void saveProgress(Progress progress) {
+        SugarProgress sugarProgress = new SugarProgress(progress);
+        sugarProgress.save();
+    }
+
+    @Override
+    public ArrayList<Progress> getProgress() {
+        List<SugarProgress> list = SugarProgress.listAll(SugarProgress.class);
+        ArrayList<Progress> progresses = new ArrayList<>();
+        for (SugarProgress sf : list) {
+            progresses.add(new Progress(sf.isRingImage(), sf.isSwordImage(), sf.isAmuletImage(), sf.getArtefactsCount(), sf.getAchievements(), sf.getItems(), sf.getTime()));
+        }
+        return progresses;
+    }
+
+    @Override
+    public void clearAll(){
+        SugarProgress.deleteAll(SugarProgress.class);
     }
 }

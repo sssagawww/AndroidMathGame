@@ -20,16 +20,16 @@ public class MyContactListener implements com.badlogic.gdx.physics.box2d.Contact
         //контакт с коллизией
         if (fa.getUserData() != null) {
             if(fb.getUserData().equals("player")){
-                state.loadStage((String) fa.getUserData());
+                state.loadStage((String) fa.getUserData(), fa.getBody());
             } else {
-                state.loadStage((String) fb.getUserData());
+                state.loadStage((String) fb.getUserData(), fb.getBody());
                 if(fb.getUserData().equals("enemy") || fb.getUserData().equals("chest") || fb.getUserData().equals("mushroom")){
                     fb.getBody().getFixtureList().get(0).setUserData("collided");
                     state.removeCollisionEntity(fb.getBody());
                 }
             }
         } else if (fa.getUserData() == null && fb.getUserData() != "player"){
-            state.loadStage("null");
+            state.loadStage("null", null);
         }
         System.out.println(fa.getUserData() + " contact with " + fb.getUserData());
     }
