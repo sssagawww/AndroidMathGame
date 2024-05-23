@@ -14,6 +14,7 @@ import static com.mygdx.game.handlers.GameStateManager.PLAY;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.MapLayer;
@@ -86,10 +87,11 @@ public class BossFightState extends GameState implements Controllable {
     private boolean fight = false;
     private boolean isStopped = false;
     private float time = 0;
+    private Music music;
 
     public BossFightState(GameStateManager gsm) {
         super(gsm);
-
+        music = Gdx.audio.newMusic(Gdx.files.internal("music/dubstep_bossfight_bg.mp3"));
         world = new World(new Vector2(0, 0), true);
         b2dr = new Box2DDebugRenderer();
         game = gsm.game();
@@ -143,6 +145,9 @@ public class BossFightState extends GameState implements Controllable {
             time += dt;
             if (dialogueBox.isFinished() && time > 2f && dcontroller.isFinished()) {
                 time = 0;
+                music.setVolume(0.5f);
+                music.setLooping(true);
+                music.play();
                 fight = true;
                 stop();
             }

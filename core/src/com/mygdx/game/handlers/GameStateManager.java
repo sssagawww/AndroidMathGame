@@ -3,7 +3,6 @@ package com.mygdx.game.handlers;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.states.*;
 
-import java.awt.Menu;
 import java.util.Stack;
 
 public class GameStateManager {
@@ -15,6 +14,7 @@ public class GameStateManager {
     private DungeonState dungeonState;
     private int lastState;
     public static final int PLAY = 912837;
+    public static final int BLACK_SCREEN = 100;
     public static final int MENU = 0;
     public static final int PAINT = 1;
     public static final int BATTLE = 2;
@@ -22,14 +22,14 @@ public class GameStateManager {
     public static final int FOREST = 5;
     public static final int MAZE = 6;
     public static final int RHYTHM = 8;
-    public static final int BLACK_SCREEN = 100;
     public static final int DUNGEON = 9;
     public static final int BOSSFIGHT = 10;
+    public static final int MUSHROOMS = 11;
 
     public GameStateManager(MyGdxGame game) {
         this.game = game;
         gameStates = new Stack<GameState>();
-        pushState(BOSSFIGHT);
+        pushState(MENU);
     }
 
     //peek - возвращает верхний элемент
@@ -69,10 +69,9 @@ public class GameStateManager {
             if (dungeonState==null) return dungeonState = new DungeonState(this);
             return dungeonState;
         } else if (state == BOSSFIGHT) {
-            return
-                    new BossFightState
-                            (this
-            );
+            return new BossFightState(this);
+        } else if (state == MUSHROOMS) {
+            return new MushroomsState(this);
         }
         return null;
     }

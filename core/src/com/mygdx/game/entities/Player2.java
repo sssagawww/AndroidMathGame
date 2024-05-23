@@ -233,5 +233,9 @@ public class Player2 extends B2DSprite {
     public void stopSounds(){
         sound.stop();
     }
+
+    public void setSpeed(float speed){
+        this.speed = speed;
+    }
 }
 

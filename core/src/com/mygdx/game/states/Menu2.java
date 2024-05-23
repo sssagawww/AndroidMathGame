@@ -11,9 +11,13 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.MyGdxGame;
@@ -43,6 +47,8 @@ public class Menu2 extends GameState {
     private BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
     private GlyphLayout layout;
     private BtnBox btnBox;
+    private Table onlineBtns;
+    private Cell cell;
     private Texture bgImg;
     private Animation animation;
     // END UI
@@ -98,7 +104,7 @@ public class Menu2 extends GameState {
 
         font.getData().setScale(2);
         layout.setText(font, "MathGame");
-        font.draw(sb, layout, V_WIDTH/2f-layout.width/2, V_HEIGHT/2f+layout.height);
+        font.draw(sb, layout, V_WIDTH / 2f - layout.width / 2, V_HEIGHT / 2f + layout.height);
         sb.end();
 
         uiStage.draw();
@@ -107,7 +113,7 @@ public class Menu2 extends GameState {
     private void createLayers() {
         tiledMap = new TmxMapLoader().load("sprites/mystic_woods_free_2.1/menu.tmx");
         //tmr = new OrthogonalTiledMapRenderer(tiledMap, 3.82f); // !!!
-        tmr = new OrthogonalTiledMapRenderer(tiledMap,V_WIDTH/(tiledMap.getProperties().get("width",Integer.class)*16f));
+        tmr = new OrthogonalTiledMapRenderer(tiledMap, V_WIDTH / (tiledMap.getProperties().get("width", Integer.class) * 16f));
         tileSize = (int) tiledMap.getProperties().get("tilewidth");
 
         tileMapWidth = (int) tiledMap.getProperties().get("width");
@@ -125,6 +131,7 @@ public class Menu2 extends GameState {
         btnBox = new BtnBox(game.getSkin());
         btnBox.addBtn("Новая игра", MENU_TO_PLAY);
         btnBox.addBtn("Продолжить", SAVE_GAME);
+        btnBox.addBtn("Сетевая игра", ONLINE);
         btnBox.addBtn("Сохранить", SAVE);
         btnBox.addBtn("Статистика", STATISTICS);
         btnBox.addBtn("Выйти", EXIT);
@@ -136,14 +143,75 @@ public class Menu2 extends GameState {
 
         table.add(btnBox);
         root.add(table).expand().align(Align.bottom).padBottom(100f).expand();
-        root.add(statistics).right().padRight(25f);
+        root.add(statistics).width(V_WIDTH / 2f).right().padRight(25f);
+        createOnlineBtns();
 
         multiplexer.addProcessor(uiStage);
         Gdx.input.setInputProcessor(multiplexer);
     }
 
+    private void createOnlineBtns() {
+        BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
+        TextButton.TextButtonStyle style = new TextButton.TextButtonStyle();
+        style.font = font;
+        style.fontColor = Color.BLACK;
+        style.downFontColor = Color.BLACK;
+
+        TextButton mushrooms = new TextButton("Сбор грибов", style);
+        style.up = game.getSkin().getDrawable("menuBtn_up");
+        style.down = game.getSkin().getDrawable("menuBtn_down");
+
+        mushrooms.addListener(new InputListener() {
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                return true;
+            }
+
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                gsm.setState(MUSHROOMS);
+            }
+        });
+
+        TextButton drawings = new TextButton("Рисование", style);
+        style.up = game.getSkin().getDrawable("menuBtn_up");
+        style.down = game.getSkin().getDrawable("menuBtn_down");
+
+        drawings.addListener(new InputListener() {
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                return true;
+            }
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                gsm.setState(PAINT);
+            }
+        });
+
+        Image exitImage = new Image(game.getSkin().getDrawable("wrong"));
+        exitImage.addListener(new InputListener() {
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                return true;
+            }
+
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                onlineBtns.setVisible(false);
+            }
+        });
+        onlineBtns = new Table(game.getSkin());
+        onlineBtns.setVisible(false);
+        onlineBtns.setBackground("menuBtn_up");
+
+        onlineBtns.add(exitImage).align(Align.right).width(exitImage.getWidth() * 3).height(exitImage.getHeight() * 3).expand().row();
+        onlineBtns.add(mushrooms).space(10f).row();
+        onlineBtns.add(drawings).padBottom(exitImage.getHeight() * 3);
+        cell = root.getCell(statistics);
+    }
+
     private void checkBtns() {
-        switch (btnBox.getState()){
+        switch (btnBox.getState()) {
             case MENU_TO_PLAY:
                 gsm.setState(BLACK_SCREEN);
                 break;
@@ -155,11 +223,16 @@ public class Menu2 extends GameState {
                 game.save = true;
                 gsm.setState(NEW_GAME);
                 break;
+            case ONLINE:
+                onlineBtns.setVisible(!onlineBtns.isVisible());
+                cell.setActor(onlineBtns);
+                break;
             case SAVE:
                 play.save();
                 break;
             case STATISTICS:
                 statistics.setVisible(!statistics.isVisible());
+                cell.setActor(statistics);
                 break;
         }
         btnBox.setState(NON);
