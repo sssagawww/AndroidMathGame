@@ -1,5 +1,6 @@
 package com.mygdx.game.UI;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Circle;
@@ -78,7 +79,7 @@ public class JoyStick {
     }
 
     public void render(ShapeRenderer shapeRenderer) {
-        shapeRenderer.setColor(Color.LIGHT_GRAY);
+        shapeRenderer.setColor(Color.DARK_GRAY);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         shapeRenderer.circle(circle.x, circle.y, circle.radius);
         shapeRenderer.end();

@@ -39,6 +39,13 @@ green
   orig: 1, 1
   offset: 0, 0
   index: -1
+blue
+  rotate: false
+  xy: 52, 57
+  size: 1, 1
+  orig: 1, 1
+  offset: 0, 0
+  index: -1
 hpbar_bar
   rotate: false
   xy: 2, 5

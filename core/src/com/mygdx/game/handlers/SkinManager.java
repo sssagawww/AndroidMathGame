@@ -25,28 +25,31 @@ public class SkinManager {
         skin.add("GUI_2x", dialog2);
         NinePatch background2 = new NinePatch(uiAtlas2.findRegion("light_back"), 10, 10, 5, 5);
         skin.add("background2", background2);
-        NinePatch option = new NinePatch(uiAtlas3.findRegion("optionbox"),6, 6, 6, 6);
+        NinePatch option = new NinePatch(uiAtlas3.findRegion("optionbox"), 6, 6, 6, 6);
         skin.add("optionbox", option);
-        NinePatch status = new NinePatch(uiAtlas.findRegion("background"),5, 4, 2, 2);
+        NinePatch status = new NinePatch(uiAtlas.findRegion("background"), 5, 4, 2, 2);
         skin.add("status", status);
-        NinePatch menuBtn_up = new NinePatch(uiAtlas2.findRegion("menuBtn_up"),10, 10, 10, 10);
+        NinePatch menuBtn_up = new NinePatch(uiAtlas2.findRegion("menuBtn_up"), 10, 10, 10, 10);
         skin.add("menuBtn_up", menuBtn_up);
-        NinePatch menuBtn_down = new NinePatch(uiAtlas2.findRegion("menuBtn_down"),10, 10, 10, 10);
+        NinePatch menuBtn_down = new NinePatch(uiAtlas2.findRegion("menuBtn_down"), 10, 10, 10, 10);
         skin.add("menuBtn_down", menuBtn_down);
-        NinePatch borders = new NinePatch(uiAtlas2.findRegion("borders"),10, 10, 10, 10);
+        NinePatch borders = new NinePatch(uiAtlas2.findRegion("borders"), 10, 10, 10, 10);
         skin.add("borders", borders);
-        NinePatch prLine = new NinePatch(uiAtlas.findRegion("prLine"),1, 1, 1, 1);
+        NinePatch label = new NinePatch(uiAtlas.findRegion("label"), 10, 10, 5, 5);
+        skin.add("label", label);
+        NinePatch prLine = new NinePatch(uiAtlas.findRegion("prLine"), 1, 1, 1, 1);
         skin.add("prLine", prLine);
         /*NinePatch next_btn = new NinePatch(uiAtlas2.findRegion("next_btn"),10, 10, 1, 1);
         skin.add("next_btn", next_btn);*/
 
-        NinePatch battleinfobox = new NinePatch(uiAtlas3.findRegion("battleinfobox"),14, 14, 5, 8);
-        battleinfobox.setPadLeft((int)battleinfobox.getTopHeight());
+        NinePatch battleinfobox = new NinePatch(uiAtlas3.findRegion("battleinfobox"), 14, 14, 5, 8);
+        battleinfobox.setPadLeft((int) battleinfobox.getTopHeight());
         skin.add("battleinfobox", battleinfobox);
 
         skin.add("hpbar_side", uiAtlas3.findRegion("hpbar_side"), TextureRegion.class);
         skin.add("hpbar_bar", uiAtlas3.findRegion("hpbar_bar"), TextureRegion.class);
         skin.add("green", uiAtlas3.findRegion("green"), TextureRegion.class);
+        skin.add("blue", uiAtlas3.findRegion("blue"), TextureRegion.class);
         skin.add("yellow", uiAtlas3.findRegion("yellow"), TextureRegion.class);
         skin.add("red", uiAtlas3.findRegion("red"), TextureRegion.class);
         skin.add("background_hpbar", uiAtlas3.findRegion("background_hpbar"), TextureRegion.class);

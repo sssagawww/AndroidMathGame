@@ -5,8 +5,12 @@ import static com.mygdx.game.MyGdxGame.V_WIDTH;
 import static com.mygdx.game.handlers.B2DVars.BIT_PLAYER;
 import static com.mygdx.game.handlers.B2DVars.BIT_TROPA;
 import static com.mygdx.game.handlers.B2DVars.PPM;
+import static com.mygdx.game.handlers.GameStateManager.BATTLE;
+import static com.mygdx.game.handlers.GameStateManager.BOSSFIGHT;
+import static com.mygdx.game.handlers.GameStateManager.DUNGEON;
 import static com.mygdx.game.handlers.GameStateManager.MAZE;
 import static com.mygdx.game.handlers.GameStateManager.MENU;
+import static com.mygdx.game.handlers.GameStateManager.PLAY;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
@@ -35,12 +39,15 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.Dialog.Dialog;
 import com.mygdx.game.Dialog.DialogController;
+import com.mygdx.game.Dialog.DialogNode;
+import com.mygdx.game.UI.BossLabel;
 import com.mygdx.game.UI.Controller;
 import com.mygdx.game.UI.DialogBox;
 import com.mygdx.game.UI.JoyStick;
 import com.mygdx.game.UI.OptionBox2;
 import com.mygdx.game.entities.PlayEntities;
 import com.mygdx.game.entities.Player2;
+import com.mygdx.game.entities.SlimeBoss;
 import com.mygdx.game.handlers.BoundedCamera;
 import com.mygdx.game.handlers.Controllable;
 import com.mygdx.game.handlers.GameStateManager;
@@ -56,19 +63,19 @@ public class BossFightState extends GameState implements Controllable {
     private Skin skin_this;
     private MyContactListener cl;
     private InputMultiplexer multiplexer;
-    private  Box2DDebugRenderer b2dr;
-    private  World world;
+    private Box2DDebugRenderer b2dr;
+    private World world;
     private BoundedCamera joyCam;
     private JoyStick joyStick;
     private ShapeRenderer shapeRenderer;
     private Vector3 mouse;
-    //private Stage controllerStage;
-    private Controller controller;
     private Player2 player;
     private TiledMap tiledMap;
     private OrthogonalTiledMapRenderer tmr;
     private PlayEntities entities;
+    private SlimeBoss slimeBoss;
     private Stage uiStage;
+    private Stage bossUiStage;
     private Table dialogRoot;
     private DialogBox dialogueBox;
     private OptionBox2 optionBox;
@@ -76,6 +83,7 @@ public class BossFightState extends GameState implements Controllable {
     private Dialog dialog;
     private boolean debug = false;
     private boolean canDraw = false;
+    private boolean fight = false;
     private boolean isStopped = false;
     private float time = 0;
 
@@ -92,8 +100,9 @@ public class BossFightState extends GameState implements Controllable {
 
         initJoyStick();
         initController();
-        createPlayer();
         createTiles();
+        createPlayer();
+        createSlime();
         //createNPC();
 
 //        createMovableNPC();
@@ -109,35 +118,158 @@ public class BossFightState extends GameState implements Controllable {
         b2dCam.setBounds(0, (tileMapWidth * tileSize) / PPM, 0, (tileMapHeight * tileSize) / PPM);
     }
 
-    private void initFight() {
-        skin_this = game.getSkin();
-        uiStage = new Stage(new ScreenViewport());
-        uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+    @Override
+    public void update(float dt) {
+        handleInput();
+        world.step(dt, 6, 2);
+        player.update(dt);
+//        entities.update(dt);
+        player.updatePL();
+        slimeBoss.update(dt);
 
-        dialogRoot = new Table();
-        dialogRoot.setFillParent(true);
-        uiStage.addActor(dialogRoot);
+        if (isStopped) {
+            isStopped = false;
+            multiplexer.addProcessor(controllerStage);
+            Gdx.input.setInputProcessor(multiplexer);
+        }
 
-        dialogueBox = new DialogBox(skin_this);
-        dialogueBox.setVisible(false);
+        if (controller.isMenuPressed()) {
+            gsm.setState(MENU);
+        }
 
-        optionBox = new OptionBox2(skin_this);
-        optionBox.setVisible(false);
+        if (canDraw) {
+            uiStage.act(dt);
+            dcontroller.update(dt);
+            time += dt;
+            if (dialogueBox.isFinished() && time > 2f && dcontroller.isFinished()) {
+                time = 0;
+                fight = true;
+                stop();
+            }
+        }
 
-        Table dialogTable = new Table();
-        dialogTable.add(dialogueBox)
-                .expand().align(Align.bottom)
-                .space(8f)
-                .row();
+        if (Gdx.input.isTouched() && !controller.isInventoryVisible() && !dialogueBox.isVisible()) {
+            mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+            joyCam.unproject(mouse);
+            joyStick.update(mouse.x, mouse.y);
+        } else {
+            joyStick.setDefaultPos();
+        }
 
-        dialogRoot.add(dialogTable).expand().align(Align.bottom).pad(15f);
+        if(fight){
+            bossUiStage.act(dt);
+        }
+        controllerStage.act(dt);
+    }
 
-        dcontroller = new DialogController(dialogueBox, optionBox);
-        multiplexer.addProcessor(uiStage); //не нагружает ли большое кол-во процессов программу?
-        //multiplexer.addProcessor(dcontroller);
-        Gdx.input.setInputProcessor(multiplexer);
+    @Override
+    public void render() {
+        Gdx.gl20.glClearColor(0, 0, 0, 1);
+        Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        bossCam.setPosition(player.getPosition().x * PPM + V_WIDTH / 35, player.getPosition().y * PPM + V_HEIGHT / 35);
+        bossCam.update();
 
-        dialog = new Dialog();
+        tmr.setView(bossCam);
+        tmr.render();
+
+        sb.setProjectionMatrix(bossCam.combined);
+        player.render(sb, 80f, 86.6f);
+        slimeBoss.render(sb, 260f, 260f);
+//        entities.render(sb, 1.5f, 1.5f);
+
+        if (debug) {
+            b2dCam.position.set(player.getPosition().x, player.getPosition().y, 0);
+            b2dCam.update();
+            b2dr.render(world, b2dCam.combined);
+        }
+
+        joyStick.render(shapeRenderer);
+
+        if (canDraw) {
+            uiStage.draw();
+        }
+
+        if(fight){
+            bossUiStage.draw();
+        }
+        controllerStage.draw();
+    }
+
+    private void createTiles() {
+        tiledMap = new TmxMapLoader().load("sprites/mystic_woods_free_2.1/bosslocation2.tmx");
+        tmr = new OrthogonalTiledMapRenderer(tiledMap, 4); // !!! размер карты
+        tileSize = (int) tiledMap.getProperties().get("tilewidth");
+
+        tileMapWidth = (int) tiledMap.getProperties().get("width");
+        tileMapHeight = (int) tiledMap.getProperties().get("height");
+
+        TiledMapTileLayer walls = (TiledMapTileLayer) tiledMap.getLayers().get("walls");
+        createLayer(walls, BIT_TROPA, BIT_PLAYER, false);
+        TiledMapTileLayer collision = (TiledMapTileLayer) tiledMap.getLayers().get("collision");
+        createLayer(collision, BIT_TROPA, BIT_PLAYER, true);
+    }
+
+    private void createLayer(TiledMapTileLayer layer, short categoryBits, short maskBits, boolean data) {
+        BodyDef bdef = new BodyDef();
+        FixtureDef fdef = new FixtureDef();
+
+        for (int row = 0; row < layer.getHeight(); row++) {
+            for (int col = 0; col < layer.getWidth(); col++) {
+                TiledMapTileLayer.Cell cell = layer.getCell(col, row);
+                if (cell == null) {
+                    continue;
+                }
+                if (cell.getTile() == null) {
+                    continue;
+                }
+
+                bdef.type = BodyDef.BodyType.StaticBody;
+                bdef.position.set(
+                        (col + 0.2f) * tileSize / 2.5f,
+                        (row + 0.4f) * tileSize / 2.5f);
+                ChainShape cs = new ChainShape();
+                Vector2[] v = new Vector2[3];
+                v[0] = new Vector2(-tileSize / 6, -tileSize / 6);
+                v[1] = new Vector2(-tileSize / 6, tileSize / 6);
+                v[2] = new Vector2(tileSize / 6, tileSize / 6);
+                cs.createChain(v);
+                fdef.friction = 0;
+                fdef.shape = cs;
+                fdef.filter.categoryBits = categoryBits;
+                fdef.filter.maskBits = maskBits;
+                fdef.isSensor = false;
+                if (data) {
+                    fdef.isSensor = true;
+                    world.createBody(bdef).createFixture(fdef).setUserData(layer.getName());
+                } else {
+                    world.createBody(bdef).createFixture(fdef);
+                }
+                world.createBody(bdef).createFixture(fdef).setUserData(layer.getName());
+                cs.dispose();
+            }
+        }
+    }
+
+    private void createPlayer() {
+        BodyDef bdef = new BodyDef();
+        PolygonShape ps = new PolygonShape();
+        FixtureDef fdef = new FixtureDef();
+
+        bdef.position.set(1000f / PPM, 150f / PPM);
+
+        bdef.type = BodyDef.BodyType.DynamicBody;
+        Body body = world.createBody(bdef);
+
+        ps.setAsBox(40f / PPM, 50f / PPM, new Vector2(-5.4f, -3.6f), 0);
+        fdef.shape = ps;
+        fdef.filter.categoryBits = BIT_PLAYER;
+        fdef.filter.maskBits = BIT_TROPA;
+        body.createFixture(fdef).setUserData("player");
+        ps.dispose();
+
+        player = new Player2(body);
+        player.setState(this);
+        body.setUserData(player);
     }
 
     private void createNPC() {
@@ -167,92 +299,72 @@ public class BossFightState extends GameState implements Controllable {
         }
     }
 
-    private void createTiles() {
-        tiledMap = new TmxMapLoader().load("sprites/mystic_woods_free_2.1/bosslocation.tmx");
-        tmr = new OrthogonalTiledMapRenderer(tiledMap, 4); // !!! размер карты
-        tileSize = (int) tiledMap.getProperties().get("tilewidth");
-
-        tileMapWidth = (int) tiledMap.getProperties().get("width");
-        tileMapHeight = (int) tiledMap.getProperties().get("height");
-
-        TiledMapTileLayer walls = (TiledMapTileLayer) tiledMap.getLayers().get("walls");
-        createLayer(walls, BIT_TROPA);
-    }
-
-    private void createLayer(TiledMapTileLayer layer, short bits) {
+    private void createSlime() {
         BodyDef bdef = new BodyDef();
-        FixtureDef fdef = new FixtureDef();
 
-        for (int row = 0; row < layer.getHeight(); row++) {
-            for (int col = 0; col < layer.getWidth(); col++) {
-                TiledMapTileLayer.Cell cell = layer.getCell(col, row);
-                if (cell == null) {
-                    continue;
-                }
-                if (cell.getTile() == null) {
-                    continue;
-                }
-
-                bdef.type = BodyDef.BodyType.StaticBody;
-                bdef.position.set(
-                        (col + 0.2f) * tileSize / 2.5f,
-                        (row + 0.4f) * tileSize / 2.5f);
-                ChainShape cs = new ChainShape();
-                Vector2[] v = new Vector2[3];
-                v[0] = new Vector2(-tileSize / 6, -tileSize / 6);
-                v[1] = new Vector2(-tileSize / 6, tileSize / 6);
-                v[2] = new Vector2(tileSize / 6, tileSize / 6);
-                cs.createChain(v);
-                fdef.friction = 0;
-                fdef.shape = cs;
-                fdef.filter.categoryBits = BIT_TROPA;
-                fdef.filter.maskBits = BIT_PLAYER;
-                fdef.isSensor = false;
-                world.createBody(bdef).createFixture(fdef).setUserData(layer.getName());
-                cs.dispose();
-            }
-        }
-    }
-
-
-    private void createPlayer() {
-        BodyDef bdef = new BodyDef();
-        PolygonShape ps = new PolygonShape();
-        FixtureDef fdef = new FixtureDef();
-
-        if (gsm.getLastState() == MAZE) {
-            bdef.position.set(1107f / PPM, 137f / PPM);
-        } else {
-            bdef.position.set(207f / PPM, 737f / PPM);
-        }
+        bdef.position.set(tileMapWidth * tileSize * 3.5f / 2f / PPM, tileMapHeight * tileSize * 3.5f / 2f / PPM);
 
         bdef.type = BodyDef.BodyType.DynamicBody;
         Body body = world.createBody(bdef);
 
-        ps.setAsBox(40f / PPM, 50f / PPM, new Vector2(-5.4f, -3.6f), 0);
-        fdef.shape = ps;
-        fdef.filter.categoryBits = BIT_PLAYER;
-        fdef.filter.maskBits = BIT_TROPA;
-        body.createFixture(fdef).setUserData("player");
-        ps.dispose();
+        FixtureDef cdef = new FixtureDef();
+        CircleShape cshape = new CircleShape();
+        cshape.setRadius(50f / PPM);
+        cdef.shape = cshape;
+        cdef.isSensor = true;
+        cdef.filter.categoryBits = BIT_TROPA;
+        cdef.filter.maskBits = BIT_PLAYER;
+        cshape.setPosition(new Vector2(7.5f, 7.5f));
+        cshape.dispose();
 
-        player = new Player2(body);
-        player.setState(this);
-        body.setUserData(player);
+        body.createFixture(cdef).setUserData("boss");
+
+        slimeBoss = new SlimeBoss(body);
+        body.setUserData(slimeBoss);
+    }
+
+    private void initFight() {
+        skin_this = game.getSkin();
+        uiStage = new Stage(new ScreenViewport());
+        uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+
+        dialogRoot = new Table();
+        dialogRoot.setFillParent(true);
+        uiStage.addActor(dialogRoot);
+
+        dialogueBox = new DialogBox(skin_this);
+        dialogueBox.setVisible(false);
+
+        optionBox = new OptionBox2(skin_this);
+        optionBox.setVisible(false);
+
+        Table dialogTable = new Table();
+        dialogTable.add(dialogueBox)
+                .expand().align(Align.bottom)
+                .space(8f)
+                .row();
+
+        dialogRoot.add(dialogTable).expand().align(Align.bottom).pad(15f);
+
+        bossUiStage = new Stage(new ScreenViewport());
+        bossUiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+
+        Table root = new Table();
+        root.setFillParent(true);
+        BossLabel bossLabel = new BossLabel(skin_this);
+        root.add(bossLabel);
+        bossUiStage.addActor(root);
+
+        dcontroller = new DialogController(dialogueBox, optionBox);
+        multiplexer.addProcessor(bossUiStage);
+        multiplexer.addProcessor(uiStage);
+        //multiplexer.addProcessor(dcontroller);
+        Gdx.input.setInputProcessor(multiplexer);
+
+        dialog = new Dialog();
     }
 
     private void initController() {
-        /*controllerStage = new Stage(new ScreenViewport());
-        controllerStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
-
-        controller = new Controller(skin_this);
-        controller.setVisible(true);
-
-        Table controllerRoot = new Table();
-        controllerRoot.setFillParent(true);
-        controllerRoot.add(controller).expand().align(Align.bottomLeft);
-        controllerStage.addActor(controllerRoot);*/
-
         multiplexer.addProcessor(controllerStage);
         Gdx.input.setInputProcessor(multiplexer);
     }
@@ -276,7 +388,32 @@ public class BossFightState extends GameState implements Controllable {
 
     @Override
     public void loadStage(String s, Body contactBody) {
+        DialogNode node1;
+        gsm.setLastState(BOSSFIGHT);
+        switch (s) {
+            case "collision":
+                if(fight) break;
+                contactBody.getFixtureList().get(0).setUserData("collided");
+                node1 = new DialogNode("Наконец-то ты добрался сюда.", 0);
+                DialogNode node2 = new DialogNode("Ты прошел через многие испытания на пути...", 1);
+                DialogNode node3 = new DialogNode("Но поглощение этого мира неизбежно.", 2);
+                DialogNode node4 = new DialogNode("Теперь же ты тоже станешь частью моей тьмы!", 3);
 
+                node1.makeLinear(node2.getId());
+                node2.makeLinear(node3.getId());
+                node3.makeLinear(node4.getId());
+
+                dialog.addNode(node1);
+                dialog.addNode(node2);
+                dialog.addNode(node3);
+                dialog.addNode(node4);
+                dcontroller.startDialog(dialog);
+                canDraw = true;
+                break;
+        }
+    }
+    private void stop() {
+        canDraw = false;
     }
 
     @Override
@@ -290,63 +427,7 @@ public class BossFightState extends GameState implements Controllable {
     }
 
     @Override
-    public void handleInput() {}
-
-    @Override
-    public void update(float dt) {
-        handleInput();
-        world.step(dt, 6, 2);
-        player.update(dt);
-//        entities.update(dt);
-        player.updatePL();
-
-        if (isStopped) {
-            isStopped = false;
-            multiplexer.addProcessor(controllerStage);
-            Gdx.input.setInputProcessor(multiplexer);
-        }
-
-        if (controller.isMenuPressed()) {
-            gsm.setState(MENU);
-        }
-
-        if (Gdx.input.isTouched() && !controller.isInventoryVisible() && !dialogueBox.isVisible()) {
-            mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-            joyCam.unproject(mouse);
-            joyStick.update(mouse.x, mouse.y);
-        } else {
-            joyStick.setDefaultPos();
-        }
-        controllerStage.act(dt);
-    }
-
-    @Override
-    public void render() {
-        Gdx.gl20.glClearColor(0, 0, 0, 1);
-        Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        bossCam.setPosition(player.getPosition().x * PPM + V_WIDTH / 35, player.getPosition().y * PPM + V_HEIGHT / 35);
-        bossCam.update();
-
-        tmr.setView(bossCam);
-        tmr.render();
-
-        sb.setProjectionMatrix(bossCam.combined);
-        player.render(sb, 80f, 86.6f);
-//        entities.render(sb, 1.5f, 1.5f);
-
-        if (debug) {
-            b2dCam.position.set(player.getPosition().x, player.getPosition().y, 0);
-            b2dCam.update();
-            b2dr.render(world, b2dCam.combined);
-        }
-
-        joyStick.render(shapeRenderer);
-
-        if (canDraw) {
-            uiStage.draw();
-        }
-
-        controllerStage.draw();
+    public void handleInput() {
     }
 
     @Override

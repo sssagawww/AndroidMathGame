@@ -74,3 +74,10 @@ point
   orig: 256, 32
   offset: 0, 0
   index: -1
+label
+  rotate: false
+  xy: 100, 52
+  size: 44, 12
+  orig: 256, 32
+  offset: 0, 0
+  index: -1

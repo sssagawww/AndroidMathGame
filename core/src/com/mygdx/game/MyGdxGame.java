@@ -70,6 +70,7 @@ public class MyGdxGame implements ApplicationListener {
         res.loadTexture("entitySprites/gnomikStep.png", "gnomik");
         res.loadTexture("entitySprites/gnomik.png", "gnomikFull");
         res.loadTexture("entitySprites/idleGnomik.png", "gnomikrow");
+        res.loadTexture("entitySprites/slime.png", "slimeBoss");
         res.loadTexture("allBtn.png", "btn");
         res.loadTexture("entitySprites/enemy2.png", "enemy");
         res.loadTexture("entitySprites/bombGuy.png", "npc");
@@ -103,13 +104,6 @@ public class MyGdxGame implements ApplicationListener {
         assetManager.load("mcRus.fnt", BitmapFont.class);
         assetManager.finishLoading();
         skin = SkinManager.generateSkin(assetManager);
-        sb = new SpriteBatch();
-        cam = new BoundedCamera();
-        cam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
-        stepDatabase = new StepDatabase();
-        exampleDatabase = new ExampleDatabase();
-        figuresDatabase = new FiguresDatabase(this);
-        gsm = new GameStateManager(this);
 
         controllerStage = new Stage(new ScreenViewport());
         controllerStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
@@ -120,6 +114,14 @@ public class MyGdxGame implements ApplicationListener {
         controllerRoot.setFillParent(true);
         controllerRoot.add(controller).expand().align(Align.bottomLeft);
         controllerStage.addActor(controllerRoot);
+
+        sb = new SpriteBatch();
+        cam = new BoundedCamera();
+        cam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
+        stepDatabase = new StepDatabase();
+        exampleDatabase = new ExampleDatabase();
+        figuresDatabase = new FiguresDatabase(this);
+        gsm = new GameStateManager(this);
     }
 
     @Override
