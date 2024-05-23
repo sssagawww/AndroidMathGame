@@ -50,4 +50,14 @@ public class Figure {
     public void setFigureType(FiguresDatabase.FIGURES_TYPES figureType) {
         this.figureType = figureType;
     }
+
+    @Override
+    public String toString() {
+        return "Figure{" +
+                "name='" + name + '\'' +
+                ", figureType=" + figureType +
+                ", points=" + points +
+                ", hints=" + hints +
+                '}';
+    }
 }

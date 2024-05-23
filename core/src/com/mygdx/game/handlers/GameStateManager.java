@@ -1,8 +1,11 @@
 package com.mygdx.game.handlers;
 
 import com.mygdx.game.MyGdxGame;
+import com.mygdx.game.paint.Figures.Figure;
+import com.mygdx.game.paint.Figures.FiguresDatabase;
 import com.mygdx.game.states.*;
 
+import java.util.ArrayList;
 import java.util.Stack;
 
 public class GameStateManager {
@@ -13,6 +16,7 @@ public class GameStateManager {
     private Forest forest;
     private DungeonState dungeonState;
     private int lastState;
+    private ArrayList<FiguresDatabase.FIGURES_TYPES> paintArgs;
     public static final int PLAY = 912837;
     public static final int BLACK_SCREEN = 100;
     public static final int MENU = 0;
@@ -54,7 +58,7 @@ public class GameStateManager {
             play = new Play(this);
             return play;
         } else if (state == PAINT) {
-            return new PaintState(this);
+            return new PaintState(this, paintArgs);
         } else if (state == MAZE) {
             if (mazeState==null) return mazeState = new MazeState(this);
             return mazeState;
@@ -112,5 +116,9 @@ public class GameStateManager {
 
     public void setLastState(int lastState) {
         this.lastState = lastState;
+    }
+
+    public void setPaintArgs(ArrayList<FiguresDatabase.FIGURES_TYPES> figuresTypes){
+        paintArgs = figuresTypes;
     }
 }

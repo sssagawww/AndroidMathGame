@@ -34,6 +34,7 @@ import com.mygdx.game.UI.PaintMenu;
 import com.mygdx.game.handlers.BoundedCamera;
 import com.mygdx.game.handlers.GameStateManager;
 import com.mygdx.game.paint.DistanceCalc;
+import com.mygdx.game.paint.Figures.Figure;
 import com.mygdx.game.paint.Figures.FiguresDatabase;
 import com.mygdx.game.paint.PixelPoint;
 
@@ -84,6 +85,13 @@ public class PaintState extends GameState implements InputProcessor {
         paintCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
 
         Gdx.input.setInputProcessor(multiplexer);
+    }
+
+    public PaintState(GameStateManager gsm, ArrayList<FiguresDatabase.FIGURES_TYPES> figuresTypes) {
+        this(gsm);
+        if(figuresTypes != null){
+            figuresDatabase.loadFigures(figuresTypes);
+        }
     }
 
     @Override
@@ -261,6 +269,7 @@ public class PaintState extends GameState implements InputProcessor {
                 // !!! ВРЕМЕННОЕ СОХРАНЕНИЕ НА КНОПКУ ФИГУРЫ В ДБ !!!
                 //game.getDbWrapper().saveFigure(new Figure("Ромб", FiguresDatabase.FIGURES_TYPES.RHOMBUS, points, points));
                 //System.out.println(game.getDbWrapper().getFigures());
+                //figuresDatabase.saveJson(new Figure("Ромб", FiguresDatabase.FIGURES_TYPES.RHOMBUS, points, points));
 
                 skippedPoints.clear();
                 points.clear();
@@ -276,7 +285,7 @@ public class PaintState extends GameState implements InputProcessor {
                 startDialogController();
                 break;
             case DONE:
-                gsm.setState(PLAY);
+                gsm.setState(gsm.getLastState());
                 break;
         }
     }
