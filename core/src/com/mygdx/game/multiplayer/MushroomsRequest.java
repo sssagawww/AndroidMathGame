@@ -16,7 +16,7 @@ import okhttp3.MediaType;
 public class MushroomsRequest {
     private OkHttpClient client;
     private int opponentId;
-    private int opponentCount;
+    private int opponentScore;
     private JsonReader json;
     private final String url = "";
 
@@ -44,8 +44,8 @@ public class MushroomsRequest {
                 try {
                     JsonValue jObject = json.parse(response.body().string());
                     opponentId = jObject.getInt("userId");
-                    opponentCount = jObject.getInt("playerCount");
-                    System.out.println("userId: " + opponentId + " playerCount: " + opponentCount);
+                    opponentScore = jObject.getInt("playerScore");
+                    System.out.println("userId: " + opponentId + " playerScore: " + opponentScore);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -58,7 +58,7 @@ public class MushroomsRequest {
         return opponentId;
     }
 
-    public int getOpponentCount() {
-        return opponentCount;
+    public int getOpponentScore() {
+        return opponentScore;
     }
 }

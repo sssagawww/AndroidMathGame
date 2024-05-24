@@ -46,8 +46,6 @@ import com.mygdx.game.handlers.GameStateManager;
 import com.mygdx.game.handlers.MyContactListener;
 import com.mygdx.game.multiplayer.MushroomsRequest;
 
-import java.util.Random;
-
 public class MushroomsState extends GameState implements Controllable {
     private Box2DDebugRenderer b2dr;
     private InputMultiplexer multiplexer;
@@ -80,7 +78,7 @@ public class MushroomsState extends GameState implements Controllable {
     private Sound mushroomSound;
     private float spawnTime = 0;
     private boolean debug = false;
-    private int playerCount;
+    private int playerScore;
     private int count = 0;
     private MushroomsRequest request;
 
@@ -313,10 +311,10 @@ public class MushroomsState extends GameState implements Controllable {
         gsm.setLastState(MUSHROOMS);
         switch (s) {
             case "mushroom":
-                playerCount++;
+                playerScore++;
                 mushroomSound.play(1f);
-                score.setText("Счет: " + playerCount + " || " + request.getOpponentCount());
-                request.postInfo(123, playerCount, playerCount >= 30);
+                score.setText("Счет: " + playerScore + " || " + request.getOpponentScore());
+                request.postInfo(123, playerScore, playerScore >= 30);
                 break;
             default:
                 break;
@@ -348,7 +346,7 @@ public class MushroomsState extends GameState implements Controllable {
         lstyle.background = skin_this.getDrawable("GUI_img");
 
         score = new Label("\n", lstyle);
-        score.setText("Счет: " + playerCount + " || " + request.getOpponentCount());
+        score.setText("Счет: " + playerScore + " || " + request.getOpponentScore());
         score.setAlignment(Align.center);
 
         Table topTable = new Table();
