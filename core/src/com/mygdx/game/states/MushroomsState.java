@@ -314,7 +314,7 @@ public class MushroomsState extends GameState implements Controllable {
                 playerScore++;
                 mushroomSound.play(1f);
                 score.setText("Счет: " + playerScore + " || " + request.getOpponentScore());
-                request.postInfo(123, playerScore, playerScore >= 30);
+                request.postInfo(123, playerScore);
                 break;
             default:
                 break;

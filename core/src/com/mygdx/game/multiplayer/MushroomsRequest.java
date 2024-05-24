@@ -25,9 +25,9 @@ public class MushroomsRequest {
         json = new JsonReader();
     }
 
-    public void postInfo(int id, int count, boolean done) {
+    public void postInfo(int id, int count) {
         MediaType JSON = MediaType.get("application/json; charset=utf-8");
-        String jsonRequest = "{\"userId\":" + id + ", \"playerCount\":" + count + ", \"done\":" + done + "}";
+        String jsonRequest = "{\"userId\":" + id + ", \"playerScore\":" + count + "}";
         RequestBody body = RequestBody.create(jsonRequest, JSON);
 
         Request request = new Request.Builder().url(url).post(body).build();
