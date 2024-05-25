@@ -9,6 +9,7 @@ import static com.mygdx.game.handlers.GameStateManager.FOREST;
 import static com.mygdx.game.handlers.GameStateManager.MENU;
 import static com.mygdx.game.handlers.GameStateManager.MUSHROOMS;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.audio.Sound;
@@ -30,7 +31,10 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -38,6 +42,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.UI.Controller;
 import com.mygdx.game.UI.JoyStick;
+import com.mygdx.game.UI.ScoreTable;
 import com.mygdx.game.entities.PlayEntities;
 import com.mygdx.game.entities.Player2;
 import com.mygdx.game.handlers.BoundedCamera;
@@ -72,15 +77,24 @@ public class MushroomsState extends GameState implements Controllable {
     private boolean canDraw;
     private Stage uiStage;
     private Label score;
-    private float time;
+    private ScoreTable scoreTable;
+    private Image readyBtn;
+    private boolean readyBtnClicked;
+    private boolean opponent;
+    private float requestTime;
+    private float gameTime;
+    private boolean gameOver;
     private int nextState;
     private Body removedBody;
     private Sound mushroomSound;
     private float spawnTime = 0;
     private boolean debug = false;
-    private int playerScore;
+    private int playerScore = 0;
     private int count = 0;
     private MushroomsRequest request;
+    public static final String MUSHROOMS_GAME = "mushroomsMiniGame";
+    private final int id = (int) (Math.random() * 10000);
+    private String playerName = "playerName";
 
     public MushroomsState(GameStateManager gsm) {
         super(gsm);
@@ -94,13 +108,19 @@ public class MushroomsState extends GameState implements Controllable {
         skin_this = game.getSkin();
         entities = new PlayEntities();
 
+        if (Gdx.app.getType() == Application.ApplicationType.Android) {
+            playerName = "androidPlayer";
+        }
+
+        initFight();
         request = new MushroomsRequest();
+        request.join(id, playerName, MUSHROOMS_GAME, 10);
+        scoreTable.addPlayerScore(playerName, playerScore);
 
         initJoyStick();
         initController();
         createPlayer();
         createTiles();
-        initFight();
 
         pickCam = new BoundedCamera();
         pickCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
@@ -116,12 +136,41 @@ public class MushroomsState extends GameState implements Controllable {
         world.step(dt, 6, 2);
         player.update(dt);
 
-        spawnTime += dt;
-        if (spawnTime >= 1 && count <= 30) {
-            count++;
-            spawnTime = 0;
-            spawnMushrooms();
+        //окончание игры
+        if (gameTime >= 30) {
+            gameTime = 0;
+            gameOver = true;
+            request.getWinner();
         }
+
+        if(gameOver){
+            readyBtnClicked = false;
+            score.setVisible(true);
+            score.setText(request.getWinnerName());
+        }
+
+        //если оба игрока готовы, то начинается обмен инфой
+        if (request.isReady() && readyBtnClicked) {
+            gameTime += dt;
+            requestTime += dt;
+            if (requestTime >= dt * 2 && gameTime < 30) {
+                requestTime = 0;
+                request.postInfo(id, playerName, playerScore);
+                checkUsers();
+                if (opponent)
+                    scoreTable.setPlayerScore(request.getOpponentName(), request.getOpponentScore());
+            }
+            scoreTable.setPlayerScore(playerName, playerScore);
+
+            //появление грибов
+            spawnTime += dt;
+            if (spawnTime >= 1 && count <= 30) {
+                count++;
+                spawnTime = 0;
+                spawnMushrooms();
+            }
+        }
+
         entities.update(dt);
         player.updatePL();
 
@@ -181,7 +230,7 @@ public class MushroomsState extends GameState implements Controllable {
         bdef.type = BodyDef.BodyType.StaticBody;
 
         float x = (float) Math.random() * (tileMapWidth * tileSize) / PPM * 4f;
-        float y = (float) Math.random() * (tileMapWidth * tileSize) / PPM * 4f;
+        float y = (float) Math.random() * (tileMapHeight * tileSize) / PPM * 4f;
 
         bdef.position.set(x, y);
 
@@ -297,6 +346,7 @@ public class MushroomsState extends GameState implements Controllable {
     public void dispose() {
         player.stopSounds();
         isStopped = true;
+        request.leave(id);
     }
 
     private void stop() {
@@ -306,6 +356,52 @@ public class MushroomsState extends GameState implements Controllable {
         canDraw = false;
     }
 
+    private void initFight() {
+        uiStage = new Stage(new ScreenViewport());
+        uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+
+        BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
+        Label.LabelStyle lstyle = new Label.LabelStyle(font, Color.BLACK);
+        lstyle.background = skin_this.getDrawable("GUI_img");
+
+        score = new Label("\n", lstyle);
+        score.setText("Ожидание игроков...");
+        score.setAlignment(Align.center);
+
+        readyBtn = new Image(skin_this.getDrawable("ok"));
+        readyBtn.addListener(new InputListener() {
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                readyBtnClicked = true;
+                score.setVisible(false);
+                return true;
+            }
+
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                request.playerIsReady(id, playerName);
+                request.postInfo(id, playerName, playerScore);
+                readyBtn.setVisible(false);
+            }
+        });
+
+        scoreTable = new ScoreTable(skin_this);
+
+        Table rightTable = new Table();
+
+        Table topTable = new Table();
+        topTable.setFillParent(true);
+        topTable.add(score).align(Align.top).expand(true,false).row();
+        rightTable.add(scoreTable).right().row();
+        rightTable.add(readyBtn).width(V_WIDTH/15f).height(V_WIDTH/15f).right();
+        topTable.add(rightTable).right().expand();
+
+        uiStage.addActor(topTable);
+
+        multiplexer.addProcessor(uiStage);
+        Gdx.input.setInputProcessor(multiplexer);
+    }
+
     @Override
     public void loadStage(String s, Body contactBody) {
         gsm.setLastState(MUSHROOMS);
@@ -313,11 +409,19 @@ public class MushroomsState extends GameState implements Controllable {
             case "mushroom":
                 playerScore++;
                 mushroomSound.play(1f);
-                score.setText("Счет: " + playerScore + " || " + request.getOpponentScore());
-                request.postInfo(123, playerScore);
                 break;
             default:
                 break;
+        }
+    }
+
+    private void checkUsers() {
+        String s = request.getOpponentName();
+        if (s == null || s.equals("")) {
+            opponent = false;
+        } else if (!scoreTable.getPlayers().containsKey(s)) {
+            scoreTable.addPlayerScore(s, request.getOpponentScore());
+            opponent = true;
         }
     }
 
@@ -335,27 +439,5 @@ public class MushroomsState extends GameState implements Controllable {
     @Override
     public JoyStick getJoyStick() {
         return joyStick;
-    }
-
-    private void initFight() {
-        uiStage = new Stage(new ScreenViewport());
-        uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
-
-        BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
-        Label.LabelStyle lstyle = new Label.LabelStyle(font, Color.BLACK);
-        lstyle.background = skin_this.getDrawable("GUI_img");
-
-        score = new Label("\n", lstyle);
-        score.setText("Счет: " + playerScore + " || " + request.getOpponentScore());
-        score.setAlignment(Align.center);
-
-        Table topTable = new Table();
-        topTable.setFillParent(true);
-        topTable.add(score).align(Align.top).expand();
-
-        uiStage.addActor(topTable);
-
-        multiplexer.addProcessor(uiStage);
-        Gdx.input.setInputProcessor(multiplexer);
     }
 }
