@@ -170,6 +170,7 @@ public class Play extends GameState implements Controllable {
 
         if (controller.isMenuPressed()) {
             gsm.setState(MENU);
+            controller.setMenuPressed(false);
         }
 
         //обновление джойстика
@@ -738,6 +739,7 @@ public class Play extends GameState implements Controllable {
     private void stop() {
         if (nextState != -1) {
             gsm.setState(nextState);
+            nextState = -1;
         }
         //entities.getEntity(entities.getCurEntity()).setVisible(false);
         music.dispose();

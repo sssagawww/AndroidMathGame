@@ -133,6 +133,7 @@ public class MazeState extends GameState implements Controllable {
 
         if (controller.isMenuPressed()) {
             gsm.setState(MENU);
+            controller.setMenuPressed(false);
         }
 
         darkStage.act(dt);

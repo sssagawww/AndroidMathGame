@@ -95,6 +95,10 @@ public class Controller extends Table {
         return menuPressed;
     }
 
+    public void setMenuPressed(boolean menuPressed) {
+        this.menuPressed = menuPressed;
+    }
+
     public void setBtnsVisibility(boolean visibility) {
         menuImg.setVisible(visibility);
         inventImg.setVisible(visibility);

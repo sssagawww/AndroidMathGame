@@ -18,11 +18,12 @@ public class MushroomsRequest {
     private OkHttpClient client;
     private int opponentId;
     private float opponentScore;
+    private boolean done = false;
     private String opponentName = "";
     private String winner = "";
     private boolean everyoneReady;
     private JsonReader json;
-    private final String url = "http://----:8080/multiplayer/";
+    private final String url = "http://192.168.1.42:8080/multiplayer/";
     private final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 
     public MushroomsRequest() {
@@ -43,13 +44,16 @@ public class MushroomsRequest {
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
+            public void onResponse(Call call, Response response) {
                 try {
+                    Thread.sleep(10);
                     JsonValue jObject = json.parse(response.body().string());
                     opponentName = jObject.getString("userName");
                     opponentScore = jObject.getFloat("number");
                 } catch (IOException e) {
                     e.printStackTrace();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
             }
         });
@@ -77,6 +81,24 @@ public class MushroomsRequest {
         });
     }
 
+    public void setPlayerReady(int id, boolean ready) {
+        String jsonRequest = "{\"userId\":" + id + ", \"ready\": \"" + ready + "\"}";
+        RequestBody body = RequestBody.create(jsonRequest, JSON);
+        Request request = new Request.Builder().url(url + "setplayerready").post(body).build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                System.out.println("Unable to connect! setPlayerReady");
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                System.out.println("setPlayerReady called");
+            }
+        });
+    }
+
     public void join(int id, String userName, String miniGame, float number) {
         String jsonRequest = "{\"userId\":" + id + ", \"userName\": \"" + userName + "\", \"miniGame\": \"" + miniGame + "\", \"number\":" + number + "}";
         RequestBody body = RequestBody.create(jsonRequest, JSON);
@@ -90,9 +112,10 @@ public class MushroomsRequest {
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
+            public void onResponse(Call call, Response response) {
                 try {
                     System.out.println(response.body().string());
+                    done = true;
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -177,6 +200,14 @@ public class MushroomsRequest {
 
     public String getOpponentName() {
         return opponentName;
+    }
+
+    public boolean isDone() {
+        return done;
+    }
+
+    public void setDone(boolean done) {
+        this.done = done;
     }
 
     public String getWinnerName() {

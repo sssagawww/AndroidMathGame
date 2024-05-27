@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.paint.Figures.FiguresDatabase;
+import com.mygdx.game.states.PaintState;
 
 public class PaintMenu extends Table {
     private MyGdxGame game;
@@ -109,7 +110,7 @@ public class PaintMenu extends Table {
         } else if(btnBox.getState() == OK || btnBox.getState() == WRONG){
             time += dt;
             if (time > 3f) {
-                if(btnBox.getState() == OK){
+                if(btnBox.getState() == OK || PaintState.isOnline()){
                     setNextFigure(figuresDatabase.getFigure(figuresDatabase.nextFigure() % figuresDatabase.getFiguresCount()).getName());
                     setAccuracy(1);
                 }

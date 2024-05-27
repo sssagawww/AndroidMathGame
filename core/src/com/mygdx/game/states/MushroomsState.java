@@ -5,7 +5,6 @@ import static com.mygdx.game.MyGdxGame.V_WIDTH;
 import static com.mygdx.game.handlers.B2DVars.BIT_PLAYER;
 import static com.mygdx.game.handlers.B2DVars.BIT_TROPA;
 import static com.mygdx.game.handlers.B2DVars.PPM;
-import static com.mygdx.game.handlers.GameStateManager.FOREST;
 import static com.mygdx.game.handlers.GameStateManager.MENU;
 import static com.mygdx.game.handlers.GameStateManager.MUSHROOMS;
 
@@ -76,13 +75,13 @@ public class MushroomsState extends GameState implements Controllable {
     private boolean isStopped;
     private boolean canDraw;
     private Stage uiStage;
-    private Label score;
+    private Label mainLabel;
     private ScoreTable scoreTable;
     private Image readyBtn;
     private boolean readyBtnClicked;
     private boolean opponent;
-    private float requestTime;
-    private float gameTime;
+    private float requestTime = 0;
+    private float miniGameTime;
     private boolean gameOver;
     private int nextState;
     private Body removedBody;
@@ -109,7 +108,7 @@ public class MushroomsState extends GameState implements Controllable {
         entities = new PlayEntities();
 
         if (Gdx.app.getType() == Application.ApplicationType.Android) {
-            playerName = "androidPlayer";
+            playerName = "androidPlayer1";
         }
 
         initFight();
@@ -137,29 +136,32 @@ public class MushroomsState extends GameState implements Controllable {
         player.update(dt);
 
         //окончание игры
-        if (gameTime >= 30) {
-            gameTime = 0;
+        if (miniGameTime >= 30) {
+            miniGameTime = 0;
             gameOver = true;
             request.getWinner();
         }
 
-        if(gameOver){
+        if (gameOver) {
             readyBtnClicked = false;
-            score.setVisible(true);
-            score.setText(request.getWinnerName());
+            mainLabel.setVisible(true);
+            mainLabel.setText(request.getWinnerName());
+        }
+
+        checkUsers();
+        requestTime += dt;
+
+        if (requestTime >= dt * 10 && miniGameTime < 30 && request.isDone()) {
+            requestTime = 0;
+            request.postInfo(id, playerName, playerScore);
+            if (opponent)
+                scoreTable.setPlayerScore(request.getOpponentName(), request.getOpponentScore());
         }
 
         //если оба игрока готовы, то начинается обмен инфой
         if (request.isReady() && readyBtnClicked) {
-            gameTime += dt;
-            requestTime += dt;
-            if (requestTime >= dt * 2 && gameTime < 30) {
-                requestTime = 0;
-                request.postInfo(id, playerName, playerScore);
-                checkUsers();
-                if (opponent)
-                    scoreTable.setPlayerScore(request.getOpponentName(), request.getOpponentScore());
-            }
+            mainLabel.setVisible(false);
+            miniGameTime += dt;
             scoreTable.setPlayerScore(playerName, playerScore);
 
             //появление грибов
@@ -182,6 +184,7 @@ public class MushroomsState extends GameState implements Controllable {
 
         if (controller.isMenuPressed()) {
             gsm.setState(MENU);
+            controller.setMenuPressed(false);
         }
 
         if (Gdx.input.isTouched() && !controller.isInventoryVisible()/* && !dialogueBox.isVisible()*/) {
@@ -253,11 +256,7 @@ public class MushroomsState extends GameState implements Controllable {
         PolygonShape ps = new PolygonShape();
         FixtureDef fdef = new FixtureDef();
 
-        if (gsm.getLastState() == FOREST) {
-            bdef.position.set(107f / PPM, 637f / PPM);
-        } else {
-            bdef.position.set(607f / PPM, 337f / PPM);
-        }
+        bdef.position.set(607f / PPM, 337f / PPM);
 
         bdef.type = BodyDef.BodyType.DynamicBody;
         Body body = world.createBody(bdef);
@@ -364,23 +363,21 @@ public class MushroomsState extends GameState implements Controllable {
         Label.LabelStyle lstyle = new Label.LabelStyle(font, Color.BLACK);
         lstyle.background = skin_this.getDrawable("GUI_img");
 
-        score = new Label("\n", lstyle);
-        score.setText("Ожидание игроков...");
-        score.setAlignment(Align.center);
+        mainLabel = new Label("\n", lstyle);
+        mainLabel.setText("Ожидание игроков...");
+        mainLabel.setAlignment(Align.center);
 
         readyBtn = new Image(skin_this.getDrawable("ok"));
         readyBtn.addListener(new InputListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 readyBtnClicked = true;
-                score.setVisible(false);
                 return true;
             }
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 request.playerIsReady(id, playerName);
-                request.postInfo(id, playerName, playerScore);
                 readyBtn.setVisible(false);
             }
         });
@@ -391,9 +388,9 @@ public class MushroomsState extends GameState implements Controllable {
 
         Table topTable = new Table();
         topTable.setFillParent(true);
-        topTable.add(score).align(Align.top).expand(true,false).row();
+        topTable.add(mainLabel).align(Align.top).expand(true, false).row();
         rightTable.add(scoreTable).right().row();
-        rightTable.add(readyBtn).width(V_WIDTH/15f).height(V_WIDTH/15f).right();
+        rightTable.add(readyBtn).width(V_WIDTH / 15f).height(V_WIDTH / 15f).right();
         topTable.add(rightTable).right().expand();
 
         uiStage.addActor(topTable);
