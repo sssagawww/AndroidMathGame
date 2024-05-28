@@ -67,12 +67,15 @@ public class PaintState extends GameState implements InputProcessor {
     private PolygonSpriteBatch batch;
     private BoundedCamera paintCam;
     private MushroomsRequest request;
+    private Label readyLabel;
     private float requestTime = 0;
     private final int id = (int) (Math.random() * 10000);
     private String playerName = "playerName";
     public static final String PAINT_GAME = "paintMiniGame";
     private static boolean online;
+    private boolean btnClicked;
     private boolean ready = false;
+    private String oppScore;
 
     public PaintState(GameStateManager gsm) {
         super(gsm);
@@ -95,7 +98,6 @@ public class PaintState extends GameState implements InputProcessor {
                 playerName = "androidPlayer";
             }
             request.join(id, playerName, PAINT_GAME, 0);
-            request.postInfo(id, playerName, 0);
         }
 
         initUI();
@@ -127,21 +129,24 @@ public class PaintState extends GameState implements InputProcessor {
         checkBtns();
         dcontroller.update(dt);
 
-        if(ready || !online) paintMenu.checkProgress(dt);
+        if (ready && (paintMenu.getBtnBox().isClicked() || btnClicked)) {
+            request.setPlayerReady(id, false);
+        }
 
-        if (ready && online) {
+        if (btnClicked || !online) {
+            paintMenu.checkProgress(dt);
+        }
+
+        if (online && request.isDone()) {
             requestTime += dt;
-            if (requestTime >= dt * 5) {
+            if (requestTime >= dt * 10) {
                 requestTime = 0;
                 request.postInfo(id, playerName, (float) distanceCalc.getAccuracy());
+                ready = request.isReady();
             }
-        } else if (online) {
-            ready = request.isReady();
-            if(requestTime >= 0){
-                requestTime = -0.5f;
-                request.setPlayerReady(id, false);
-            }
+            oppScore = String.format("%.2f", 1 - request.getOpponentScore());
         }
+        checkProgress();
     }
 
     @Override
@@ -247,7 +252,7 @@ public class PaintState extends GameState implements InputProcessor {
             BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
             Label.LabelStyle lstyle = new Label.LabelStyle(font, Color.BLACK);
             lstyle.background = game.getSkin().getDrawable("menuBtn_down");
-            Label readyLabel = new Label("Нажмите, если готовы", lstyle);
+            readyLabel = new Label("Нажмите, если готовы", lstyle);
             readyLabel.setAlignment(Align.center);
             readyLabel.addListener(new InputListener() {
                 @Override
@@ -259,6 +264,7 @@ public class PaintState extends GameState implements InputProcessor {
                 @Override
                 public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                     readyLabel.setVisible(false);
+                    btnClicked = true;
                 }
             });
 
@@ -308,13 +314,17 @@ public class PaintState extends GameState implements InputProcessor {
         btn.addListener(new InputListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                if(online){
+                    request.postInfo(id, playerName, (float) distanceCalc.getAccuracy());
+                }
                 return true;
             }
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                request.setPlayerReady(id, true);
-                ready = request.isReady();
+                if (online) {
+                    request.setPlayerReady(id, true);
+                }
                 paintMenu.getBtnBox().setState(CHECK);
                 paintMenu.getBtnBox().setClicked(true);
             }
@@ -329,6 +339,10 @@ public class PaintState extends GameState implements InputProcessor {
                 paintMenu.getBtnBox().setState(OK);
             } else {
                 paintMenu.getBtnBox().setState(WRONG);
+            }
+
+            if (online && !ready) {
+                paintMenu.getBtnBox().setState(CHECK);
             }
             paintMenu.setAccuracy(distanceCalc.getAccuracy());
         }
@@ -345,20 +359,29 @@ public class PaintState extends GameState implements InputProcessor {
             case OK:
                 node = new DialogNode("Получилось! Молодец!", 0);
                 if (online) {
-                    node = new DialogNode(String.format("%.2f", 1 - distanceCalc.getAccuracy()) + " : " + String.format("%.2f", 1 - request.getOpponentScore()), 0);
+                    node = new DialogNode(String.format("%.2f", 1 - distanceCalc.getAccuracy()) + " : " + oppScore, 0);
                 }
                 startDialogController();
                 break;
             case WRONG:
                 node = new DialogNode("Попробуй еще раз!", 0);
                 if (online) {
-                    node = new DialogNode(distanceCalc.getAccuracy() + " : " + request.getOpponentScore(), 0);
+                    node = new DialogNode(String.format("%.2f", 1 - distanceCalc.getAccuracy()) + " : " + oppScore, 0);
                 }
                 startDialogController();
                 break;
             case DONE:
                 gsm.setState(gsm.getLastState());
                 break;
+        }
+    }
+
+    private void checkProgress() {
+        if (paintMenu.getBtnBox().isClicked() && !ready) {
+            readyLabel.setText("Ожидание игрока...");
+            readyLabel.setVisible(true);
+        } else if (ready) {
+            readyLabel.setVisible(false);
         }
     }
 
