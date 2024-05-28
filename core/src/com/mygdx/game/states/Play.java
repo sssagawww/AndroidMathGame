@@ -315,6 +315,8 @@ public class Play extends GameState implements Controllable {
         createLayer(nextForest, BIT_TROPA, BIT_PLAYER, true);
         TiledMapTileLayer signDungeon = (TiledMapTileLayer) tiledMap.getLayers().get("signDungeon");
         createLayer(signDungeon, BIT_TROPA, BIT_PLAYER, true);
+        TiledMapTileLayer nextBoss = (TiledMapTileLayer) tiledMap.getLayers().get("nextBoss");
+        createLayer(nextBoss, BIT_TROPA, BIT_PLAYER, true);
     }
 
     //коллизия слоя на карте (слой создаётся в Tiled)
@@ -642,6 +644,10 @@ public class Play extends GameState implements Controllable {
                 /*if(prevState == nextState) break;
                 prevState = FOREST;*/
                 //entities.getEntity(entities.getCurEntity()).setVisible(true); //почему-то вылетает из-за этого
+                stop();
+                break;
+            case "nextBoss":
+                nextState = BOSSFIGHT;
                 stop();
                 break;
             case "null":

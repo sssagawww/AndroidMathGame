@@ -29,11 +29,13 @@ public class BossLabel extends Table {
     private Table hpTable;
     private Table btnsTable;
     private TextButton.TextButtonStyle style;
-    private ATTACK_STATES state;
+    private ATTACK_STATES state = ATTACK_STATES.NON;
+
     public enum ATTACK_STATES {
         MATH,
         RHYTHM,
-        PAINT
+        PAINT,
+        NON
     }
 
     public BossLabel(Skin skin) {
@@ -61,13 +63,13 @@ public class BossLabel extends Table {
 
         Table labelTable = new Table(skin);
         labelTable.setBackground("label");
-        labelTable.add(label).width(V_WIDTH/2f).center().padTop(22f);
+        labelTable.add(label).width(V_WIDTH / 2f).center().padTop(22f);
 
-        hpTable.add(labelTable).height(V_HEIGHT/10f).row();
+        hpTable.add(labelTable).height(V_HEIGHT / 10f).row();
         createBars();
         uiTable.add(hpTable).top().expand().row();
         createBtns();
-        uiTable.add(btnsTable).bottom().padBottom(V_HEIGHT/10f).expand();
+        uiTable.add(btnsTable).bottom().padBottom(V_HEIGHT / 10f).expand();
     }
 
     private void createBars() {
@@ -77,7 +79,7 @@ public class BossLabel extends Table {
         progressBarStyle.knobBefore.setMinHeight(20f);
         hpBar = new ProgressBar(0, 100, .1f, false, progressBarStyle);
         hpBar.setAnimateDuration(.15f);
-        hpTable.add(hpBar).width(V_WIDTH/2f).height(50f).row();
+        hpTable.add(hpBar).width(V_WIDTH / 2f).height(50f).row();
         hpBar.setValue(100f);
     }
 
@@ -104,7 +106,7 @@ public class BossLabel extends Table {
             }
         });
 
-        btnsTable.add(btn).align(Align.bottom).width(V_WIDTH/3.5f).height(100f).space(25f);
+        btnsTable.add(btn).align(Align.bottom).width(V_WIDTH / 3.5f).height(100f).space(25f);
     }
 
     public ATTACK_STATES getState() {

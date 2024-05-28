@@ -2,6 +2,7 @@ package com.mygdx.game.states;
 
 import static com.mygdx.game.MyGdxGame.V_HEIGHT;
 import static com.mygdx.game.MyGdxGame.V_WIDTH;
+import static com.mygdx.game.UI.BtnBox.STATES.NON;
 import static com.mygdx.game.handlers.B2DVars.BIT_PLAYER;
 import static com.mygdx.game.handlers.B2DVars.BIT_TROPA;
 import static com.mygdx.game.handlers.B2DVars.PPM;
@@ -11,6 +12,7 @@ import static com.mygdx.game.handlers.GameStateManager.DUNGEON;
 import static com.mygdx.game.handlers.GameStateManager.MAZE;
 import static com.mygdx.game.handlers.GameStateManager.MENU;
 import static com.mygdx.game.handlers.GameStateManager.PLAY;
+import static com.mygdx.game.handlers.GameStateManager.RHYTHM;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
@@ -82,6 +84,7 @@ public class BossFightState extends GameState implements Controllable {
     private OptionBox2 optionBox;
     private DialogController dcontroller;
     private Dialog dialog;
+    private BossLabel bossLabel;
     private boolean debug = false;
     private boolean canDraw = false;
     private boolean fight = false;
@@ -162,7 +165,7 @@ public class BossFightState extends GameState implements Controllable {
             joyStick.setDefaultPos();
         }
 
-        if(fight){
+        if (fight) {
             bossUiStage.act(dt);
         }
         controllerStage.act(dt);
@@ -195,8 +198,9 @@ public class BossFightState extends GameState implements Controllable {
             uiStage.draw();
         }
 
-        if(fight){
+        if (fight) {
             bossUiStage.draw();
+            checkBtns();
         }
         controllerStage.draw();
     }
@@ -357,7 +361,7 @@ public class BossFightState extends GameState implements Controllable {
 
         Table root = new Table();
         root.setFillParent(true);
-        BossLabel bossLabel = new BossLabel(skin_this);
+        bossLabel = new BossLabel(skin_this);
         root.add(bossLabel);
         bossUiStage.addActor(root);
 
@@ -387,6 +391,15 @@ public class BossFightState extends GameState implements Controllable {
 
     }
 
+    private void checkBtns() {
+        switch (bossLabel.getState()) {
+            case RHYTHM:
+                gsm.setState(RHYTHM);
+                break;
+        }
+        bossLabel.setState(BossLabel.ATTACK_STATES.NON);
+    }
+
     @Override
     public JoyStick getJoyStick() {
         return joyStick;
@@ -398,7 +411,7 @@ public class BossFightState extends GameState implements Controllable {
         gsm.setLastState(BOSSFIGHT);
         switch (s) {
             case "collision":
-                if(fight) break;
+                if (fight) break;
                 contactBody.getFixtureList().get(0).setUserData("collided");
                 node1 = new DialogNode("Наконец-то ты добрался сюда.", 0);
                 DialogNode node2 = new DialogNode("Ты прошел через многие испытания на пути...", 1);
@@ -418,6 +431,7 @@ public class BossFightState extends GameState implements Controllable {
                 break;
         }
     }
+
     private void stop() {
         canDraw = false;
     }
