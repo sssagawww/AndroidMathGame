@@ -42,6 +42,7 @@ public class RhythmState extends GameState {
     private RhythmMenu rhythmMenu;
     private static boolean done;
     private static boolean strength100;
+    private static boolean bossFight;
     private Sound doneSound;
 
     public RhythmState(GameStateManager gsm) {
@@ -73,7 +74,7 @@ public class RhythmState extends GameState {
             doneSound.play(0.7f);
         }
         if (dialogBox.isPressed()) {
-            gsm.setState(FOREST);
+            gsm.setState(gsm.getLastState());
         }
     }
 
@@ -110,11 +111,11 @@ public class RhythmState extends GameState {
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                gsm.setState(FOREST);
+                gsm.setState(gsm.getLastState());
             }
         });
 
-        rhythmMenu = new RhythmMenu(game.getSkin());
+        rhythmMenu = new RhythmMenu(game.getSkin(), bossFight);
 
         Table table = new Table();
         root.add(menuImg).expand().align(Align.topLeft).padTop(65f);
@@ -143,5 +144,13 @@ public class RhythmState extends GameState {
 
     public static boolean isStrength100() {
         return strength100;
+    }
+
+    public static boolean isBossFight() {
+        return bossFight;
+    }
+
+    public static void setBossFight(boolean bossFight) {
+        RhythmState.bossFight = bossFight;
     }
 }

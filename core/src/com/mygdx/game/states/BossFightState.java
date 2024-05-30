@@ -2,16 +2,13 @@ package com.mygdx.game.states;
 
 import static com.mygdx.game.MyGdxGame.V_HEIGHT;
 import static com.mygdx.game.MyGdxGame.V_WIDTH;
-import static com.mygdx.game.UI.BtnBox.STATES.NON;
 import static com.mygdx.game.handlers.B2DVars.BIT_PLAYER;
 import static com.mygdx.game.handlers.B2DVars.BIT_TROPA;
 import static com.mygdx.game.handlers.B2DVars.PPM;
 import static com.mygdx.game.handlers.GameStateManager.BATTLE;
 import static com.mygdx.game.handlers.GameStateManager.BOSSFIGHT;
-import static com.mygdx.game.handlers.GameStateManager.DUNGEON;
-import static com.mygdx.game.handlers.GameStateManager.MAZE;
 import static com.mygdx.game.handlers.GameStateManager.MENU;
-import static com.mygdx.game.handlers.GameStateManager.PLAY;
+import static com.mygdx.game.handlers.GameStateManager.PAINT;
 import static com.mygdx.game.handlers.GameStateManager.RHYTHM;
 
 import com.badlogic.gdx.Gdx;
@@ -35,11 +32,17 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.github.tommyettinger.textra.Font;
+import com.github.tommyettinger.textra.TypingLabel;
 import com.mygdx.game.Dialog.Dialog;
 import com.mygdx.game.Dialog.DialogController;
 import com.mygdx.game.Dialog.DialogNode;
@@ -90,7 +93,9 @@ public class BossFightState extends GameState implements Controllable {
     private boolean fight = false;
     private boolean isStopped = false;
     private float time = 0;
+    private boolean done;
     private Music music;
+    private float bossPositionY;
 
     public BossFightState(GameStateManager gsm) {
         super(gsm);
@@ -109,9 +114,6 @@ public class BossFightState extends GameState implements Controllable {
         createPlayer();
         createSlime();
         //createNPC();
-
-//        createMovableNPC();
-//        initDarkness();
 
         initFight();
 
@@ -133,6 +135,28 @@ public class BossFightState extends GameState implements Controllable {
         slimeBoss.update(dt);
 
         if (isStopped) {
+            if (PaintState.isDone()) {
+                PaintState.setDone(false);
+                slimeBoss.setNewAnimation(3, 32, 32);
+                bossLabel.getHpBar().setValue(bossLabel.getHpBar().getValue() - 33f);
+                bossLabel.getPaintBtn().setVisible(false);
+            } else if (RhythmState.isDone()) {
+                RhythmState.setDone(false);
+                slimeBoss.setNewAnimation(3, 32, 32);
+                bossLabel.getHpBar().setValue(bossLabel.getHpBar().getValue() - 33f);
+                bossLabel.getRhythmBtn().setVisible(false);
+            } else if (BattleState2.isDone()) {
+                BattleState2.setDone(false);
+                slimeBoss.setNewAnimation(3, 32, 32);
+                bossLabel.getHpBar().setValue(bossLabel.getHpBar().getValue() - 33f);
+                bossLabel.getMathBtn().setVisible(false);
+            }
+
+            if (bossLabel.getHpBar().getValue() <= 1) {
+                slimeBoss.setNewAnimation(0, 32, 32);
+                storyNext();
+            }
+
             isStopped = false;
             multiplexer.addProcessor(controllerStage);
             Gdx.input.setInputProcessor(multiplexer);
@@ -143,21 +167,35 @@ public class BossFightState extends GameState implements Controllable {
             controller.setMenuPressed(false);
         }
 
+        if (done && slimeBoss.getPosition().y < bossPositionY) {
+            done = false;
+            slimeBoss.setDirection(0, 0, 30, 32, 32);
+            finalDialog();
+        }
+
         if (canDraw) {
             uiStage.act(dt);
             dcontroller.update(dt);
             time += dt;
             if (dialogueBox.isFinished() && time > 2f && dcontroller.isFinished()) {
                 time = 0;
-                music.setVolume(0.5f);
-                music.setLooping(true);
-                music.play();
-                fight = true;
+                if (done) {
+                    slimeBoss.setDirection(1, 0.8f, 30, 32, 32);
+                    bossLabel.changeCell();
+                    bossLabel.getTimeTable().setVisible(true);
+                } else if (!fight) {
+                    music.setVolume(0.0f);
+                    music.setLooping(true);
+                    music.play();
+                    fight = true;
+                } else {
+                    slimeBoss.setNewAnimation(4, 32, 32);
+                }
                 stop();
             }
         }
 
-        if (Gdx.input.isTouched() && !controller.isInventoryVisible() && !dialogueBox.isVisible()) {
+        if (Gdx.input.isTouched() && !controller.isInventoryVisible() && !dialogueBox.isVisible() && !fight) {
             mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
             joyCam.unproject(mouse);
             joyStick.update(mouse.x, mouse.y);
@@ -166,6 +204,7 @@ public class BossFightState extends GameState implements Controllable {
         }
 
         if (fight) {
+            if (!done) slimeBoss.randomAnimation(dt);
             bossUiStage.act(dt);
         }
         controllerStage.act(dt);
@@ -192,7 +231,7 @@ public class BossFightState extends GameState implements Controllable {
             b2dr.render(world, b2dCam.combined);
         }
 
-        joyStick.render(shapeRenderer);
+        if (!fight) joyStick.render(shapeRenderer);
 
         if (canDraw) {
             uiStage.draw();
@@ -331,6 +370,8 @@ public class BossFightState extends GameState implements Controllable {
 
         slimeBoss = new SlimeBoss(body);
         body.setUserData(slimeBoss);
+
+        bossPositionY = slimeBoss.getPosition().y;
     }
 
     private void initFight() {
@@ -362,6 +403,20 @@ public class BossFightState extends GameState implements Controllable {
         Table root = new Table();
         root.setFillParent(true);
         bossLabel = new BossLabel(skin_this);
+        bossLabel.getTimeTable().addListener(new InputListener() {
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                slimeBoss.setDirection(-1, -0.8f, 45, 32, 32);
+                bossLabel.getTimeTable().setVisible(false);
+                DialogNode node1 = new DialogNode("Время изменило свой ход...", 0);
+
+                dialog.addNode(node1);
+                dcontroller.startDialog(dialog);
+                canDraw = true;
+                return true;
+            }
+        });
+
         root.add(bossLabel);
         bossUiStage.addActor(root);
 
@@ -393,11 +448,19 @@ public class BossFightState extends GameState implements Controllable {
 
     private void checkBtns() {
         switch (bossLabel.getState()) {
-            case RHYTHM:
+            case PAINT_ATTACK:
+                gsm.setPaintArgs(null);
+                gsm.setState(PAINT);
+                break;
+            case RHYTHM_ATTACK:
+                RhythmState.setBossFight(true);
                 gsm.setState(RHYTHM);
                 break;
+            case MATH_ATTACK:
+                gsm.setState(BATTLE);
+                break;
         }
-        bossLabel.setState(BossLabel.ATTACK_STATES.NON);
+        bossLabel.setState(BossLabel.ATTACK_STATES.NON_ATTACK);
     }
 
     @Override
@@ -434,6 +497,34 @@ public class BossFightState extends GameState implements Controllable {
 
     private void stop() {
         canDraw = false;
+    }
+
+    private void storyNext() {
+        music.stop();
+        DialogNode node1 = new DialogNode("Ты... сильнее, чем я думал...", 0);
+        DialogNode node2 = new DialogNode("Но я добьюсь своей цели.", 1);
+
+        node1.makeLinear(node2.getId());
+
+        dialog.addNode(node1);
+        dialog.addNode(node2);
+        dcontroller.startDialog(dialog);
+        canDraw = true;
+        done = true;
+    }
+
+    private void finalDialog() {
+        DialogNode node1 = new DialogNode("Нет...", 0);
+        DialogNode node2 = new DialogNode("Я... ещe вернусь...", 1);
+
+        node1.makeLinear(node2.getId());
+
+        dialog.addNode(node1);
+        dialog.addNode(node2);
+        dcontroller.startDialog(dialog);
+        canDraw = true;
+
+        bossLabel.setVisible(false);
     }
 
     @Override

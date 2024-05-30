@@ -69,6 +69,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
     private Texture tex;
     private Texture texEnemy;
     private Music music;
+    private static boolean done;
 
     public BattleState2(GameStateManager gsm) {
         super(gsm);
@@ -121,6 +122,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
                     music.dispose();
                     gsm.setState(gsm.getLastState());
                 } else if (battle.getState() == Battle.STATE.WIN) {
+                    done = true;
                     music.dispose();
                     gsm.setState(gsm.getLastState());
                 } else if (battle.getState() == Battle.STATE.LOSE) {
@@ -276,6 +278,14 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
         music.setVolume(0.9f);
         music.setLooping(true);
         music.play();
+    }
+
+    public static boolean isDone() {
+        return done;
+    }
+
+    public static void setDone(boolean done) {
+        BattleState2.done = done;
     }
 
     @Override

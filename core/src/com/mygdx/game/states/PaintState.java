@@ -76,6 +76,7 @@ public class PaintState extends GameState implements InputProcessor {
     private boolean btnClicked;
     private boolean ready = false;
     private String oppScore;
+    private static boolean done;
 
     public PaintState(GameStateManager gsm) {
         super(gsm);
@@ -203,8 +204,8 @@ public class PaintState extends GameState implements InputProcessor {
 
     @Override
     public void dispose() {
+        if(online) request.leave(id);
         PaintState.setOnline(false);
-        request.leave(id);
     }
 
     private void createSD() {
@@ -242,7 +243,7 @@ public class PaintState extends GameState implements InputProcessor {
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                gsm.setState(DUNGEON);
+                gsm.setState(gsm.getLastState());
             }
         });
 
@@ -371,13 +372,14 @@ public class PaintState extends GameState implements InputProcessor {
                 startDialogController();
                 break;
             case DONE:
+                done = true;
                 gsm.setState(gsm.getLastState());
                 break;
         }
     }
 
     private void checkProgress() {
-        if (paintMenu.getBtnBox().isClicked() && !ready) {
+        if (paintMenu.getBtnBox().isClicked() && !ready && online) {
             readyLabel.setText("Ожидание игрока...");
             readyLabel.setVisible(true);
         } else if (ready) {
@@ -406,6 +408,14 @@ public class PaintState extends GameState implements InputProcessor {
 
     public ArrayList<PixelPoint> getFigureHints() {
         return figuresDatabase.getFigure(figuresDatabase.getCurFigure()).getHints();
+    }
+
+    public static boolean isDone() {
+        return done;
+    }
+
+    public static void setDone(boolean done) {
+        PaintState.done = done;
     }
 
     public static boolean isOnline() {

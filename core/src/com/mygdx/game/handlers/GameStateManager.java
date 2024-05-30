@@ -15,6 +15,7 @@ public class GameStateManager {
     private MazeState mazeState;
     private Forest forest;
     private DungeonState dungeonState;
+    private BossFightState bossFightState;
     private int lastState;
     private ArrayList<FiguresDatabase.FIGURES_TYPES> paintArgs;
     public static final int PLAY = 912837;
@@ -73,7 +74,8 @@ public class GameStateManager {
             if (dungeonState==null) return dungeonState = new DungeonState(this);
             return dungeonState;
         } else if (state == BOSSFIGHT) {
-            return new BossFightState(this);
+            if (bossFightState==null) return bossFightState = new BossFightState(this);
+            return bossFightState;
         } else if (state == MUSHROOMS) {
             return new MushroomsState(this);
         }

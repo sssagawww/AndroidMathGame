@@ -10,7 +10,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.mygdx.game.MyGdxGame;
 
-public class SlimeBoss extends B2DSprite{
+public class SlimeBoss extends B2DSprite {
     private TextureRegion[] sprites;
     private Texture tex;
     private int countIdle = 1;
@@ -20,6 +20,7 @@ public class SlimeBoss extends B2DSprite{
     private float time = 0;
     private float velx = 0;
     private float vely = 0;
+    private int randomAnimations[] = new int[]{1, 2};
 
     public SlimeBoss(Body body) {
         super(body);
@@ -38,6 +39,19 @@ public class SlimeBoss extends B2DSprite{
     public void setNewAnimation(int row, int width, int height) {
         TextureRegion[] sprites = TextureRegion.split(tex, width, height)[row];
         setAnimation(sprites, 1 / 5f);
+    }
+
+    public void randomAnimation(float dt) {
+        time += dt;
+        if (time >= 3 && time < 3.2f) {
+            time = 3.2f;
+            int r = (int) (Math.random() * 2);
+            setNewAnimation(randomAnimations[r], 32, 32);
+        } else if (time >= 6 && time <= 6.2f) {
+            setNewAnimation(0, 32, 32);
+        } else if(time >= 10){
+            time = 0;
+        }
     }
 
     public void setDirection(float velx, float vely, float speed, int width, int height) {

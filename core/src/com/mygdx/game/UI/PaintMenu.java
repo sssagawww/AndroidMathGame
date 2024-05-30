@@ -51,7 +51,7 @@ public class PaintMenu extends Table {
         textLabel.setAlignment(Align.center);
         uiTable.add(textLabel).align(Align.bottom).width(getPrefWidth() - 4).row();
 
-        figureImage = new Image(new Texture("controller/square.png"));
+        figureImage = new Image(skin.getDrawable(figuresDatabase.getFigure(0).getName()));
         //uiTable.add(image).align(Align.top).width(200f).height(200f).row();
 
         Table imageTable = new Table(getSkin());
