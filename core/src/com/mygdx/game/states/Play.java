@@ -149,7 +149,7 @@ public class Play extends GameState implements Controllable {
         //если этот state был выгружен, то при запуске все процессы должны возобновиться (удаляются ли они в multiplexer при выгрузке или просто останавливаются?)
         if (isStopped) {
             //игрок выходит из подземелья не там, где зашёл
-            if (nextState == DUNGEON) {
+            if (gsm.getLastState() == DUNGEON) {
                 player.getBody().setTransform(205f, 80f, 0);
             }
 
