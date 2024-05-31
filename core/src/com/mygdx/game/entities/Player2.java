@@ -2,6 +2,7 @@ package com.mygdx.game.entities;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -26,7 +27,7 @@ public class Player2 extends B2DSprite {
     private JoyStick joyStick;
     private int countIdle = 1;
     private int countMove = 1;
-    private Sound sound;
+    private Music sound;
     private long soundId;
 
     public Player2(Body body) {
@@ -43,7 +44,7 @@ public class Player2 extends B2DSprite {
         x = body.getPosition().x * PPM;
         y = body.getPosition().y * PPM;
 
-        sound.setVolume(soundId, getSoundEffVolume());
+        sound.setVolume(getSoundEffVolume());
         checkJoyStick();
     }
 
@@ -177,9 +178,9 @@ public class Player2 extends B2DSprite {
             }
             prevDir = dir;
             if (countMove == 1) {
-                soundId = sound.play(1.0f);
-                sound.setVolume(soundId, 0.5f);
-                sound.setLooping(soundId, true);
+                sound.setVolume(0.5f);
+                sound.setLooping(true);
+                sound.play();
                 countIdle = 1;
                 countMove = 0;
             }
@@ -228,7 +229,7 @@ public class Player2 extends B2DSprite {
     public void setState(Controllable state) {
         this.state = state;
         joyStick = state.getJoyStick();
-        sound = state instanceof DungeonState ? Gdx.audio.newSound(Gdx.files.internal("music/steps_dun_and_maze.mp3")) : Gdx.audio.newSound(Gdx.files.internal("music/steps_grass3.mp3")) ;
+        sound = (Music) (state instanceof DungeonState ? Gdx.audio.newSound(Gdx.files.internal("music/steps_dun_and_maze.mp3")) : Gdx.audio.newSound(Gdx.files.internal("music/steps_grass3.mp3")));
         Global.soundEffs.add(sound);
     }
 
