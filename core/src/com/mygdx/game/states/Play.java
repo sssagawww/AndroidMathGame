@@ -601,8 +601,10 @@ public class Play extends GameState implements Controllable {
                 stop();
                 break;
             case "nextBoss":
-                nextState = BOSSFIGHT;
-                stop();
+                if(controller.getInventory().getArtefacts() >= 3){
+                    nextState = BOSSFIGHT;
+                    stop();
+                }
                 break;
             case "null":
                 movableNPCs.get("hooded").setDirection(0, 0, 20, 58, 58);

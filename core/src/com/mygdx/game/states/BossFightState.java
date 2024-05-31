@@ -160,6 +160,8 @@ public class BossFightState extends GameState implements Controllable {
             }
 
             isStopped = false;
+            multiplexer.addProcessor(uiStage);
+            multiplexer.addProcessor(bossUiStage);
             multiplexer.addProcessor(controllerStage);
             Gdx.input.setInputProcessor(multiplexer);
         }

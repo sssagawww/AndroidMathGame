@@ -106,7 +106,6 @@
 </data>
  </layer>
  <objectgroup id="11" name="npcLayer">
-  <object id="1" name="enemy" x="380.833" y="266.5" width="20" height="20"/>
   <object id="2" name="npc" x="1010.5" y="190.333" width="10" height="10">
    <ellipse/>
   </object>
