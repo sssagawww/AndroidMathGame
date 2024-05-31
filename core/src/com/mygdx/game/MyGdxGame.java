@@ -73,6 +73,7 @@ public class MyGdxGame implements ApplicationListener {
         res.loadTexture("entitySprites/slime.png", "slimeBoss");
         res.loadTexture("allBtn.png", "btn");
         res.loadTexture("entitySprites/enemy2.png", "enemy");
+        res.loadTexture("entitySprites/enemySlime.png", "enemy2");
         res.loadTexture("entitySprites/bombGuy.png", "npc");
         res.loadTexture("entitySprites/hooded2.png", "hooded");
         res.loadTexture("entitySprites/player.png", "npcForest");

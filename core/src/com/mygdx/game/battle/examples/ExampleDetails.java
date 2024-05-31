@@ -1,21 +1,21 @@
 package com.mygdx.game.battle.examples;
 
 public class ExampleDetails {
-   private EXAMPLE_LIST exampleList;
+   private EXAMPLE_NUM exampleList;
    private String name;
    private int num;
 
-   public ExampleDetails(EXAMPLE_LIST list, String name, int num){
+   public ExampleDetails(EXAMPLE_NUM list, String name, int num){
       this.exampleList = list;
       this.name = name;
       this.num = num;
    }
 
-   public EXAMPLE_LIST getExampleList() {
+   public EXAMPLE_NUM getExampleList() {
       return exampleList;
    }
 
-   public void setExampleList(EXAMPLE_LIST exampleList) {
+   public void setExampleList(EXAMPLE_NUM exampleList) {
       this.exampleList = exampleList;
    }
 

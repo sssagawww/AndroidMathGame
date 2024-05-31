@@ -6,6 +6,7 @@ import static com.mygdx.game.handlers.B2DVars.BIT_PLAYER;
 import static com.mygdx.game.handlers.B2DVars.BIT_TROPA;
 import static com.mygdx.game.handlers.B2DVars.PPM;
 import static com.mygdx.game.handlers.GameStateManager.BATTLE;
+import static com.mygdx.game.handlers.GameStateManager.BLACK_SCREEN;
 import static com.mygdx.game.handlers.GameStateManager.BOSSFIGHT;
 import static com.mygdx.game.handlers.GameStateManager.MENU;
 import static com.mygdx.game.handlers.GameStateManager.PAINT;
@@ -94,6 +95,7 @@ public class BossFightState extends GameState implements Controllable {
     private boolean isStopped = false;
     private float time = 0;
     private boolean done;
+    private boolean end;
     private Music music;
     private float bossPositionY;
 
@@ -190,8 +192,17 @@ public class BossFightState extends GameState implements Controllable {
                     fight = true;
                 } else {
                     slimeBoss.setNewAnimation(4, 32, 32);
+                    end = true;
                 }
                 stop();
+            }
+        }
+
+        if(end){
+            time += dt;
+            if (time >= 1){
+                BlackScreen.setFinalTitles(true);
+                gsm.setState(BLACK_SCREEN);
             }
         }
 
@@ -449,14 +460,18 @@ public class BossFightState extends GameState implements Controllable {
     private void checkBtns() {
         switch (bossLabel.getState()) {
             case PAINT_ATTACK:
+                gsm.setLastState(BOSSFIGHT);
                 gsm.setPaintArgs(null);
                 gsm.setState(PAINT);
                 break;
             case RHYTHM_ATTACK:
+                gsm.setLastState(BOSSFIGHT);
                 RhythmState.setBossFight(true);
                 gsm.setState(RHYTHM);
                 break;
             case MATH_ATTACK:
+                gsm.setLastState(BOSSFIGHT);
+                BattleState2.setBossFight(true);
                 gsm.setState(BATTLE);
                 break;
         }

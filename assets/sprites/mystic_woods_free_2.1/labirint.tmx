@@ -228,12 +228,12 @@
 </data>
  </layer>
  <objectgroup id="5" name="monsters">
-  <object id="1" name="enemy" x="516.333" y="308.333"/>
+  <object id="1" name="enemy2" x="516.333" y="308.333"/>
   <object id="2" name="enemy" x="525.667" y="257.333"/>
   <object id="3" name="enemy" x="598.667" y="338.333"/>
-  <object id="4" name="enemy" x="472" y="155.333"/>
+  <object id="4" name="enemy2" x="472" y="155.333"/>
   <object id="6" name="enemy" x="491.667" y="75.3333"/>
-  <object id="7" name="enemy" x="399.606" y="82.9394"/>
+  <object id="7" name="enemy2" x="399.606" y="82.9394"/>
   <object id="8" name="enemy" x="407.333" y="43"/>
   <object id="9" name="chest" x="543.625" y="58" width="16.125" height="16.375"/>
   <object id="10" name="hooded" x="56" y="434" width="22.6667" height="25.3333"/>

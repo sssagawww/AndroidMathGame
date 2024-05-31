@@ -30,6 +30,7 @@ public class BlackScreen extends GameState {
     private float animatedTime;
     private ArrayList<String> phrases;
     private int curPhrase = 0;
+    private static boolean finalTitles;
 
     public BlackScreen(GameStateManager gsm) {
         super(gsm);
@@ -38,6 +39,10 @@ public class BlackScreen extends GameState {
 
         phrases = new ArrayList<>();
         createPhrases();
+        if(finalTitles){
+            phrases.clear();
+            createCredits();
+        }
         initUI();
 
         Gdx.input.setInputProcessor(multiplexer);
@@ -76,8 +81,12 @@ public class BlackScreen extends GameState {
         curPhrase = (curPhrase + 1) % phrases.size();
         if (curPhrase == 0) {
             label.clearActions();//фикс этой ошибки
-            gsm.setState(NEW_GAME);
-        } else if(curPhrase+1 == phrases.size()){
+            if(finalTitles){
+                gsm.setState(MENU);
+            } else {
+                gsm.setState(NEW_GAME);
+            }
+        } else if (curPhrase + 1 == phrases.size()) {
             label.addAction(sequence(fadeOut(3f)));//крашает игру, если прокликивать при первом запуске
         }
         label.restart(phrases.get(curPhrase));
@@ -110,5 +119,20 @@ public class BlackScreen extends GameState {
         phrases.add("Однажды он получил письмо от своего наставника,\n\nв котором говорилось о древнем пророчестве.");
         phrases.add(" \"Только собрав 3 могущественных артефакта,\n\nможно спасти мир от катастрофы. \" ");
         phrases.add("И " + charName + " отправился в путешествие...");
+    }
+
+    private void createCredits() {
+        phrases.add("Темные силы повержены,\n\nи мир вновь обрел покой.");
+        phrases.add(charName + " возвращается домой,\n\nгде его встречают как великого спасителя.");
+        phrases.add("Пусть и ваш путь освещается\n\nсветом надежды и доблести.");
+        phrases.add("Конец.");
+    }
+
+    public static boolean isFinalTitles() {
+        return finalTitles;
+    }
+
+    public static void setFinalTitles(boolean finalTitles) {
+        BlackScreen.finalTitles = finalTitles;
     }
 }

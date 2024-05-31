@@ -5,7 +5,7 @@ import com.mygdx.game.battle.events.B_TextEvent;
 import com.mygdx.game.battle.events.BattleEvent;
 import com.mygdx.game.battle.events.BattleEventPlayer;
 import com.mygdx.game.battle.events.BattleEventQueue;
-import com.mygdx.game.battle.examples.EXAMPLE_LIST;
+import com.mygdx.game.battle.examples.EXAMPLE_NUM;
 import com.mygdx.game.battle.examples.Example;
 import com.mygdx.game.battle.steps.STEP_BOOLEAN;
 import com.mygdx.game.battle.steps.Step;
@@ -116,23 +116,23 @@ public class Battle implements BattleEventQueue {
         }
         System.out.println(example.getList());
         Example thisEx = example;
-        if(example.getList() == EXAMPLE_LIST.EXAMPLE_1){
+        if(example.getList() == EXAMPLE_NUM.EXAMPLE_1){
             queueEvent(new B_TextEvent(thisEx.getName(), true));
             player.setStepBoolean(1, STEP_BOOLEAN.RIGHT);
             currentIndex++;
-        } else if(example.getList() == EXAMPLE_LIST.EXAMPLE_2){
+        } else if(example.getList() == EXAMPLE_NUM.EXAMPLE_2){
             queueEvent(new B_TextEvent(thisEx.getName(), true));
             player.setStepBoolean(3, STEP_BOOLEAN.RIGHT);
             currentIndex++;
-        } else if(example.getList() == EXAMPLE_LIST.EXAMPLE_3){
+        } else if(example.getList() == EXAMPLE_NUM.EXAMPLE_3){
             queueEvent(new B_TextEvent(thisEx.getName(), true));
             player.setStepBoolean(2, STEP_BOOLEAN.RIGHT);
             currentIndex++;
-        } else if(example.getList() == EXAMPLE_LIST.EXAMPLE_4){
+        } else if(example.getList() == EXAMPLE_NUM.EXAMPLE_4){
             queueEvent(new B_TextEvent(thisEx.getName(), true));
             player.setStepBoolean(6, STEP_BOOLEAN.RIGHT);
             currentIndex++;
-        } else if(example.getList() == EXAMPLE_LIST.EXAMPLE_5){
+        } else if(example.getList() == EXAMPLE_NUM.EXAMPLE_5){
             queueEvent(new B_TextEvent(thisEx.getName(), true));
             player.setStepBoolean(7, STEP_BOOLEAN.RIGHT);
         }
