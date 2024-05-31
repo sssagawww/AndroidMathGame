@@ -10,6 +10,7 @@ import static com.mygdx.game.handlers.GameStateManager.MENU;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.MapLayer;
@@ -37,6 +38,7 @@ import com.mygdx.game.Dialog.Dialog;
 import com.mygdx.game.Dialog.DialogController;
 import com.mygdx.game.UI.Controller;
 import com.mygdx.game.UI.DialogBox;
+import com.mygdx.game.UI.Global;
 import com.mygdx.game.UI.JoyStick;
 import com.mygdx.game.UI.OptionBox2;
 import com.mygdx.game.entities.PlayEntities;
@@ -78,6 +80,7 @@ public class BossFightState extends GameState implements Controllable {
     private boolean canDraw = false;
     private boolean isStopped = false;
     private float time = 0;
+    private Music dubstep;
 
     public BossFightState(GameStateManager gsm) {
         super(gsm);
@@ -94,6 +97,10 @@ public class BossFightState extends GameState implements Controllable {
         initController();
         createPlayer();
         createTiles();
+
+        dubstep = (Music) Gdx.files.internal("music/dubstep_bossfight_bg.mp3");
+        dubstep.setLooping(true);
+        Global.bgSounds.add(dubstep);
         //createNPC();
 
 //        createMovableNPC();
@@ -352,6 +359,7 @@ public class BossFightState extends GameState implements Controllable {
     @Override
     public void dispose() {
         player.stopSounds();
+        dubstep.stop();
         isStopped = true;
     }
 }

@@ -3,6 +3,7 @@ package com.mygdx.game.states;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.maps.MapLayer;
@@ -273,6 +274,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
 
     private void createMusic() {
         music = Gdx.audio.newMusic(Gdx.files.internal("music/battleTheme.mp3"));
+        Global.bgSounds.add(music);
         music.setVolume(0.9f);
         music.setLooping(true);
         music.play();
