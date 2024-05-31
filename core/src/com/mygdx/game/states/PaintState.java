@@ -77,6 +77,9 @@ public class PaintState extends GameState implements InputProcessor {
     private boolean ready = false;
     private String oppScore;
     private static boolean done;
+    private int count = 0;
+    private int oppCount = 0;
+    private float time = 0;
 
     public PaintState(GameStateManager gsm) {
         super(gsm);
@@ -130,6 +133,15 @@ public class PaintState extends GameState implements InputProcessor {
         checkBtns();
         dcontroller.update(dt);
 
+        if(done && online){
+            time+=dt;
+            if(time >= 2){
+                time = 0;
+                done = false;
+                gsm.setState(gsm.getLastState());
+            }
+        }
+
         if (ready && (paintMenu.getBtnBox().isClicked() || btnClicked)) {
             request.setPlayerReady(id, false);
         }
@@ -140,7 +152,7 @@ public class PaintState extends GameState implements InputProcessor {
 
         if (online && request.isDone()) {
             requestTime += dt;
-            if (requestTime >= dt * 10) {
+            if (requestTime >= dt * 15) {
                 requestTime = 0;
                 request.postInfo(id, playerName, (float) distanceCalc.getAccuracy());
                 ready = request.isReady();
@@ -315,9 +327,9 @@ public class PaintState extends GameState implements InputProcessor {
         btn.addListener(new InputListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                if(online){
+                /*if(online){
                     request.postInfo(id, playerName, (float) distanceCalc.getAccuracy());
-                }
+                }*/
                 return true;
             }
 
@@ -360,6 +372,11 @@ public class PaintState extends GameState implements InputProcessor {
             case OK:
                 node = new DialogNode("Получилось! Молодец!", 0);
                 if (online) {
+                    if((1 - distanceCalc.getAccuracy()) >  1 - request.getOpponentScore()){
+                        count++;
+                    } else {
+                        oppCount++;
+                    }
                     node = new DialogNode(String.format("%.2f", 1 - distanceCalc.getAccuracy()) + " : " + oppScore, 0);
                 }
                 startDialogController();
@@ -367,13 +384,25 @@ public class PaintState extends GameState implements InputProcessor {
             case WRONG:
                 node = new DialogNode("Попробуй еще раз!", 0);
                 if (online) {
+                    if((1 - distanceCalc.getAccuracy()) >  1 - request.getOpponentScore()){
+                        count++;
+                    } else {
+                        oppCount++;
+                    }
                     node = new DialogNode(String.format("%.2f", 1 - distanceCalc.getAccuracy()) + " : " + oppScore, 0);
                 }
                 startDialogController();
                 break;
             case DONE:
+                paintMenu.getBtnBox().setState(FINISH);
                 done = true;
-                gsm.setState(gsm.getLastState());
+                if(count > oppCount){
+                    node = new DialogNode("Вы победили!", 0);
+                } else {
+                    node = new DialogNode("Вы проиграли!", 0);
+                }
+                dialog.addNode(node);
+                dcontroller.startDialog(dialog);
                 break;
         }
     }

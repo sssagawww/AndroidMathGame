@@ -28,7 +28,8 @@ public class BtnBox extends Table {
         OK,
         WRONG,
         CHECK,
-        DONE
+        DONE,
+        FINISH
     }
 
     private STATES state;
