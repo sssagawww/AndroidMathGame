@@ -29,6 +29,7 @@ import com.mygdx.game.entities.B2DSprite;
 import com.mygdx.game.entities.BattleEntity;
 import com.mygdx.game.entities.SlimeBoss;
 import com.mygdx.game.entities.StaticNPC;
+import com.mygdx.game.handlers.BoundedCamera;
 import com.mygdx.game.handlers.GameStateManager;
 import com.mygdx.game.handlers.MyContactListener;
 
@@ -74,6 +75,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
     private static boolean done;
     private static boolean bossFight;
     private static boolean enemy2;
+    private BoundedCamera fightCam;
 
     public BattleState2(GameStateManager gsm) {
         super(gsm);
@@ -94,7 +96,9 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
             game.getStepDatabase().initializeSteps();
         }
 
-        cam.setBounds(0, 4864, 0, 2688);
+        fightCam = new BoundedCamera();
+        fightCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
+        fightCam.setBounds(0, 4864, 0, 2688);
 
         tex = MyGdxGame.res.getTexture("enemy");
         battle = new Battle(BattleEntity.generateEntity("Игрок", tex, game.getStepDatabase(), game.getExampleDatabase()),
@@ -165,11 +169,11 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
         //Gdx.input.setInputProcessor(bcontroller);
         Gdx.gl20.glClearColor(0, 0, 0, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        cam.setPosition(0, 0);
-        cam.update();
+        fightCam.setPosition(V_WIDTH / 2f, V_HEIGHT / 2f);
+        fightCam.update();
 
         //draw map
-        tmr.setView(cam);
+        tmr.setView(fightCam);
         tmr.render();
         //draw enemy
         boss.render(sb, 200, 200);
@@ -178,7 +182,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
         battleRenderer.render(sb);
         sb.end();*/
 
-        sb.setProjectionMatrix(cam.combined);
+        sb.setProjectionMatrix(fightCam.combined);
 
         uiStage.draw();
         controllerStage.draw();
@@ -238,7 +242,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
     }
 
     private void createLayers() {
-        tiledMap = new TmxMapLoader().load("sprites/mystic_woods_free_2.1/fightmap.tmx");
+        tiledMap = new TmxMapLoader().load("sprites/mystic_woods_free_2.1/fightmap2.tmx");
         tmr = new OrthogonalTiledMapRenderer(tiledMap, 4); // !!!
         tileSize = (int) tiledMap.getProperties().get("tilewidth");
 
@@ -250,7 +254,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
         BodyDef bdef = new BodyDef();
 
         bdef.type = BodyDef.BodyType.StaticBody;
-        bdef.position.set((V_WIDTH/2f) / PPM, (V_HEIGHT/2f) / PPM);
+        bdef.position.set((V_WIDTH / 2f) / PPM - 5, (V_HEIGHT / 2f) / PPM);
         Body body = world.createBody(bdef);
 
         boss = new StaticNPC(body, "enemy", 5f);

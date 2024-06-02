@@ -396,10 +396,14 @@ public class PaintState extends GameState implements InputProcessor {
             case DONE:
                 paintMenu.getBtnBox().setState(FINISH);
                 done = true;
-                if(count > oppCount){
-                    node = new DialogNode("Вы победили!", 0);
+                if(online){
+                    if(count > oppCount){
+                        node = new DialogNode("Вы победили!", 0);
+                    } else {
+                        node = new DialogNode("Вы проиграли!", 0);
+                    }
                 } else {
-                    node = new DialogNode("Вы проиграли!", 0);
+                    gsm.setState(gsm.getLastState());
                 }
                 dialog.addNode(node);
                 dcontroller.startDialog(dialog);

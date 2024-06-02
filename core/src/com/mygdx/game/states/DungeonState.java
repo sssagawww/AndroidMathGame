@@ -407,7 +407,7 @@ public class DungeonState extends GameState implements Controllable {
                 dialog.addNode(node1);
                 dcontroller.startDialog(dialog);
                 nextState = PAINT;
-                gsm.setPaintArgs(new ArrayList<>(Arrays.asList(FIGURES_TYPES.CIRCLE, FIGURES_TYPES.RHOMBUS, FIGURES_TYPES.STAR)));
+                gsm.setPaintArgs(new ArrayList<>(Arrays.asList(FIGURES_TYPES.SQUARE, FIGURES_TYPES.RHOMBUS, FIGURES_TYPES.STAR)));
                 canDraw = true;
 
                 opening = true;
@@ -418,7 +418,7 @@ public class DungeonState extends GameState implements Controllable {
                 dialog.addNode(node1);
                 dcontroller.startDialog(dialog);
                 nextState = PAINT;
-                gsm.setPaintArgs(new ArrayList<>(Arrays.asList(FIGURES_TYPES.SQUARE, FIGURES_TYPES.TRIANGLE)));
+                gsm.setPaintArgs(new ArrayList<>(Arrays.asList(FIGURES_TYPES.CIRCLE, FIGURES_TYPES.TRIANGLE)));
                 canDraw = true;
 
                 opening = true;

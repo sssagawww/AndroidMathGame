@@ -21,7 +21,7 @@ import java.util.ArrayList;
 
 
 public class BlackScreen extends GameState {
-    private String charName = "{VAR=FIRE}ИмяГГ{VAR=ENDFIRE}";
+    private String charName = "{VAR=FIRE}Элиас{VAR=ENDFIRE}";
     private InputMultiplexer multiplexer;
     private Stage uiStage;
     private Font font = new Font(String.valueOf(Gdx.files.internal("mcRus.fnt")));

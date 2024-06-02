@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
@@ -44,6 +45,7 @@ public class RhythmState extends GameState {
     private static boolean strength100;
     private static boolean bossFight;
     private Sound doneSound;
+    private Sprite bg;
 
     public RhythmState(GameStateManager gsm) {
         super(gsm);
@@ -51,6 +53,7 @@ public class RhythmState extends GameState {
         multiplexer = new InputMultiplexer();
         doneSound = Gdx.audio.newSound(Gdx.files.internal("music/swordShort.mp3"));
 
+        //bg = new Sprite(new Texture("UI/forestBg.png"));
         initUI();
 
         Gdx.input.setInputProcessor(multiplexer);
@@ -82,6 +85,10 @@ public class RhythmState extends GameState {
     public void render() {
         Gdx.gl20.glClearColor(1, 1, 1, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        /*sb.begin();
+        sb.draw(bg, 0, 0, V_WIDTH, V_HEIGHT);
+        sb.end();*/
 
         uiStage.draw();
     }

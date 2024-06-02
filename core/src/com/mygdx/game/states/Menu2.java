@@ -104,7 +104,7 @@ public class Menu2 extends GameState {
 
         font.getData().setScale(2);
         layout.setText(font, "MathGame");
-        font.draw(sb, layout, V_WIDTH / 2f - layout.width / 2, V_HEIGHT / 2f + layout.height);
+        font.draw(sb, layout, V_WIDTH / 2f - layout.width / 2, V_HEIGHT / 2f + layout.height + 80);
         sb.end();
 
         uiStage.draw();
