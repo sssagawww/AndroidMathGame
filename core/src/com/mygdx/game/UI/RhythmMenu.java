@@ -157,11 +157,16 @@ public class RhythmMenu extends Table {
         timeLabel.setAlignment(Align.top);
 
         Table playerTable = new Table();
-        playerTable.add(playerImage).align(Align.center).width(V_HEIGHT / 1.5f).height(V_HEIGHT / 1.5f).padLeft(80f).expand().row();
-        playerTable.add(progressBar).width(500f).align(Align.center).padLeft(80f);
-        playerTable.add(percentsLabel).align(Align.left).padLeft(25f);
+        Table bottomTable = new Table(skin);
+        bottomTable.setBackground("menuBtn_down");
+        bottomTable.add(progressBar).width(500f).align(Align.center);
+        bottomTable.add(percentsLabel).align(Align.left).padLeft(25f);
 
-        Table rightTable = new Table();
+        playerTable.add(playerImage).align(Align.center).width(V_HEIGHT / 1.5f).height(V_HEIGHT / 1.5f).expand().row();
+        playerTable.add(bottomTable).bottom();
+
+        Table rightTable = new Table(skin);
+        rightTable.setBackground("menuBtn_down");
         rightTable.add(clickBtn).expand().align(Align.right).row();
         rightTable.add(timeLabel);
 

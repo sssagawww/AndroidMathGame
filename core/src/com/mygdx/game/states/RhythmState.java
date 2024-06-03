@@ -32,6 +32,7 @@ import com.mygdx.game.UI.DialogBox;
 import com.mygdx.game.UI.OptionBox;
 import com.mygdx.game.UI.PaintMenu;
 import com.mygdx.game.UI.RhythmMenu;
+import com.mygdx.game.handlers.BoundedCamera;
 import com.mygdx.game.handlers.GameStateManager;
 
 import java.util.ArrayList;
@@ -46,6 +47,7 @@ public class RhythmState extends GameState {
     private static boolean bossFight;
     private Sound doneSound;
     private Sprite bg;
+    private BoundedCamera rhCam;
 
     public RhythmState(GameStateManager gsm) {
         super(gsm);
@@ -53,8 +55,15 @@ public class RhythmState extends GameState {
         multiplexer = new InputMultiplexer();
         doneSound = Gdx.audio.newSound(Gdx.files.internal("music/swordShort.mp3"));
 
-        //bg = new Sprite(new Texture("UI/forestBg.png"));
+        bg = new Sprite(new Texture("UI/forestBg.png"));
+        if(bossFight){
+            bg = new Sprite(new Texture("UI/bossBg.png"));
+        }
         initUI();
+
+       rhCam = new BoundedCamera();
+       rhCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
+        rhCam.setBounds(0, V_WIDTH, 0, V_HEIGHT);
 
         Gdx.input.setInputProcessor(multiplexer);
     }
@@ -83,12 +92,15 @@ public class RhythmState extends GameState {
 
     @Override
     public void render() {
-        Gdx.gl20.glClearColor(1, 1, 1, 1);
+        Gdx.gl20.glClearColor(0, 0, 0, 0);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        rhCam.setPosition(0,0);
+        rhCam.update();
+        sb.setProjectionMatrix(rhCam.combined);
 
-        /*sb.begin();
-        sb.draw(bg, 0, 0, V_WIDTH, V_HEIGHT);
-        sb.end();*/
+        sb.begin();
+        sb.draw(bg, -V_WIDTH/4f, 0);
+        sb.end();
 
         uiStage.draw();
     }

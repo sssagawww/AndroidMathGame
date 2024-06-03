@@ -93,7 +93,7 @@ public class MushroomsState extends GameState implements Controllable {
     private MushroomsRequest request;
     public static final String MUSHROOMS_GAME = "mushroomsMiniGame";
     private final int id = (int) (Math.random() * 10000);
-    private String playerName = "playerName";
+    private String playerName = "pro228335";
 
     public MushroomsState(GameStateManager gsm) {
         super(gsm);
@@ -108,7 +108,7 @@ public class MushroomsState extends GameState implements Controllable {
         entities = new PlayEntities();
 
         if (Gdx.app.getType() == Application.ApplicationType.Android) {
-            playerName = "androidPlayer1";
+            playerName = "MegaNoob:]";
         }
 
         initFight();

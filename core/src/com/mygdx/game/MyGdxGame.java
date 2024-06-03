@@ -61,6 +61,7 @@ public class MyGdxGame implements ApplicationListener {
             V_WIDTH = width; //Gdx.graphics.getWidth();
             V_HEIGHT = height; //Gdx.graphics.getHeight();
             if(dbWrapper.getProgress().size() != 0) gameTime = dbWrapper.getProgress().get(dbWrapper.getProgress().size()-1).getTime();
+            Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
         }
 
         //V_WIDTH = (int) ((Gdx.graphics.getWidth()/1216f)*1216);
