@@ -190,7 +190,7 @@ public class BossFightState extends GameState implements Controllable {
                     bossLabel.changeCell();
                     bossLabel.getTimeTable().setVisible(true);
                 } else if (!fight) {
-                    music.setVolume(0.0f);
+                    music.setVolume(0.3f);
                     music.setLooping(true);
                     music.play();
                     fight = true;
@@ -563,6 +563,7 @@ public class BossFightState extends GameState implements Controllable {
 
     @Override
     public void dispose() {
+        music.stop();
         player.stopSounds();
         isStopped = true;
     }
