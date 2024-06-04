@@ -177,8 +177,7 @@ public class Player2 extends B2DSprite {
             }
             prevDir = dir;
             if (countMove == 1) {
-                soundId = sound.play(1.0f);
-                sound.setVolume(soundId, 0.5f);
+                soundId = sound.play(getSoundEffVolume());
                 sound.setLooping(soundId, true);
                 countIdle = 1;
                 countMove = 0;

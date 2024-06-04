@@ -70,6 +70,7 @@ public class Play extends GameState implements Controllable {
     private Dialog dialog;
     private DialogController dcontroller;
     private Music music;
+    private Music rabbitSound;
     private Preferences prefs;
     public boolean canDraw;
     public boolean savePlay;
@@ -102,6 +103,7 @@ public class Play extends GameState implements Controllable {
         world.setContactListener(cl);
         //music = Gdx.audio.newMusic(Gdx.files.internal("music/song.wav"));
         music = Gdx.audio.newMusic(Gdx.files.internal("music/birds.mp3"));
+        rabbitSound = Gdx.audio.newMusic(Gdx.files.internal("music/rabbit.mp3"));
         prefs = Gdx.app.getPreferences(PREF_NAME);
         savePlay = game.save;
         skin_this = game.getSkin();
@@ -142,8 +144,12 @@ public class Play extends GameState implements Controllable {
 
         player.updatePL();
 
-        if (controller.getSoundSettings().getSliderBg().isDragging())
+        if (controller.getSoundSettings().getSliderBg().isDragging()){
             music.setVolume(getBgVolume());
+        }
+        if (controller.getSoundSettings().getSliderSoundEff().isDragging()){
+            rabbitSound.setVolume(controller.getSoundSettings().getSliderSoundEff().getPercent());
+        }
 
         //нужно обновление размера экрана, и тогда будет resize всех компонентов?
 
@@ -524,6 +530,7 @@ public class Play extends GameState implements Controllable {
     public void dispose() {
         save();
         music.stop();
+        rabbitSound.stop();
         player.stopSounds();
         isStopped = true;
     }
@@ -616,6 +623,7 @@ public class Play extends GameState implements Controllable {
                 canDraw = true;
                 break;
             case "rabbit":
+                rabbitSound.play();
                 controller.getInventory().setAchievementVisibility(1);
                 movableNPCs.get("rabbit").setTime(0);
                 movableNPCs.get("rabbit").setDirection(-movableNPCs.get("rabbit").getVelx(), -movableNPCs.get("rabbit").getVely(), 50, 58, 58);
