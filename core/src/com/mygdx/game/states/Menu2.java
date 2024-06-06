@@ -65,7 +65,7 @@ public class Menu2 extends GameState {
         bgImg = new Texture("UI/bg.png");*/
 
         font.setColor(Color.BLACK);
-        layout = new GlyphLayout(font, "MathGame");
+        layout = new GlyphLayout(font, "Quenta");
 
         init();
         createLayers();
@@ -103,7 +103,7 @@ public class Menu2 extends GameState {
         sb.draw(animation.getFrame(), V_WIDTH - V_WIDTH/3f, 0);*/
 
         font.getData().setScale(2);
-        layout.setText(font, "MathGame");
+        layout.setText(font, "Quenta");
         font.draw(sb, layout, V_WIDTH / 2f - layout.width / 2, V_HEIGHT / 2f + layout.height + 80);
         sb.end();
 

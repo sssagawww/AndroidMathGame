@@ -75,14 +75,14 @@ public class BossLabel extends Table {
         labelTable.add(label).width(V_WIDTH / 2f).center().padTop(22f);
 
         Image timeImage = new Image(new Texture("UI/artefacts.png"));
-        Label label = new Label("Использовать\nартефакты", lstyle);
+        Label label = new Label("Воспользоваться артефактами\nи остановить тьму", lstyle);
         label.setAlignment(Align.center);
         label.setColor(Color.BLACK);
 
         timeTable = new Table(skin);
         timeTable.setBackground(skin.getDrawable("GUI_img"));
         timeTable.add(timeImage).width(V_HEIGHT / 8f).height(V_HEIGHT / 8f).expand().padRight(15f).left();
-        timeTable.add(label).width(V_WIDTH / 3f).height(V_HEIGHT / 8f).expand().right();
+        timeTable.add(label).width(V_WIDTH / 2.5f).height(V_HEIGHT / 8f).expand().right();
         timeTable.setVisible(false);
 
         hpTable.add(labelTable).height(V_HEIGHT / 10f).row();

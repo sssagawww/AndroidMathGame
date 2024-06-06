@@ -97,12 +97,10 @@ public class BossFightState extends GameState implements Controllable {
     private boolean done;
     private boolean end;
     private Music music;
-    private Music rabbitSound;
     private float bossPositionY;
 
     public BossFightState(GameStateManager gsm) {
         super(gsm);
-        rabbitSound = Gdx.audio.newMusic(Gdx.files.internal("music/rabbit.mp3"));
         music = Gdx.audio.newMusic(Gdx.files.internal("music/dubstep_bossfight_bg.mp3"));
         world = new World(new Vector2(0, 0), true);
         b2dr = new Box2DDebugRenderer();
@@ -204,7 +202,6 @@ public class BossFightState extends GameState implements Controllable {
 
         if(end){
             time += dt;
-            rabbitSound.play();
             if (time >= 1){
                 BlackScreen.setFinalTitles(true);
                 gsm.setState(BLACK_SCREEN);

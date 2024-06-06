@@ -2,6 +2,7 @@ package com.mygdx.game.states;
 
 import static com.mygdx.game.MyGdxGame.V_HEIGHT;
 import static com.mygdx.game.MyGdxGame.V_WIDTH;
+import static com.mygdx.game.UI.BtnBox.STATES.FINISH;
 import static com.mygdx.game.paint.Figures.FiguresDatabase.FIGURES_TYPES;
 import static com.mygdx.game.handlers.B2DVars.BIT_PLAYER;
 import static com.mygdx.game.handlers.B2DVars.BIT_TROPA;
@@ -138,6 +139,11 @@ public class DungeonState extends GameState implements Controllable {
 
         if (isStopped) {
             isStopped = false;
+            if (opening) {
+                openDoor(doorForOpen);
+                opening = false;
+                openingTime = 0;
+            }
             multiplexer.addProcessor(controllerStage);
             Gdx.input.setInputProcessor(multiplexer);
         }
@@ -167,14 +173,7 @@ public class DungeonState extends GameState implements Controllable {
 
         controllerStage.act(dt);
 
-        if (opening) {
-            openingTime += dt;
-            if (openingTime > 0.6) {
-                openDoor(doorForOpen);
-                opening = false;
-                openingTime = 0;
-            }
-        }
+
     }
 
     @Override
@@ -403,7 +402,7 @@ public class DungeonState extends GameState implements Controllable {
                 }
                 break;
             case "door1":
-                node1 = new DialogNode("Дверь заперта. Ее нужно взломать!", 0);
+                node1 = new DialogNode("Дверь заперта. Нужно разгадать руны!", 0);
                 dialog.addNode(node1);
                 dcontroller.startDialog(dialog);
                 nextState = PAINT;
@@ -414,7 +413,7 @@ public class DungeonState extends GameState implements Controllable {
                 doorForOpen = s;
                 break;
             case "door2":
-                node1 = new DialogNode("Эта тоже... Нужно взламывать!", 0);
+                node1 = new DialogNode("Эта тоже... Снова руны!", 0);
                 dialog.addNode(node1);
                 dcontroller.startDialog(dialog);
                 nextState = PAINT;
@@ -425,7 +424,7 @@ public class DungeonState extends GameState implements Controllable {
                 doorForOpen = s;
                 break;
             case "door3":
-                node1 = new DialogNode("Дверь заперта на ключ...", 0);
+                node1 = new DialogNode("Дверь заперта...", 0);
                 dialog.addNode(node1);
                 dcontroller.startDialog(dialog);
                 nextState = PAINT;
