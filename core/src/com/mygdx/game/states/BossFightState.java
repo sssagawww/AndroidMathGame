@@ -50,6 +50,7 @@ import com.mygdx.game.Dialog.DialogNode;
 import com.mygdx.game.UI.BossLabel;
 import com.mygdx.game.UI.Controller;
 import com.mygdx.game.UI.DialogBox;
+import com.mygdx.game.UI.Global;
 import com.mygdx.game.UI.JoyStick;
 import com.mygdx.game.UI.OptionBox2;
 import com.mygdx.game.entities.PlayEntities;
@@ -562,6 +563,7 @@ public class BossFightState extends GameState implements Controllable {
     public void dispose() {
         music.stop();
         player.stopSounds();
+        dubstep.stop();
         isStopped = true;
     }
 }

@@ -2,14 +2,17 @@ package com.mygdx.game.entities;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.mygdx.game.MyGdxGame;
+import com.mygdx.game.UI.Global;
 import com.mygdx.game.UI.JoyStick;
 
 import com.mygdx.game.handlers.Controllable;
+import com.mygdx.game.states.DungeonState;
 
 import static com.mygdx.game.handlers.B2DVars.*;
 import static com.mygdx.game.handlers.B2DVars.PlayerAnim.*;
@@ -24,13 +27,12 @@ public class Player2 extends B2DSprite {
     private JoyStick joyStick;
     private int countIdle = 1;
     private int countMove = 1;
-    private Sound sound;
+    private Music sound;
     private long soundId;
 
     public Player2(Body body) {
         super(body);
-//        sound = Gdx.audio.newSound(Gdx.files.internal("music/steps_grass3.mp3"));
-        sound = Gdx.audio.newSound(Gdx.files.internal("music/steps_dun_and_maze.mp3"));
+//        sound = ;
         tex = MyGdxGame.res.getTexture("gnomik");
         tex2 = MyGdxGame.res.getTexture("gnomikrow");
         sprites = TextureRegion.split(tex2, 120, 130)[0];
@@ -42,8 +44,7 @@ public class Player2 extends B2DSprite {
         x = body.getPosition().x * PPM;
         y = body.getPosition().y * PPM;
 
-        if(state.getController().getSoundSettings().getSliderSoundEff().isDragging()) sound.setVolume(soundId, getSoundEffVolume());
-
+        sound.setVolume(getSoundEffVolume());
         checkJoyStick();
     }
 
@@ -227,6 +228,8 @@ public class Player2 extends B2DSprite {
     public void setState(Controllable state) {
         this.state = state;
         joyStick = state.getJoyStick();
+        sound = (state instanceof DungeonState ? Gdx.audio.newMusic(Gdx.files.internal("music/steps_dun_and_maze.mp3")) : Gdx.audio.newMusic(Gdx.files.internal("music/steps_grass3.mp3")));
+        Global.soundEffs.add(sound);
     }
 
     public void stopSounds(){

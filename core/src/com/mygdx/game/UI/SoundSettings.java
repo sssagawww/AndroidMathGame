@@ -6,6 +6,7 @@ import static com.mygdx.game.MyGdxGame.V_WIDTH;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -13,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
 
 public class SoundSettings extends Table {
@@ -42,6 +44,16 @@ public class SoundSettings extends Table {
         soundEffLbl = new Label("Звуковые эффекты", lstyle);
 
         exitImage = new Image(skin.getDrawable("wrong"));
+
+        sliderStyle = new Slider.SliderStyle();
+        sliderStyle.knob = skin.getDrawable("menuBtn_up");
+        sliderStyle.background = skin.getDrawable("menuBtn_up");
+
+        sliderBG = new Slider(0, 100, 1, false, sliderStyle);
+        sliderBG.setVisualPercent(Global.backgroundVolume);
+        sliderSoundEff = new Slider(0, 100, 1, false, sliderStyle);
+        sliderSoundEff.setVisualPercent(Global.soundEffVolume);
+
         exitImage.addListener(new InputListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
@@ -50,19 +62,18 @@ public class SoundSettings extends Table {
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                Global.soundEffVolume = sliderSoundEff.getPercent();
+                Global.backgroundVolume = sliderBG.getPercent();
+                Global.bgSounds.forEach(sound -> {
+                    sound.setVolume(Global.backgroundVolume);
+                });
+                Global.soundEffs.forEach(sound -> {
+                    sound.setVolume(Global.soundEffVolume);
+                });
                 setVisible(false);
                 controller.setBtnsVisibility(true);
             }
         });
-
-        sliderStyle = new Slider.SliderStyle();
-        sliderStyle.knob = skin.getDrawable("menuBtn_up");
-        sliderStyle.background = skin.getDrawable("menuBtn_up");
-
-        sliderBG = new Slider(0, 100, 1, false, sliderStyle);
-        sliderBG.setVisualPercent(1);
-        sliderSoundEff = new Slider(0, 100, 1, false, sliderStyle);
-        sliderSoundEff.setVisualPercent(1);
 
         uiTable.add(titleLabel).center();
         uiTable.add(exitImage).width(exitImage.getWidth() * 3).height(exitImage.getHeight() * 3).right().row();
