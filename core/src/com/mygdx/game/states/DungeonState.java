@@ -142,7 +142,6 @@ public class DungeonState extends GameState implements Controllable {
             if (opening) {
                 openDoor(doorForOpen);
                 opening = false;
-                openingTime = 0;
             }
             multiplexer.addProcessor(controllerStage);
             Gdx.input.setInputProcessor(multiplexer);
@@ -436,8 +435,9 @@ public class DungeonState extends GameState implements Controllable {
                 break;
             case "keyDoor":
                 if (earnedKey) {
-                    opening = true;
+                    opening = false;
                     doorForOpen = s;
+                    openDoor(doorForOpen);
                     controller.getInventory().removeItem("Ключ");
                 } else {
                     node1 = new DialogNode("Дверь заперта... Возможно, ключ от нее где-то рядом.", 0);

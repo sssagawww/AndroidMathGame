@@ -189,7 +189,8 @@ public class BossFightState extends GameState implements Controllable {
                     bossLabel.changeCell();
                     bossLabel.getTimeTable().setVisible(true);
                 } else if (!fight) {
-                    music.setVolume(0.3f);
+                    if (controller.getSoundSettings().getSliderSoundEff().isDragging())
+                        music.setVolume(controller.getSoundSettings().getSliderBg().getPercent());
                     music.setLooping(true);
                     music.play();
                     fight = true;
@@ -201,9 +202,9 @@ public class BossFightState extends GameState implements Controllable {
             }
         }
 
-        if(end){
+        if (end) {
             time += dt;
-            if (time >= 1){
+            if (time >= 1) {
                 BlackScreen.setFinalTitles(true);
                 gsm.setState(BLACK_SCREEN);
             }
@@ -561,9 +562,7 @@ public class BossFightState extends GameState implements Controllable {
 
     @Override
     public void dispose() {
-        music.stop();
         player.stopSounds();
-        dubstep.stop();
         isStopped = true;
     }
 }
