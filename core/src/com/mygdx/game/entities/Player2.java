@@ -229,7 +229,7 @@ public class Player2 extends B2DSprite {
     public void setState(Controllable state) {
         this.state = state;
         joyStick = state.getJoyStick();
-        sound = (Music) (state instanceof DungeonState ? Gdx.audio.newSound(Gdx.files.internal("music/steps_dun_and_maze.mp3")) : Gdx.audio.newSound(Gdx.files.internal("music/steps_grass3.mp3")));
+        sound = (state instanceof DungeonState ? Gdx.audio.newMusic(Gdx.files.internal("music/steps_dun_and_maze.mp3")) : Gdx.audio.newMusic(Gdx.files.internal("music/steps_grass3.mp3")));
         Global.soundEffs.add(sound);
     }
 
