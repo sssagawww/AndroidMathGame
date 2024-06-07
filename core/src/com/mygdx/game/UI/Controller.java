@@ -51,7 +51,7 @@ public class Controller extends Table {
             }
         });
 
-        inventImg = new Image(new Texture("controller/circle.png"));
+        inventImg = new Image(new Texture("controller/inventoryB.png"));
         inventImg.addListener(new InputListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
@@ -79,7 +79,7 @@ public class Controller extends Table {
         table.add(settingsImg).width(settingsImg.getWidth() * 5).height(settingsImg.getHeight() * 5).align(Align.topRight);
         this.add(table).top();
         this.add(inventory).expand().align(Align.center);
-        this.add(inventImg).width(inventImg.getWidth() * 5).height(inventImg.getHeight() * 5).align(Align.topRight);
+        this.add(inventImg).width(inventImg.getWidth() * 5).height(inventImg.getHeight() * 5).align(Align.topRight).padRight(15f);
         cell = getCell(inventory);
     }
 
@@ -93,6 +93,10 @@ public class Controller extends Table {
 
     public boolean isMenuPressed() {
         return menuPressed;
+    }
+
+    public void setMenuPressed(boolean menuPressed) {
+        this.menuPressed = menuPressed;
     }
 
     public void setBtnsVisibility(boolean visibility) {

@@ -4,7 +4,8 @@
     package="com.mygdx.game">
 
     <uses-feature android:glEsVersion="0x00020000" android:required="true" />
-
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <application
         android:allowBackup="true"
         android:fullBackupContent="true"
@@ -12,6 +13,7 @@
         android:isGame="true"
         android:appCategory="game"
         android:label="@string/app_name"
+        android:usesCleartextTraffic="true"
         tools:ignore="UnusedAttribute"
         tools:replace="android:icon"
         android:name="com.orm.SugarApp">

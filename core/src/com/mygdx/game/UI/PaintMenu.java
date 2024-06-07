@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.paint.Figures.FiguresDatabase;
+import com.mygdx.game.states.PaintState;
 
 public class PaintMenu extends Table {
     private MyGdxGame game;
@@ -50,7 +51,7 @@ public class PaintMenu extends Table {
         textLabel.setAlignment(Align.center);
         uiTable.add(textLabel).align(Align.bottom).width(getPrefWidth() - 4).row();
 
-        figureImage = new Image(new Texture("controller/square.png"));
+        figureImage = new Image(skin.getDrawable(figuresDatabase.getFigure(0).getName()));
         //uiTable.add(image).align(Align.top).width(200f).height(200f).row();
 
         Table imageTable = new Table(getSkin());
@@ -109,7 +110,7 @@ public class PaintMenu extends Table {
         } else if(btnBox.getState() == OK || btnBox.getState() == WRONG){
             time += dt;
             if (time > 3f) {
-                if(btnBox.getState() == OK){
+                if(btnBox.getState() == OK || PaintState.isOnline()){
                     setNextFigure(figuresDatabase.getFigure(figuresDatabase.nextFigure() % figuresDatabase.getFiguresCount()).getName());
                     setAccuracy(1);
                 }

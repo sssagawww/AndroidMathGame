@@ -133,6 +133,7 @@ public class MazeState extends GameState implements Controllable {
 
         if (controller.isMenuPressed()) {
             gsm.setState(MENU);
+            controller.setMenuPressed(false);
         }
 
         darkStage.act(dt);
@@ -305,17 +306,6 @@ public class MazeState extends GameState implements Controllable {
     }
 
     private void initController() {
-        /*controllerStage = new Stage(new ScreenViewport());
-        controllerStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
-
-        controller = new Controller(skin_this);
-        controller.setVisible(true);
-
-        Table controllerRoot = new Table();
-        controllerRoot.setFillParent(true);
-        controllerRoot.add(controller).expand().align(Align.bottomLeft);
-        controllerStage.addActor(controllerRoot);*/
-
         multiplexer.addProcessor(controllerStage);
         Gdx.input.setInputProcessor(multiplexer);
     }
@@ -363,8 +353,16 @@ public class MazeState extends GameState implements Controllable {
         DialogNode node1;
         gsm.setLastState(MAZE);
         switch (s) {
+            case "enemy2":
+                node1 = new DialogNode("Мрачный Мицелий атакует!", 0);
+                dialog.addNode(node1);
+                dcontroller.startDialog(dialog);
+                BattleState2.setEnemy2(true);
+                nextState = BATTLE;
+                canDraw = true;
+                break;
             case "enemy":
-                node1 = new DialogNode("Враг атакует!", 0);
+                node1 = new DialogNode("Булыжный Воин атакует!", 0);
                 dialog.addNode(node1);
                 dcontroller.startDialog(dialog);
                 nextState = BATTLE;

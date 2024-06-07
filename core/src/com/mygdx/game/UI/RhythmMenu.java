@@ -49,9 +49,11 @@ public class RhythmMenu extends Table {
     private float size = V_HEIGHT / 1.5f * 1.34f;
     private float playerImageX;
     private float playerImageSize;
+    private boolean bossFight;
 
-    public RhythmMenu(Skin skin) {
+    public RhythmMenu(Skin skin, boolean bossFight) {
         super(skin);
+        this.bossFight = bossFight;
         //this.setDebug(true);
         strengthTable = new Table();
         strengthTable.setBackground(skin.getDrawable(("menuBtn_up")));
@@ -59,6 +61,9 @@ public class RhythmMenu extends Table {
         drawables = new ArrayList<>();
 
         sound = Gdx.audio.newSound(Gdx.files.internal("music/sound3.wav"));
+        if(bossFight){
+            sound = Gdx.audio.newSound(Gdx.files.internal("music/bonk.mp3"));
+        }
 
         //кнопки
         createBtnStyle();
@@ -74,6 +79,7 @@ public class RhythmMenu extends Table {
         });
 
         TextButton clickBtn = new TextButton("Тянуть", style);
+        if(bossFight) clickBtn = new TextButton("Ударить", style);
         clickBtn.addListener(new InputListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
@@ -118,6 +124,9 @@ public class RhythmMenu extends Table {
 
         //спрайт гг
         Texture tex = MyGdxGame.res.getTexture("playerSword");
+        if(bossFight){
+            tex = MyGdxGame.res.getTexture("playerBossSword");
+        }
         TextureRegion[] sprites = TextureRegion.split(tex, tex.getHeight(), tex.getHeight())[0];
         drawables.add(new TextureRegionDrawable(sprites[0]));
         drawables.add(new TextureRegionDrawable(sprites[1]));
@@ -148,11 +157,16 @@ public class RhythmMenu extends Table {
         timeLabel.setAlignment(Align.top);
 
         Table playerTable = new Table();
-        playerTable.add(playerImage).align(Align.center).width(V_HEIGHT / 1.5f).height(V_HEIGHT / 1.5f).padLeft(80f).expand().row();
-        playerTable.add(progressBar).width(500f).align(Align.center).padLeft(80f);
-        playerTable.add(percentsLabel).align(Align.left).padLeft(25f);
+        Table bottomTable = new Table(skin);
+        bottomTable.setBackground("menuBtn_down");
+        bottomTable.add(progressBar).width(500f).align(Align.center);
+        bottomTable.add(percentsLabel).align(Align.left).padLeft(25f);
 
-        Table rightTable = new Table();
+        playerTable.add(playerImage).align(Align.center).width(V_HEIGHT / 1.5f).height(V_HEIGHT / 1.5f).expand().row();
+        playerTable.add(bottomTable).bottom();
+
+        Table rightTable = new Table(skin);
+        rightTable.setBackground("menuBtn_down");
         rightTable.add(clickBtn).expand().align(Align.right).row();
         rightTable.add(timeLabel);
 

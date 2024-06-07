@@ -61,6 +61,7 @@ public class MyGdxGame implements ApplicationListener {
             V_WIDTH = width; //Gdx.graphics.getWidth();
             V_HEIGHT = height; //Gdx.graphics.getHeight();
             if(dbWrapper.getProgress().size() != 0) gameTime = dbWrapper.getProgress().get(dbWrapper.getProgress().size()-1).getTime();
+            Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
         }
 
         //V_WIDTH = (int) ((Gdx.graphics.getWidth()/1216f)*1216);
@@ -70,12 +71,15 @@ public class MyGdxGame implements ApplicationListener {
         res.loadTexture("entitySprites/gnomikStep.png", "gnomik");
         res.loadTexture("entitySprites/gnomik.png", "gnomikFull");
         res.loadTexture("entitySprites/idleGnomik.png", "gnomikrow");
+        res.loadTexture("entitySprites/slime.png", "slimeBoss");
         res.loadTexture("allBtn.png", "btn");
         res.loadTexture("entitySprites/enemy2.png", "enemy");
+        res.loadTexture("entitySprites/enemySlime.png", "enemy2");
         res.loadTexture("entitySprites/bombGuy.png", "npc");
         res.loadTexture("entitySprites/hooded2.png", "hooded");
         res.loadTexture("entitySprites/player.png", "npcForest");
         res.loadTexture("entitySprites/sword3.png", "playerSword");
+        res.loadTexture("entitySprites/swordBoss2.png", "playerBossSword");
         res.loadTexture("entitySprites/finalSword.png", "finalSword");
         res.loadTexture("entitySprites/swordAnim.png", "sword");
         res.loadTexture("entitySprites/next.png", "next");
@@ -103,13 +107,6 @@ public class MyGdxGame implements ApplicationListener {
         assetManager.load("mcRus.fnt", BitmapFont.class);
         assetManager.finishLoading();
         skin = SkinManager.generateSkin(assetManager);
-        sb = new SpriteBatch();
-        cam = new BoundedCamera();
-        cam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
-        stepDatabase = new StepDatabase();
-        exampleDatabase = new ExampleDatabase();
-        figuresDatabase = new FiguresDatabase(this);
-        gsm = new GameStateManager(this);
 
         controllerStage = new Stage(new ScreenViewport());
         controllerStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
@@ -120,6 +117,14 @@ public class MyGdxGame implements ApplicationListener {
         controllerRoot.setFillParent(true);
         controllerRoot.add(controller).expand().align(Align.bottomLeft);
         controllerStage.addActor(controllerRoot);
+
+        sb = new SpriteBatch();
+        cam = new BoundedCamera();
+        cam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
+        stepDatabase = new StepDatabase();
+        exampleDatabase = new ExampleDatabase();
+        figuresDatabase = new FiguresDatabase(this);
+        gsm = new GameStateManager(this);
     }
 
     @Override

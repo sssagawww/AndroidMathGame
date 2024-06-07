@@ -76,3 +76,12 @@ rotate: false
   orig: 768, 352
   offset: 0, 0
   index: -1
+label
+rotate: false
+  xy: 418, 69
+  size: 96, 22
+  split: 0, 0, 0, 0
+  pad: 0, 0, 0, 0
+  orig: 768, 352
+  offset: 0, 0
+  index: -1

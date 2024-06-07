@@ -26,8 +26,11 @@ import com.mygdx.game.battle.ENTITY_LIST;
 import com.mygdx.game.battle.events.BattleEvent;
 import com.mygdx.game.battle.events.BattleEventPlayer;
 import com.mygdx.game.battle.render_controller.BattleScreenController;
+import com.mygdx.game.entities.B2DSprite;
 import com.mygdx.game.entities.BattleEntity;
+import com.mygdx.game.entities.SlimeBoss;
 import com.mygdx.game.entities.StaticNPC;
+import com.mygdx.game.handlers.BoundedCamera;
 import com.mygdx.game.handlers.GameStateManager;
 import com.mygdx.game.handlers.MyContactListener;
 
@@ -66,22 +69,38 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
     private BattleEvent currentEvent;
     private Queue<BattleEvent> queue = new ArrayDeque<BattleEvent>();
     private Battle battle;
-    private StaticNPC boss;
+    private B2DSprite boss;
     private Texture tex;
     private Texture texEnemy;
     private Music music;
+    private static boolean done;
+    private static boolean bossFight;
+    private static boolean enemy2;
+    private BoundedCamera fightCam;
 
     public BattleState2(GameStateManager gsm) {
         super(gsm);
         world = new World(new Vector2(0, 0), true);
         game = gsm.game();
-        multiplexer = new InputMultiplexer(); //не нужен(?), пока нет процессов, обработчиков событий
+        multiplexer = new InputMultiplexer();
 
         createMusic();
+        if(bossFight){
+            music.stop();
+            game.getExampleDatabase().initializeExamples3();
+            game.getStepDatabase().initializeSteps3();
+        } else if(enemy2){
+            game.getExampleDatabase().initializeExamples2();
+            game.getStepDatabase().initializeSteps2();
+        } else {
+            game.getExampleDatabase().initializeExamples();
+            game.getStepDatabase().initializeSteps();
+        }
 
-        cam.setBounds(0, 4864, 0, 2688);
+        fightCam = new BoundedCamera();
+        fightCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
+        fightCam.setBounds(0, 4864, 0, 2688);
 
-        tex = MyGdxGame.res.getTexture("gnomik"); //не юзается?
         tex = MyGdxGame.res.getTexture("enemy");
         battle = new Battle(BattleEntity.generateEntity("Игрок", tex, game.getStepDatabase(), game.getExampleDatabase()),
                 BattleEntity.generateEntity("Враг", texEnemy, game.getStepDatabase(), game.getExampleDatabase()));
@@ -122,6 +141,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
                     music.dispose();
                     gsm.setState(gsm.getLastState());
                 } else if (battle.getState() == Battle.STATE.WIN) {
+                    done = true;
                     music.dispose();
                     gsm.setState(gsm.getLastState());
                 } else if (battle.getState() == Battle.STATE.LOSE) {
@@ -146,15 +166,15 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
     }
 
     @Override
-    public void render() { // fix update cam (F11)
+    public void render() { // update cam needs to be fixed (F11)
         //Gdx.input.setInputProcessor(bcontroller);
         Gdx.gl20.glClearColor(0, 0, 0, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        cam.setPosition(0, 0);
-        cam.update();
+        fightCam.setPosition(V_WIDTH / 2f, V_HEIGHT / 2f);
+        fightCam.update();
 
         //draw map
-        tmr.setView(cam);
+        tmr.setView(fightCam);
         tmr.render();
         //draw enemy
         boss.render(sb, 200, 200);
@@ -163,7 +183,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
         battleRenderer.render(sb);
         sb.end();*/
 
-        sb.setProjectionMatrix(cam.combined);
+        sb.setProjectionMatrix(fightCam.combined);
 
         uiStage.draw();
         controllerStage.draw();
@@ -223,7 +243,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
     }
 
     private void createLayers() {
-        tiledMap = new TmxMapLoader().load("sprites/mystic_woods_free_2.1/fightmap.tmx");
+        tiledMap = new TmxMapLoader().load("sprites/mystic_woods_free_2.1/fightmap2.tmx");
         tmr = new OrthogonalTiledMapRenderer(tiledMap, 4); // !!!
         tileSize = (int) tiledMap.getProperties().get("tilewidth");
 
@@ -232,16 +252,18 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
     }
 
     private void createEnemy() {
-        PolygonShape ps = new PolygonShape();
-        MapLayer layer = tiledMap.getLayers().get("enemy");
         BodyDef bdef = new BodyDef();
-        FixtureDef fdef = new FixtureDef();
 
         bdef.type = BodyDef.BodyType.StaticBody;
-        bdef.position.set(600f / PPM, 350f / PPM);
+        bdef.position.set((V_WIDTH / 2f) / PPM - 5, (V_HEIGHT / 2f) / PPM);
         Body body = world.createBody(bdef);
 
         boss = new StaticNPC(body, "enemy", 5f);
+        if(bossFight){
+            boss = new SlimeBoss(body);
+        } else if (enemy2){
+            boss = new StaticNPC(body, "enemy2", 5f);
+        }
         body.setUserData(boss);
     }
 
@@ -280,9 +302,19 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
         music.play();
     }
 
+    public static boolean isDone() {
+        return done;
+    }
+
+    public static void setDone(boolean done) {
+        BattleState2.done = done;
+    }
+
     @Override
     public void dispose() {
         music.stop();
+        enemy2 = false;
+        bossFight = false;
     }
 
     @Override
@@ -304,5 +336,21 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
     @Override
     public void queueEvent(BattleEvent event) {
         queue.add(event);
+    }
+
+    public static boolean isBossFight() {
+        return bossFight;
+    }
+
+    public static void setBossFight(boolean bossFight) {
+        BattleState2.bossFight = bossFight;
+    }
+
+    public static boolean isEnemy2() {
+        return enemy2;
+    }
+
+    public static void setEnemy2(boolean enemy2) {
+        BattleState2.enemy2 = enemy2;
     }
 }

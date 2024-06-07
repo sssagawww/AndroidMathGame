@@ -76,11 +76,14 @@ public class SoundSettings extends Table {
         });
 
         uiTable.add(titleLabel).center();
-        uiTable.add(exitImage).align(Align.topRight).width(exitImage.getWidth() * 3).height(exitImage.getHeight() * 3).row();
-        uiTable.add(bgSoundsLbl);
-        uiTable.add(sliderBG).align(Align.topLeft).row();
-        uiTable.add(soundEffLbl);
-        uiTable.add(sliderSoundEff);
+        uiTable.add(exitImage).width(exitImage.getWidth() * 3).height(exitImage.getHeight() * 3).right().row();
+
+        Table bottomTable = new Table();
+        bottomTable.add(bgSoundsLbl).pad(15f);
+        bottomTable.add(sliderBG).align(Align.topLeft).pad(15f).row();
+        bottomTable.add(soundEffLbl).pad(15f);
+        bottomTable.add(sliderSoundEff).pad(15f);
+        uiTable.add(bottomTable).expand().center();
     }
 
     public Slider getSliderBg() {

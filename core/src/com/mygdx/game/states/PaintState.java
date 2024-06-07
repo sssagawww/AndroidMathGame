@@ -4,6 +4,7 @@ import static com.mygdx.game.MyGdxGame.*;
 import static com.mygdx.game.UI.BtnBox.STATES.*;
 import static com.mygdx.game.handlers.GameStateManager.*;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
@@ -11,6 +12,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -20,6 +22,7 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
@@ -33,7 +36,9 @@ import com.mygdx.game.UI.OptionBox2;
 import com.mygdx.game.UI.PaintMenu;
 import com.mygdx.game.handlers.BoundedCamera;
 import com.mygdx.game.handlers.GameStateManager;
+import com.mygdx.game.multiplayer.MushroomsRequest;
 import com.mygdx.game.paint.DistanceCalc;
+import com.mygdx.game.paint.Figures.Figure;
 import com.mygdx.game.paint.Figures.FiguresDatabase;
 import com.mygdx.game.paint.PixelPoint;
 
@@ -51,6 +56,7 @@ public class PaintState extends GameState implements InputProcessor {
     private ArrayList<Integer> skippedPoints = new ArrayList<>();
     private FiguresDatabase figuresDatabase;
     private Stage uiStage;
+    private Stage onlineStage;
     private PaintMenu paintMenu;
     private InputMultiplexer multiplexer;
     private Dialog dialog;
@@ -60,6 +66,20 @@ public class PaintState extends GameState implements InputProcessor {
     private Array<Vector2> arr = new Array<>();
     private PolygonSpriteBatch batch;
     private BoundedCamera paintCam;
+    private MushroomsRequest request;
+    private Label readyLabel;
+    private float requestTime = 0;
+    private final int id = (int) (Math.random() * 10000);
+    private String playerName = "playerName";
+    public static final String PAINT_GAME = "paintMiniGame";
+    private static boolean online;
+    private boolean btnClicked;
+    private boolean ready = false;
+    private String oppScore;
+    private static boolean done;
+    private int count = 0;
+    private int oppCount = 0;
+    private float time = 0;
 
     public PaintState(GameStateManager gsm) {
         super(gsm);
@@ -76,6 +96,14 @@ public class PaintState extends GameState implements InputProcessor {
 
         distanceCalc = new DistanceCalc(this);
 
+        request = new MushroomsRequest();
+        if (online) {
+            if (Gdx.app.getType() == Application.ApplicationType.Android) {
+                playerName = "androidPlayer";
+            }
+            request.join(id, playerName, PAINT_GAME, 0);
+        }
+
         initUI();
         createSD();
 
@@ -86,6 +114,13 @@ public class PaintState extends GameState implements InputProcessor {
         Gdx.input.setInputProcessor(multiplexer);
     }
 
+    public PaintState(GameStateManager gsm, ArrayList<FiguresDatabase.FIGURES_TYPES> figuresTypes) {
+        this(gsm);
+        if (figuresTypes != null) {
+            figuresDatabase.loadFigures(figuresTypes);
+        }
+    }
+
     @Override
     public void handleInput() {
 
@@ -94,9 +129,37 @@ public class PaintState extends GameState implements InputProcessor {
     @Override
     public void update(float dt) {
         uiStage.act(dt);
+        if (online) onlineStage.act(dt);
         checkBtns();
         dcontroller.update(dt);
-        paintMenu.checkProgress(dt);
+
+        if(done && online){
+            time+=dt;
+            if(time >= 2){
+                time = 0;
+                done = false;
+                gsm.setState(gsm.getLastState());
+            }
+        }
+
+        if (ready && (paintMenu.getBtnBox().isClicked() || btnClicked)) {
+            request.setPlayerReady(id, false);
+        }
+
+        if (btnClicked || !online) {
+            paintMenu.checkProgress(dt);
+        }
+
+        if (online && request.isDone()) {
+            requestTime += dt;
+            if (requestTime >= dt * 15) {
+                requestTime = 0;
+                request.postInfo(id, playerName, (float) distanceCalc.getAccuracy());
+                ready = request.isReady();
+            }
+            oppScore = String.format("%.2f", 1 - request.getOpponentScore());
+        }
+        checkProgress();
     }
 
     @Override
@@ -148,11 +211,13 @@ public class PaintState extends GameState implements InputProcessor {
         batch.end();
 
         uiStage.draw();
+        if (online) onlineStage.draw();
     }
 
     @Override
     public void dispose() {
-
+        if(online) request.leave(id);
+        PaintState.setOnline(false);
     }
 
     private void createSD() {
@@ -190,9 +255,37 @@ public class PaintState extends GameState implements InputProcessor {
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                gsm.setState(DUNGEON);
+                gsm.setState(gsm.getLastState());
             }
         });
+
+        onlineStage = new Stage(new ScreenViewport());
+        onlineStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+        if (online) {
+            BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
+            Label.LabelStyle lstyle = new Label.LabelStyle(font, Color.BLACK);
+            lstyle.background = game.getSkin().getDrawable("menuBtn_down");
+            readyLabel = new Label("Нажмите, если готовы", lstyle);
+            readyLabel.setAlignment(Align.center);
+            readyLabel.addListener(new InputListener() {
+                @Override
+                public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                    request.playerIsReady(id, playerName);
+                    return true;
+                }
+
+                @Override
+                public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                    readyLabel.setVisible(false);
+                    btnClicked = true;
+                }
+            });
+
+            Table onlineRoot = new Table();
+            onlineRoot.setFillParent(true);
+            onlineStage.addActor(onlineRoot);
+            onlineRoot.add(readyLabel).width(V_WIDTH).height(V_HEIGHT / 4f).expand(true, false);
+        }
 
         Table table = new Table();
         table.add(initBtn()).expand().align(Align.bottomRight).width(100f).height(100f).pad(15f);
@@ -207,7 +300,6 @@ public class PaintState extends GameState implements InputProcessor {
         DialogBox dialogueBox = new DialogBox(game.getSkin());
         dialogueBox.setVisible(false);
 
-        //уже не используется, но если переделать, то можно использовать в выборе из 2 варинтов
         OptionBox2 optionBox = new OptionBox2(game.getSkin());
         optionBox.setVisible(false);
 
@@ -217,6 +309,7 @@ public class PaintState extends GameState implements InputProcessor {
         dialog = new Dialog();
 
         multiplexer.addProcessor(uiStage);
+        multiplexer.addProcessor(onlineStage);
         Gdx.input.setInputProcessor(multiplexer);
     }
 
@@ -234,11 +327,17 @@ public class PaintState extends GameState implements InputProcessor {
         btn.addListener(new InputListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                /*if(online){
+                    request.postInfo(id, playerName, (float) distanceCalc.getAccuracy());
+                }*/
                 return true;
             }
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                if (online) {
+                    request.setPlayerReady(id, true);
+                }
                 paintMenu.getBtnBox().setState(CHECK);
                 paintMenu.getBtnBox().setClicked(true);
             }
@@ -254,13 +353,16 @@ public class PaintState extends GameState implements InputProcessor {
             } else {
                 paintMenu.getBtnBox().setState(WRONG);
             }
+
+            if (online && !ready) {
+                paintMenu.getBtnBox().setState(CHECK);
+            }
             paintMenu.setAccuracy(distanceCalc.getAccuracy());
         }
         switch (paintMenu.getBtnBox().getState()) {
             case CLEAR:
-                // !!! ВРЕМЕННОЕ СОХРАНЕНИЕ НА КНОПКУ ФИГУРЫ В ДБ !!!
-                //game.getDbWrapper().saveFigure(new Figure("Ромб", FiguresDatabase.FIGURES_TYPES.RHOMBUS, points, points));
-                //System.out.println(game.getDbWrapper().getFigures());
+                //временное сохранение фигуры в json
+                //figuresDatabase.saveJson(new Figure("Ромб", FiguresDatabase.FIGURES_TYPES.RHOMBUS, points, points));
 
                 skippedPoints.clear();
                 points.clear();
@@ -269,15 +371,52 @@ public class PaintState extends GameState implements InputProcessor {
                 break;
             case OK:
                 node = new DialogNode("Получилось! Молодец!", 0);
+                if (online) {
+                    if((1 - distanceCalc.getAccuracy()) >  1 - request.getOpponentScore()){
+                        count++;
+                    } else {
+                        oppCount++;
+                    }
+                    node = new DialogNode(String.format("%.2f", 1 - distanceCalc.getAccuracy()) + " : " + oppScore, 0);
+                }
                 startDialogController();
                 break;
             case WRONG:
                 node = new DialogNode("Попробуй еще раз!", 0);
+                if (online) {
+                    if((1 - distanceCalc.getAccuracy()) >  1 - request.getOpponentScore()){
+                        count++;
+                    } else {
+                        oppCount++;
+                    }
+                    node = new DialogNode(String.format("%.2f", 1 - distanceCalc.getAccuracy()) + " : " + oppScore, 0);
+                }
                 startDialogController();
                 break;
             case DONE:
-                gsm.setState(PLAY);
+                paintMenu.getBtnBox().setState(FINISH);
+                done = true;
+                if(online){
+                    if(count > oppCount){
+                        node = new DialogNode("Вы победили!", 0);
+                    } else {
+                        node = new DialogNode("Вы проиграли!", 0);
+                    }
+                } else {
+                    gsm.setState(gsm.getLastState());
+                }
+                dialog.addNode(node);
+                dcontroller.startDialog(dialog);
                 break;
+        }
+    }
+
+    private void checkProgress() {
+        if (paintMenu.getBtnBox().isClicked() && !ready && online) {
+            readyLabel.setText("Ожидание игрока...");
+            readyLabel.setVisible(true);
+        } else if (ready) {
+            readyLabel.setVisible(false);
         }
     }
 
@@ -302,6 +441,22 @@ public class PaintState extends GameState implements InputProcessor {
 
     public ArrayList<PixelPoint> getFigureHints() {
         return figuresDatabase.getFigure(figuresDatabase.getCurFigure()).getHints();
+    }
+
+    public static boolean isDone() {
+        return done;
+    }
+
+    public static void setDone(boolean done) {
+        PaintState.done = done;
+    }
+
+    public static boolean isOnline() {
+        return online;
+    }
+
+    public static void setOnline(boolean online) {
+        PaintState.online = online;
     }
 
     @Override

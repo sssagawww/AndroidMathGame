@@ -20,6 +20,7 @@ public class BtnBox extends Table {
         MENU_TO_PLAY,
         EXIT,
         SAVE,
+        ONLINE,
         STATISTICS,
         SAVE_GAME,
         NON,
@@ -27,7 +28,8 @@ public class BtnBox extends Table {
         OK,
         WRONG,
         CHECK,
-        DONE
+        DONE,
+        FINISH
     }
 
     private STATES state;

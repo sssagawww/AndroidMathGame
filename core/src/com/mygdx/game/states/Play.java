@@ -70,6 +70,7 @@ public class Play extends GameState implements Controllable {
     private Dialog dialog;
     private DialogController dcontroller;
     private Music music;
+    private Music rabbitSound;
     private Preferences prefs;
     public boolean canDraw;
     public boolean savePlay;
@@ -102,6 +103,7 @@ public class Play extends GameState implements Controllable {
         world.setContactListener(cl);
         //music = Gdx.audio.newMusic(Gdx.files.internal("music/song.wav"));
         music = Gdx.audio.newMusic(Gdx.files.internal("music/birds.mp3"));
+        rabbitSound = Gdx.audio.newMusic(Gdx.files.internal("music/rabbit.mp3"));
         prefs = Gdx.app.getPreferences(PREF_NAME);
         savePlay = game.save;
         skin_this = game.getSkin();
@@ -142,15 +144,22 @@ public class Play extends GameState implements Controllable {
 
         player.updatePL();
 
-        if(controller.getSoundSettings().getSliderBg().isDragging()) music.setVolume(getBgVolume());
+        if (controller.getSoundSettings().getSliderBg().isDragging()){
+            music.setVolume(getBgVolume());
+        }
+        if (controller.getSoundSettings().getSliderSoundEff().isDragging()){
+            rabbitSound.setVolume(controller.getSoundSettings().getSliderSoundEff().getPercent());
+        }
 
         //нужно обновление размера экрана, и тогда будет resize всех компонентов?
 
         //если этот state был выгружен, то при запуске все процессы должны возобновиться (удаляются ли они в multiplexer при выгрузке или просто останавливаются?)
         if (isStopped) {
             //игрок выходит из подземелья не там, где зашёл
-            if (nextState == DUNGEON) {
+            if (gsm.getLastState() == DUNGEON) {
                 player.getBody().setTransform(205f, 80f, 0);
+            } else if (gsm.getLastState() == FOREST) {
+                player.getBody().setTransform(475, 185f, 0);
             }
 
             player.getBody().setLinearVelocity(0, 0);
@@ -170,6 +179,7 @@ public class Play extends GameState implements Controllable {
 
         if (controller.isMenuPressed()) {
             gsm.setState(MENU);
+            controller.setMenuPressed(false);
         }
 
         //обновление джойстика
@@ -248,6 +258,7 @@ public class Play extends GameState implements Controllable {
             uiStage.draw();
             if (optionBox.getBtnId() == 0 && optionBox.isClicked() && contactBody.getFixtureList().get(0).getUserData().equals("hooded")) {
                 movableNPCs.get("hooded").setDirection(1, -0.5f, 20, 58, 58);
+                contact = true;
             } else if (contactBody.getFixtureList().get(0).getUserData().equals("npc")) {
                 checkDeal();
             }
@@ -314,6 +325,8 @@ public class Play extends GameState implements Controllable {
         createLayer(nextForest, BIT_TROPA, BIT_PLAYER, true);
         TiledMapTileLayer signDungeon = (TiledMapTileLayer) tiledMap.getLayers().get("signDungeon");
         createLayer(signDungeon, BIT_TROPA, BIT_PLAYER, true);
+        TiledMapTileLayer nextBoss = (TiledMapTileLayer) tiledMap.getLayers().get("nextBoss");
+        createLayer(nextBoss, BIT_TROPA, BIT_PLAYER, true);
     }
 
     //коллизия слоя на карте (слой создаётся в Tiled)
@@ -491,9 +504,9 @@ public class Play extends GameState implements Controllable {
         controllerRoot.add(controller).expand().align(Align.bottomLeft);
         controllerStage.addActor(controllerRoot);*/
 
-        if(savePlay){
+        if (savePlay) {
             controller.getInventory().reload(game.getDbWrapper());
-        } else{
+        } else {
             game.getDbWrapper().clearAll();
         }
 
@@ -513,59 +526,11 @@ public class Play extends GameState implements Controllable {
         mouse = new Vector3();
     }
 
-    //был тестовый метод, чтобы понять работает ли диалог, можно использовать в других местах
-   /* private void initUI() {
-        skin_this = game.getSkin();
-        uiStage = new Stage(new ScreenViewport());
-        uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
-
-        dialogRoot = new Table();
-        dialogRoot.setFillParent(true);
-        uiStage.addActor(dialogRoot);
-
-        dialogueBox = new DialogBox(skin_this);
-        dialogueBox.setVisible(false);
-
-        optionBox = new OptionBox2(skin_this);
-        optionBox.setVisible(false);
-
-        Table dialogTable = new Table();
-        dialogTable.add(optionBox)
-                .expand().align(Align.right)
-                .space(8f)
-                .row();
-        dialogTable.add(dialogueBox)
-                .expand().align(Align.bottom)
-                .space(8f)
-                .row();
-
-        dialogRoot.add(dialogTable).expand().align(Align.bottom).pad(15f);
-
-        dcontroller = new DialogController(dialogueBox, optionBox);
-        multiplexer.addProcessor(dcontroller);
-        Gdx.input.setInputProcessor(multiplexer);
-
-        dialog = new Dialog();
-        DialogNode node1 = new DialogNode("Привет! Это первая фраза", 0);
-        DialogNode node2 = new DialogNode("И это вторая?", 1);
-        DialogNode node3 = new DialogNode("Да, ты прав", 2);
-        DialogNode node4 = new DialogNode("Неа, не угадал :(", 4);
-
-        node1.makeLinear(node2.getId());
-        node2.addChoice("Да", 2);
-        node2.addChoice("Нет", 4);
-
-        dialog.addNode(node1);
-        dialog.addNode(node2);
-        dialog.addNode(node3);
-        dialog.addNode(node4);
-        multiplexer.addProcessor(uiStage);
-    }*/
-
     @Override
     public void dispose() {
         save();
         music.stop();
+        rabbitSound.stop();
         player.stopSounds();
         isStopped = true;
     }
@@ -576,7 +541,7 @@ public class Play extends GameState implements Controllable {
 
         //сохранение прогресса (инвентаря)
         Inventory inventory = controller.getInventory();
-        Progress progress = new Progress(inventory.getImgVisibility(0),inventory.getImgVisibility(1), inventory.getImgVisibility(2), inventory.getArtefacts(),
+        Progress progress = new Progress(inventory.getImgVisibility(0), inventory.getImgVisibility(1), inventory.getImgVisibility(2), inventory.getArtefacts(),
                 inventory.getAchievementsVisibility(), inventory.getItems(), gameTime);
         game.getDbWrapper().saveProgress(progress);
     }
@@ -602,7 +567,6 @@ public class Play extends GameState implements Controllable {
                 break;
             case "hooded":
                 if (contact) break;
-                else contact = true;
                 node1 = new DialogNode("Приветствую, путник!", 0);
                 DialogNode node2 = new DialogNode("Не ожидал встретить здесь кого-то.", 1);
                 DialogNode node3 = new DialogNode("Не хочешь исследовать со мной руины?", 2);
@@ -643,6 +607,12 @@ public class Play extends GameState implements Controllable {
                 //entities.getEntity(entities.getCurEntity()).setVisible(true); //почему-то вылетает из-за этого
                 stop();
                 break;
+            case "nextBoss":
+                if(controller.getInventory().getArtefacts() >= 3){
+                    nextState = BOSSFIGHT;
+                    stop();
+                }
+                break;
             case "null":
                 movableNPCs.get("hooded").setDirection(0, 0, 20, 58, 58);
                 node1 = new DialogNode("Вот мы и пришли.", 0);
@@ -653,6 +623,7 @@ public class Play extends GameState implements Controllable {
                 canDraw = true;
                 break;
             case "rabbit":
+                rabbitSound.play();
                 controller.getInventory().setAchievementVisibility(1);
                 movableNPCs.get("rabbit").setTime(0);
                 movableNPCs.get("rabbit").setDirection(-movableNPCs.get("rabbit").getVelx(), -movableNPCs.get("rabbit").getVely(), 50, 58, 58);
@@ -705,6 +676,16 @@ public class Play extends GameState implements Controllable {
         DialogNode node6 = new DialogNode("Ладно, приходи еще.", 6);
         DialogNode node8 = new DialogNode("Все равно загляни ко мне еще!", 8);
 
+        /*if(controller.getInventory().getImgVisibility(1)){
+            DialogNode node9 = new DialogNode("Ты вытащил Меч Силы?!", 9);
+            DialogNode node10 = new DialogNode("Это, конечно круто, но знаешь что ещё круче?", 10);
+            node9.makeLinear(node10.getId());
+            node10.makeLinear(node1.getId());
+
+            dialog.addNode(node9);
+            dialog.addNode(node10);
+        }*/
+
         if (controller.getInventory().getItem("Чудесный\nгриб") != null && controller.getInventory().getItem("Чудесный\nгриб").getCount() >= 6) {
             node5 = new DialogNode("Отлично! Забирай.", 5);
             node6 = new DialogNode("Оно тебе точно поможет в приключениях!", 6);
@@ -738,6 +719,7 @@ public class Play extends GameState implements Controllable {
     private void stop() {
         if (nextState != -1) {
             gsm.setState(nextState);
+            nextState = -1;
         }
         //entities.getEntity(entities.getCurEntity()).setVisible(false);
         music.dispose();

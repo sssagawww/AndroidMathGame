@@ -3,7 +3,6 @@ package com.mygdx.game.battle.steps;
 import com.mygdx.game.battle.BattleMechanics;
 import com.mygdx.game.battle.ENTITY_LIST;
 import com.mygdx.game.battle.events.BattleEventQueue;
-import com.mygdx.game.battle.examples.EXAMPLE_LIST;
 import com.mygdx.game.entities.BattleEntity;
 
 public abstract class Step {

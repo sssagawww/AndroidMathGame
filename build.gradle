@@ -101,6 +101,7 @@ project(":core") {
 
 
     dependencies {
+        implementation "com.squareup.okhttp3:okhttp:4.12.0"
         implementation "com.github.tommyettinger:textratypist:0.10.0"
         implementation "space.earlygrey:shapedrawer:$shapedrawerVersion"
         api 'com.google.code.gson:gson:2.8.5'

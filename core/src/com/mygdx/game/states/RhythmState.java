@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
@@ -31,6 +32,7 @@ import com.mygdx.game.UI.DialogBox;
 import com.mygdx.game.UI.OptionBox;
 import com.mygdx.game.UI.PaintMenu;
 import com.mygdx.game.UI.RhythmMenu;
+import com.mygdx.game.handlers.BoundedCamera;
 import com.mygdx.game.handlers.GameStateManager;
 
 import java.util.ArrayList;
@@ -42,7 +44,10 @@ public class RhythmState extends GameState {
     private RhythmMenu rhythmMenu;
     private static boolean done;
     private static boolean strength100;
+    private static boolean bossFight;
     private Sound doneSound;
+    private Sprite bg;
+    private BoundedCamera rhCam;
 
     public RhythmState(GameStateManager gsm) {
         super(gsm);
@@ -50,7 +55,15 @@ public class RhythmState extends GameState {
         multiplexer = new InputMultiplexer();
         doneSound = Gdx.audio.newSound(Gdx.files.internal("music/swordShort.mp3"));
 
+        bg = new Sprite(new Texture("UI/forestBg.png"));
+        if(bossFight){
+            bg = new Sprite(new Texture("UI/bossBg.png"));
+        }
         initUI();
+
+       rhCam = new BoundedCamera();
+       rhCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
+        rhCam.setBounds(0, V_WIDTH, 0, V_HEIGHT);
 
         Gdx.input.setInputProcessor(multiplexer);
     }
@@ -73,14 +86,21 @@ public class RhythmState extends GameState {
             doneSound.play(0.7f);
         }
         if (dialogBox.isPressed()) {
-            gsm.setState(FOREST);
+            gsm.setState(gsm.getLastState());
         }
     }
 
     @Override
     public void render() {
-        Gdx.gl20.glClearColor(1, 1, 1, 1);
+        Gdx.gl20.glClearColor(0, 0, 0, 0);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        rhCam.setPosition(0,0);
+        rhCam.update();
+        sb.setProjectionMatrix(rhCam.combined);
+
+        sb.begin();
+        sb.draw(bg, -V_WIDTH/4f, 0);
+        sb.end();
 
         uiStage.draw();
     }
@@ -110,11 +130,11 @@ public class RhythmState extends GameState {
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                gsm.setState(FOREST);
+                gsm.setState(gsm.getLastState());
             }
         });
 
-        rhythmMenu = new RhythmMenu(game.getSkin());
+        rhythmMenu = new RhythmMenu(game.getSkin(), bossFight);
 
         Table table = new Table();
         root.add(menuImg).expand().align(Align.topLeft).padTop(65f);
@@ -143,5 +163,13 @@ public class RhythmState extends GameState {
 
     public static boolean isStrength100() {
         return strength100;
+    }
+
+    public static boolean isBossFight() {
+        return bossFight;
+    }
+
+    public static void setBossFight(boolean bossFight) {
+        RhythmState.bossFight = bossFight;
     }
 }

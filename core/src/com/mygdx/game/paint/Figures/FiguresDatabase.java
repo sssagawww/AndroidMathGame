@@ -1,5 +1,8 @@
 package com.mygdx.game.paint.Figures;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.utils.Json;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.db.DbWrapper;
 import com.mygdx.game.paint.PixelPoint;
@@ -9,9 +12,11 @@ import java.util.Arrays;
 
 public class FiguresDatabase {
     private ArrayList<Figure> figures = new ArrayList<>();
+    private ArrayList<Figure> allFigures = new ArrayList<>();
     private MyGdxGame game;
     private DbWrapper dbWrapper;
     private int curFigure;
+    private Json json;
 
     public enum FIGURES_TYPES {
         SQUARE,
@@ -23,23 +28,55 @@ public class FiguresDatabase {
 
     public FiguresDatabase(MyGdxGame game) {
         this.game = game;
+        json = new Json();
         dbWrapper = game.getDbWrapper();
         curFigure = 0;
-        initializeFigures();
+        loadAllFromJson();
+        //initializeFigures();
         //figures = dbWrapper.getFigures(); // загружает из дб, которая пока доступна только на 1 устройстве, не переносится
     }
 
-    private void saveFigures(){
+    public void loadAllFromJson(){
+        ArrayList<String> files = new ArrayList<>(Arrays.asList("square.json", "circle.json","star.json","triangle.json","rhombus.json"));
+        Json json = new Json();
+        for (int i = 0; i < files.size(); i++) {
+            FileHandle file = Gdx.files.internal("figures/" + files.get(i));
+            String figureJson = file.readString();
+            Figure figure = json.fromJson(Figure.class, figureJson);
+            allFigures.add(figure);
+        }
+        figures = (ArrayList<Figure>) allFigures.clone();
+    }
+
+    public void loadFigures(ArrayList<FiguresDatabase.FIGURES_TYPES> figuresTypes){
+        figures = (ArrayList<Figure>) allFigures.clone();
+        ArrayList<Figure> newFigures = new ArrayList<>();
+        for (int i = 0; i < figures.size(); i++) {
+            if(figuresTypes.contains(figures.get(i).getFigureType())){
+                newFigures.add(figures.get(i));
+            }
+        }
+        figures = (ArrayList<Figure>) newFigures.clone();
+    }
+
+    public void saveJson(Figure figure){
+        String jsonObj = json.toJson(figure);
+        FileHandle file = Gdx.files.local("figures.json");
+        file.writeString(jsonObj, true);
+    }
+
+    //для бд
+    /*private void saveFigures(){
         dbWrapper.saveFigure(figures.get(1));
         dbWrapper.saveFigure(figures.get(2));
         dbWrapper.saveFigure(figures.get(4));
         dbWrapper.saveFigure(figures.get(6));
         dbWrapper.saveFigure(figures.get(8));
-    }
+    }*/
 
-    public void addFigure(Figure figure) {
+    /*public void addFigure(Figure figure) {
         game.getDbWrapper().saveFigure(figure);
-    }
+    }*/
 
     //???
     private void initializeFigures() {
