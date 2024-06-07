@@ -189,8 +189,6 @@ public class BossFightState extends GameState implements Controllable {
                     bossLabel.changeCell();
                     bossLabel.getTimeTable().setVisible(true);
                 } else if (!fight) {
-                    if (controller.getSoundSettings().getSliderSoundEff().isDragging())
-                        music.setVolume(controller.getSoundSettings().getSliderBg().getPercent());
                     music.setLooping(true);
                     music.play();
                     fight = true;
@@ -219,6 +217,8 @@ public class BossFightState extends GameState implements Controllable {
         }
 
         if (fight) {
+            if (controller.getSoundSettings().getSliderBg().isDragging())
+                music.setVolume(controller.getSoundSettings().getSliderBg().getPercent());
             if (!done) slimeBoss.randomAnimation(dt);
             bossUiStage.act(dt);
         }
