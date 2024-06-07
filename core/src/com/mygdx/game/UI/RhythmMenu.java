@@ -101,7 +101,7 @@ public class RhythmMenu extends Table {
                 }
                 progressBar.setValue(value);
                 percentsLabel.setText(String.format("%.1f", value) + "%");
-                sound.setVolume(sound.play(), 0.5f);
+                sound.setVolume(sound.play(), 1f);
                 return true;
             }
 
