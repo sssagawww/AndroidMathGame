@@ -56,13 +56,13 @@ public class RhythmState extends GameState {
         doneSound = Gdx.audio.newSound(Gdx.files.internal("music/swordShort.mp3"));
 
         bg = new Sprite(new Texture("UI/forestBg.png"));
-        if(bossFight){
+        if (bossFight) {
             bg = new Sprite(new Texture("UI/bossBg.png"));
         }
         initUI();
 
-       rhCam = new BoundedCamera();
-       rhCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
+        rhCam = new BoundedCamera();
+        rhCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
         rhCam.setBounds(0, V_WIDTH, 0, V_HEIGHT);
 
         Gdx.input.setInputProcessor(multiplexer);
@@ -94,12 +94,12 @@ public class RhythmState extends GameState {
     public void render() {
         Gdx.gl20.glClearColor(0, 0, 0, 0);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        rhCam.setPosition(0,0);
+        rhCam.setPosition(0, 0);
         rhCam.update();
         sb.setProjectionMatrix(rhCam.combined);
 
         sb.begin();
-        sb.draw(bg, -V_WIDTH/4f, 0);
+        sb.draw(bg, -V_WIDTH / 4f, 0);
         sb.end();
 
         uiStage.draw();
