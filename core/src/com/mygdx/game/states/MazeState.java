@@ -12,6 +12,7 @@ import static com.mygdx.game.handlers.GameStateManager.FOREST;
 import static com.mygdx.game.handlers.GameStateManager.MAZE;
 import static com.mygdx.game.handlers.GameStateManager.MENU;
 import static com.mygdx.game.handlers.GameStateManager.PAINT;
+import static com.mygdx.game.states.Play.PREF_MAZE;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
@@ -90,6 +91,7 @@ public class MazeState extends GameState implements Controllable {
     private OptionBox2 optionBox;
     private Body removedBody;
     private boolean debug = false;
+    public static boolean progress;
 
     public MazeState(GameStateManager gsm) {
         super(gsm);
@@ -150,9 +152,9 @@ public class MazeState extends GameState implements Controllable {
             uiStage.act(dt);
             dcontroller.update(dt);
             time += dt;
-            if(hoodedRun && dcontroller.isFinished()){
-                removeCollisionEntity(entities.getEntity(entities.getEntityCount()-1).getBody());
-                entities.getEntity(entities.getEntityCount()-1).getBody().getFixtureList().get(0).setUserData("collided");
+            if (hoodedRun && dcontroller.isFinished()) {
+                removeCollisionEntity(entities.getEntity(entities.getEntityCount() - 1).getBody());
+                entities.getEntity(entities.getEntityCount() - 1).getBody().getFixtureList().get(0).setUserData("collided");
                 //entities.getEntity(entities.getEntityCount()-1).getBody().setLinearVelocity(-1,1);
             }
             if (dialogueBox.isFinished() && time > 2f && dcontroller.isFinished()) {
@@ -201,6 +203,9 @@ public class MazeState extends GameState implements Controllable {
         entities = new PlayEntities();
 
         for (MapObject mo : mlayer.getObjects()) {
+            if(mo.getName().equals("hooded") && progress){
+                continue;
+            }
             BodyDef bdef = new BodyDef();
             bdef.type = BodyDef.BodyType.StaticBody;
             float x = (float) mo.getProperties().get("x") / PPM * 4f;
@@ -211,7 +216,7 @@ public class MazeState extends GameState implements Controllable {
             FixtureDef cdef = new FixtureDef();
             CircleShape cshape = new CircleShape();
             cshape.setRadius(50f / PPM);
-            if(mo.getName().equals("chest")){
+            if (mo.getName().equals("chest")) {
                 cshape.setRadius(30f / PPM);
             }
             cdef.shape = cshape;
@@ -230,7 +235,7 @@ public class MazeState extends GameState implements Controllable {
         PolygonShape ps = new PolygonShape();
         FixtureDef fdef = new FixtureDef();
 
-        if(gsm.getLastState() == FOREST){
+        if (gsm.getLastState() == FOREST) {
             bdef.position.set(107f / PPM, 637f / PPM);
         } else {
             bdef.position.set(607f / PPM, 337f / PPM);
@@ -321,7 +326,7 @@ public class MazeState extends GameState implements Controllable {
         mouse = new Vector3();
     }
 
-    private void initDarkness(){
+    private void initDarkness() {
         Image image = new Image(new Texture("UI/darkness2.png"));
         Table root = new Table();
         root.setFillParent(true);
@@ -332,12 +337,15 @@ public class MazeState extends GameState implements Controllable {
     }
 
     @Override
-    public void handleInput() {}
+    public void handleInput() {
+    }
 
     @Override
     public void dispose() {
         player.stopSounds();
         isStopped = true;
+        gsm.getPlay().getPrefs().putBoolean(PREF_MAZE, MazeState.progress).flush();
+        gsm.getPlay().saveInventory();
     }
 
     private void stop() {
@@ -376,12 +384,14 @@ public class MazeState extends GameState implements Controllable {
                 canDraw = true;
                 break;
             case "chest":
-                node1 = new DialogNode("Вы получили Кольцо Мудрости.", 0);
-                controller.getInventory().setImgVisibility(0, true);
-                dialog.addNode(node1);
-                dcontroller.startDialog(dialog);
-                nextState = -1;
-                canDraw = true;
+                if (!progress) {
+                    node1 = new DialogNode("Вы получили Кольцо Мудрости.", 0);
+                    controller.getInventory().setImgVisibility(0, true);
+                    dialog.addNode(node1);
+                    dcontroller.startDialog(dialog);
+                    nextState = -1;
+                    canDraw = true;
+                }
                 break;
             case "hooded":
                 node1 = new DialogNode("Ты справился! Ведь было несложно?", 0);
@@ -402,6 +412,7 @@ public class MazeState extends GameState implements Controllable {
                 nextState = -1;
                 canDraw = true;
                 hoodedRun = true;
+                progress = true;
                 break;
             case "next":
                 nextState = FOREST;

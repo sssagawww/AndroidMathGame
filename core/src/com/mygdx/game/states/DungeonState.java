@@ -8,6 +8,8 @@ import static com.mygdx.game.handlers.B2DVars.BIT_PLAYER;
 import static com.mygdx.game.handlers.B2DVars.BIT_TROPA;
 import static com.mygdx.game.handlers.B2DVars.PPM;
 import static com.mygdx.game.handlers.GameStateManager.*;
+import static com.mygdx.game.states.Play.PREF_DUNGEON;
+import static com.mygdx.game.states.Play.PREF_FOREST;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
@@ -99,6 +101,7 @@ public class DungeonState extends GameState implements Controllable {
     private float openingTime = 0;
     private Sound openingDoorSound;
     private long soundId;
+    public static boolean progress;
 
     public DungeonState(GameStateManager gsm) {
         super(gsm);
@@ -385,6 +388,7 @@ public class DungeonState extends GameState implements Controllable {
                     controller.getInventory().setImgVisibility(2, true);
                     earnedAmulet = true;
                     canDraw = true;
+                    progress = true;
                     nextState = -1;
                 }
                 break;
@@ -505,6 +509,8 @@ public class DungeonState extends GameState implements Controllable {
     public void dispose() {
         player.stopSounds();
         isStopped = true;
+        gsm.getPlay().getPrefs().putBoolean(PREF_DUNGEON, DungeonState.progress).flush();
+        gsm.getPlay().saveInventory();
     }
 
     @Override

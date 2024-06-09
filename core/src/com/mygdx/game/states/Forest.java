@@ -12,6 +12,8 @@ import static com.mygdx.game.handlers.GameStateManager.MENU;
 import static com.mygdx.game.handlers.GameStateManager.PAINT;
 import static com.mygdx.game.handlers.GameStateManager.PLAY;
 import static com.mygdx.game.handlers.GameStateManager.RHYTHM;
+import static com.mygdx.game.states.Play.PREF_FOREST;
+import static com.mygdx.game.states.Play.PREF_MAZE;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
@@ -101,6 +103,7 @@ public class Forest extends GameState implements Controllable {
     private int mushrooms = 0;
     private MovableNPC npc;
     private Sound mushroomSound;
+    public static boolean progress;
 
     public Forest(GameStateManager gsm) {
         super(gsm);
@@ -160,6 +163,7 @@ public class Forest extends GameState implements Controllable {
             RhythmState.setDone(false);
             if(RhythmState.isStrength100()) controller.getInventory().setAchievementVisibility(2);
             controller.getInventory().setImgVisibility(1, true);
+            progress = true;
             npc.setDirection(1f, 0.35f, 100f, 64, 64);
             for (int i = 0; i < entities.getEntityCount(); i++) {
                 if (entities.getEntity(i).getBody().getUserData().equals("sword")) {
@@ -243,6 +247,8 @@ public class Forest extends GameState implements Controllable {
     public void dispose() {
         player.stopSounds();
         isStopped = true;
+        gsm.getPlay().getPrefs().putBoolean(PREF_FOREST, Forest.progress).flush();
+        gsm.getPlay().saveInventory();
     }
 
     private void createPlayer() {
@@ -334,6 +340,9 @@ public class Forest extends GameState implements Controllable {
         entities = new PlayEntities();
 
         for (MapObject mo : mlayer.getObjects()) {
+            if(mo.getName().equals("sword") && progress){
+                continue;
+            }
             BodyDef bdef = new BodyDef();
             bdef.type = BodyDef.BodyType.StaticBody;
 
@@ -538,11 +547,12 @@ public class Forest extends GameState implements Controllable {
                 break;
             case "next":
                 if (player.getPosition().x < 800f / PPM) nextState = PLAY;
-                else nextState = MAZE;
+                else if(MazeState.progress) nextState = MAZE;
+                else break;
                 stop();
                 break;
             case "null":
-                npc.setDirection(0, 0, 40, 64, 64);
+                npc.setDirection(0, 0, 100, 64, 64);
                 node1 = new DialogNode("Ты вытащил Меч Силы!?!?!?", 0);
                 node2 = new DialogNode("Пошли в деревню.", 1);
                 node3 = new DialogNode("Ты обязан рассказать об этом.", 2);
