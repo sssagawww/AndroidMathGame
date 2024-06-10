@@ -128,6 +128,11 @@ public class MazeState extends GameState implements Controllable {
         player.updatePL();
 
         if (isStopped) {
+            if (BattleState2.isDone()) {
+                BattleState2.setDone(false);
+                entities.removeEntity(removedBody);
+                removedBody.getFixtureList().get(0).setUserData("collided");
+            }
             isStopped = false;
             multiplexer.addProcessor(controllerStage);
             Gdx.input.setInputProcessor(multiplexer);
@@ -155,11 +160,12 @@ public class MazeState extends GameState implements Controllable {
             if (hoodedRun && dcontroller.isFinished()) {
                 removeCollisionEntity(entities.getEntity(entities.getEntityCount() - 1).getBody());
                 entities.getEntity(entities.getEntityCount() - 1).getBody().getFixtureList().get(0).setUserData("collided");
+                entities.removeEntity(removedBody);
                 //entities.getEntity(entities.getEntityCount()-1).getBody().setLinearVelocity(-1,1);
             }
             if (dialogueBox.isFinished() && time > 2f && dcontroller.isFinished()) {
                 time = 0;
-                entities.removeEntity(removedBody);
+                //entities.removeEntity(removedBody);
                 stop();
             }
         }
@@ -203,7 +209,7 @@ public class MazeState extends GameState implements Controllable {
         entities = new PlayEntities();
 
         for (MapObject mo : mlayer.getObjects()) {
-            if(mo.getName().equals("hooded") && progress){
+            if (mo.getName().equals("hooded") && progress) {
                 continue;
             }
             BodyDef bdef = new BodyDef();
@@ -236,7 +242,7 @@ public class MazeState extends GameState implements Controllable {
         FixtureDef fdef = new FixtureDef();
 
         if (gsm.getLastState() == FOREST) {
-            bdef.position.set(107f / PPM, 637f / PPM);
+            bdef.position.set(137f / PPM, 637f / PPM);
         } else {
             bdef.position.set(607f / PPM, 337f / PPM);
         }
@@ -368,6 +374,7 @@ public class MazeState extends GameState implements Controllable {
                 BattleState2.setEnemy2(true);
                 nextState = BATTLE;
                 canDraw = true;
+                removedBody = contactBody;
                 break;
             case "enemy":
                 node1 = new DialogNode("Булыжный Воин атакует!", 0);
@@ -375,6 +382,7 @@ public class MazeState extends GameState implements Controllable {
                 dcontroller.startDialog(dialog);
                 nextState = BATTLE;
                 canDraw = true;
+                removedBody = contactBody;
                 break;
             case "npc":
                 node1 = new DialogNode("Начнем испытание!", 0);

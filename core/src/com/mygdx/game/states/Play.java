@@ -283,7 +283,9 @@ public class Play extends GameState implements Controllable {
             Forest.progress = prefs.getBoolean(PREF_FOREST, false);
             DungeonState.progress = prefs.getBoolean(PREF_DUNGEON, false);
             game.save = false;
+            savePlay = false;
         } else {
+            prefs.clear();
             bdef.position.set(607f / PPM, 337f / PPM);
         }
 

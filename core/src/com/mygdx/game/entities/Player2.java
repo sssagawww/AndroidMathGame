@@ -44,7 +44,7 @@ public class Player2 extends B2DSprite {
         x = body.getPosition().x * PPM;
         y = body.getPosition().y * PPM;
 
-        sound.setVolume(getSoundEffVolume());
+        if(state.getController().getSoundSettings().getSliderSoundEff().isDragging()) sound.setVolume(getSoundEffVolume());
         checkJoyStick();
     }
 

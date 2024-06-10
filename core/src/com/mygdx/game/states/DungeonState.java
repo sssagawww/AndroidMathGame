@@ -142,7 +142,8 @@ public class DungeonState extends GameState implements Controllable {
 
         if (isStopped) {
             isStopped = false;
-            if (opening) {
+            if (opening || PaintState.isDone()) {
+                PaintState.setDone(false);
                 openDoor(doorForOpen);
                 opening = false;
             }
@@ -412,7 +413,7 @@ public class DungeonState extends GameState implements Controllable {
                 gsm.setPaintArgs(new ArrayList<>(Arrays.asList(FIGURES_TYPES.SQUARE, FIGURES_TYPES.RHOMBUS, FIGURES_TYPES.STAR)));
                 canDraw = true;
 
-                opening = true;
+                //opening = true;
                 doorForOpen = s;
                 break;
             case "door2":
@@ -423,7 +424,7 @@ public class DungeonState extends GameState implements Controllable {
                 gsm.setPaintArgs(new ArrayList<>(Arrays.asList(FIGURES_TYPES.CIRCLE, FIGURES_TYPES.TRIANGLE)));
                 canDraw = true;
 
-                opening = true;
+                //opening = true;
                 doorForOpen = s;
                 break;
             case "door3":
@@ -434,7 +435,7 @@ public class DungeonState extends GameState implements Controllable {
                 gsm.setPaintArgs(new ArrayList<>(Arrays.asList(FIGURES_TYPES.STAR, FIGURES_TYPES.TRIANGLE, FIGURES_TYPES.CIRCLE, FIGURES_TYPES.SQUARE)));
                 canDraw = true;
 
-                opening = true;
+                //opening = true;
                 doorForOpen = s;
                 break;
             case "keyDoor":
