@@ -157,8 +157,9 @@ public class Play extends GameState implements Controllable {
 
         //нужно обновление размера экрана, и тогда будет resize всех компонентов?
 
-        //если этот state был выгружен, то при запуске все процессы должны возобновиться (удаляются ли они в multiplexer при выгрузке или просто останавливаются?)
+        //если этот state был выгружен, то при запуске все процессы должны возобновиться
         if (isStopped) {
+            isStopped = false;
             //игрок выходит из подземелья не там, где зашёл
             if (gsm.getLastState() == DUNGEON) {
                 player.getBody().setTransform(205f, 80f, 0);
@@ -166,9 +167,12 @@ public class Play extends GameState implements Controllable {
                 player.getBody().setTransform(475, 185f, 0);
             }
 
+            if(gsm.getLastState() != PLAY && gsm.getLastState() != NEW_GAME){
+                music.setLooping(true);
+                music.play();
+            }
+
             player.getBody().setLinearVelocity(0, 0);
-            music.play();
-            isStopped = false;
             for (Map.Entry<String, MovableNPC> entry : movableNPCs.entrySet()) {
                 movableNPCs.get(entry.getKey()).setDirection(0, 0, 20, 58, 58);
             }
@@ -528,6 +532,7 @@ public class Play extends GameState implements Controllable {
         if (savePlay) {
             controller.getInventory().reload(game.getDbWrapper());
         } else {
+            gameTime = 0;
             game.getDbWrapper().clearAll();
         }
 
@@ -767,11 +772,11 @@ public class Play extends GameState implements Controllable {
 
     private void stop() {
         if (nextState != -1) {
+            music.stop();
             gsm.setState(nextState);
             nextState = -1;
         }
         //entities.getEntity(entities.getCurEntity()).setVisible(false);
-        music.dispose();
         canDraw = false;
     }
 

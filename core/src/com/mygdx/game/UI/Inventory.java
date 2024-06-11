@@ -158,6 +158,7 @@ public class Inventory extends Table {
 
     public void reload(DbWrapper dbWrapper) {
         Progress progress = dbWrapper.getProgress().get(dbWrapper.getProgress().size() - 1);
+        gameTime = progress.getTime();
         setImgVisibility(0, progress.isRingImageVisible());
         setImgVisibility(1, progress.isSwordImageVisible());
         setImgVisibility(2, progress.isAmuletImageVisible());
