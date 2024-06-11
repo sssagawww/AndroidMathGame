@@ -89,9 +89,13 @@ public class Play extends GameState implements Controllable {
     private int nextState;
     private int prevState = -123;
     private boolean contact = false;
+    private TiledMapTileLayer dungeonLayer;
     private static final String PREF_NAME = "position";
     private static final String PREF_X = "x";
     private static final String PREF_Y = "y";
+    public static final String PREF_MAZE = "mazeProgress";
+    public static final String PREF_FOREST = "forestProgress";
+    public static final String PREF_DUNGEON = "dungeonProgress";
 
     public Play(GameStateManager gsm) {
         super(gsm);
@@ -153,8 +157,9 @@ public class Play extends GameState implements Controllable {
 
         //нужно обновление размера экрана, и тогда будет resize всех компонентов?
 
-        //если этот state был выгружен, то при запуске все процессы должны возобновиться (удаляются ли они в multiplexer при выгрузке или просто останавливаются?)
+        //если этот state был выгружен, то при запуске все процессы должны возобновиться
         if (isStopped) {
+            isStopped = false;
             //игрок выходит из подземелья не там, где зашёл
             if (gsm.getLastState() == DUNGEON) {
                 player.getBody().setTransform(205f, 80f, 0);
@@ -162,9 +167,12 @@ public class Play extends GameState implements Controllable {
                 player.getBody().setTransform(475, 185f, 0);
             }
 
+            if(gsm.getLastState() != PLAY && gsm.getLastState() != NEW_GAME){
+                music.setLooping(true);
+                music.play();
+            }
+
             player.getBody().setLinearVelocity(0, 0);
-            music.play();
-            isStopped = false;
             for (Map.Entry<String, MovableNPC> entry : movableNPCs.entrySet()) {
                 movableNPCs.get(entry.getKey()).setDirection(0, 0, 20, 58, 58);
             }
@@ -206,8 +214,8 @@ public class Play extends GameState implements Controllable {
                 time = 0;
                 //коллизия ловушки
                 if (nextState == DUNGEON) {
-                    TiledMapTileLayer layer = (TiledMapTileLayer) tiledMap.getLayers().get("trap");
-                    createLayer(layer, BIT_TROPA, BIT_PLAYER, false);
+                    dungeonLayer = (TiledMapTileLayer) tiledMap.getLayers().get("trap");
+                    createLayer(dungeonLayer, BIT_TROPA, BIT_PLAYER, false);
                 }
                 stop();
             }
@@ -275,8 +283,13 @@ public class Play extends GameState implements Controllable {
         if (savePlay) {
             bdef.position.x = prefs.getFloat(PREF_X, 607f / PPM);
             bdef.position.y = prefs.getFloat(PREF_Y, 337f / PPM);
+            MazeState.progress = prefs.getBoolean(PREF_MAZE, false);
+            Forest.progress = prefs.getBoolean(PREF_FOREST, false);
+            DungeonState.progress = prefs.getBoolean(PREF_DUNGEON, false);
             game.save = false;
+            savePlay = false;
         } else {
+            prefs.clear();
             bdef.position.set(607f / PPM, 337f / PPM);
         }
 
@@ -325,8 +338,20 @@ public class Play extends GameState implements Controllable {
         createLayer(nextForest, BIT_TROPA, BIT_PLAYER, true);
         TiledMapTileLayer signDungeon = (TiledMapTileLayer) tiledMap.getLayers().get("signDungeon");
         createLayer(signDungeon, BIT_TROPA, BIT_PLAYER, true);
+        TiledMapTileLayer signBoss = (TiledMapTileLayer) tiledMap.getLayers().get("signBoss");
+        createLayer(signBoss, BIT_TROPA, BIT_PLAYER, true);
+        TiledMapTileLayer signVillage = (TiledMapTileLayer) tiledMap.getLayers().get("signVillage");
+        createLayer(signVillage, BIT_TROPA, BIT_PLAYER, true);
+        TiledMapTileLayer signMaze = (TiledMapTileLayer) tiledMap.getLayers().get("signMaze");
+        createLayer(signMaze, BIT_TROPA, BIT_PLAYER, true);
         TiledMapTileLayer nextBoss = (TiledMapTileLayer) tiledMap.getLayers().get("nextBoss");
         createLayer(nextBoss, BIT_TROPA, BIT_PLAYER, true);
+
+        if(DungeonState.progress){
+            dungeonLayer = (TiledMapTileLayer) tiledMap.getLayers().get("trap");
+            createLayer(dungeonLayer, BIT_TROPA, BIT_PLAYER, false);
+            dungeonLayer.setVisible(true);
+        }
     }
 
     //коллизия слоя на карте (слой создаётся в Tiled)
@@ -507,6 +532,7 @@ public class Play extends GameState implements Controllable {
         if (savePlay) {
             controller.getInventory().reload(game.getDbWrapper());
         } else {
+            gameTime = 0;
             game.getDbWrapper().clearAll();
         }
 
@@ -538,8 +564,15 @@ public class Play extends GameState implements Controllable {
     public void save() {
         prefs.putFloat(PREF_X, player.getPosition().x).flush();
         prefs.putFloat(PREF_Y, player.getPosition().y).flush();
+        prefs.putBoolean(PREF_MAZE, MazeState.progress).flush();
+        prefs.putBoolean(PREF_FOREST, Forest.progress).flush();
+        prefs.putBoolean(PREF_DUNGEON, DungeonState.progress).flush();
 
         //сохранение прогресса (инвентаря)
+        saveInventory();
+    }
+
+    public void saveInventory() {
         Inventory inventory = controller.getInventory();
         Progress progress = new Progress(inventory.getImgVisibility(0), inventory.getImgVisibility(1), inventory.getImgVisibility(2), inventory.getArtefacts(),
                 inventory.getAchievementsVisibility(), inventory.getItems(), gameTime);
@@ -566,7 +599,7 @@ public class Play extends GameState implements Controllable {
                 canDraw = true;
                 break;
             case "hooded":
-                if (contact) break;
+                if (contact || MazeState.progress) break;
                 node1 = new DialogNode("Приветствую, путник!", 0);
                 DialogNode node2 = new DialogNode("Не ожидал встретить здесь кого-то.", 1);
                 DialogNode node3 = new DialogNode("Не хочешь исследовать со мной руины?", 2);
@@ -588,6 +621,27 @@ public class Play extends GameState implements Controllable {
                 dialog.addNode(node6);
                 dcontroller.startDialog(dialog);
 
+                nextState = -1;
+                canDraw = true;
+                break;
+            case "signBoss":
+                node1 = new DialogNode("Северо-запад: Светлая цитадель", 0);
+                dialog.addNode(node1);
+                dcontroller.startDialog(dialog);
+                nextState = -1;
+                canDraw = true;
+                break;
+            case "signVillage":
+                node1 = new DialogNode("Северо-восток: деревня Альбора", 0);
+                dialog.addNode(node1);
+                dcontroller.startDialog(dialog);
+                nextState = -1;
+                canDraw = true;
+                break;
+            case "signMaze":
+                node1 = new DialogNode("Юго-восток: неизвестные руины", 0);
+                dialog.addNode(node1);
+                dcontroller.startDialog(dialog);
                 nextState = -1;
                 canDraw = true;
                 break;
@@ -718,11 +772,11 @@ public class Play extends GameState implements Controllable {
 
     private void stop() {
         if (nextState != -1) {
+            music.stop();
             gsm.setState(nextState);
             nextState = -1;
         }
         //entities.getEntity(entities.getCurEntity()).setVisible(false);
-        music.dispose();
         canDraw = false;
     }
 
@@ -736,5 +790,9 @@ public class Play extends GameState implements Controllable {
 
     public JoyStick getJoyStick() {
         return joyStick;
+    }
+
+    public Preferences getPrefs() {
+        return prefs;
     }
 }

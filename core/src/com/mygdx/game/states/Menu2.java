@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
@@ -51,6 +52,7 @@ public class Menu2 extends GameState {
     private Cell cell;
     private Texture bgImg;
     private Animation animation;
+    private Sprite bg;
     // END UI
 
     public Menu2(GameStateManager gsm) {
@@ -64,6 +66,7 @@ public class Menu2 extends GameState {
         animation = new Animation(sprites, 1/10f);
         bgImg = new Texture("UI/bg.png");*/
 
+        bg = new Sprite(new Texture("UI/menu.png"));
         font.setColor(Color.BLACK);
         layout = new GlyphLayout(font, "Quenta");
 
@@ -92,19 +95,21 @@ public class Menu2 extends GameState {
         cam.setPosition(0, 0);
         cam.update();
 
-        tmr.setView(cam);
-        tmr.render();
+        /*tmr.setView(cam);
+        tmr.render();*/
 
         sb.setProjectionMatrix(cam.combined);
 
         sb.begin();
 
+        sb.draw(bg, 0, 0, V_WIDTH, V_HEIGHT);
+
         /*sb.draw(bgImg, 0, 0, V_WIDTH, V_HEIGHT);
         sb.draw(animation.getFrame(), V_WIDTH - V_WIDTH/3f, 0);*/
 
-        font.getData().setScale(2);
+        /*font.getData().setScale(2);
         layout.setText(font, "Quenta");
-        font.draw(sb, layout, V_WIDTH / 2f - layout.width / 2, V_HEIGHT / 2f + layout.height + 80);
+        font.draw(sb, layout, V_WIDTH / 2f - layout.width / 2, V_HEIGHT / 2f + layout.height + 80);*/
         sb.end();
 
         uiStage.draw();

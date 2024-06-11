@@ -156,8 +156,9 @@ public class Inventory extends Table {
         return itemsTable;
     }
 
-    public void reload(DbWrapper dbWrapper){
-        Progress progress = dbWrapper.getProgress().get(dbWrapper.getProgress().size()-1);
+    public void reload(DbWrapper dbWrapper) {
+        Progress progress = dbWrapper.getProgress().get(dbWrapper.getProgress().size() - 1);
+        gameTime = progress.getTime();
         setImgVisibility(0, progress.isRingImageVisible());
         setImgVisibility(1, progress.isSwordImageVisible());
         setImgVisibility(2, progress.isAmuletImageVisible());
@@ -181,7 +182,7 @@ public class Inventory extends Table {
         items.add(actor).padRight(15f).padLeft(15f);
     }
 
-    public void removeItem(String name){
+    public void removeItem(String name) {
         items.removeActor(itemsList.get(name));
         itemsList.remove(name);
         System.out.println(itemsList + " itemsList");
@@ -195,7 +196,7 @@ public class Inventory extends Table {
     }
 
     public HashMap<String, Integer> getItems() {
-        HashMap<String, Integer>  items = new HashMap<>();
+        HashMap<String, Integer> items = new HashMap<>();
         for (String item : itemsList.keySet()) {
             items.put(item, itemsList.get(item).getCount());
         }
@@ -229,7 +230,7 @@ public class Inventory extends Table {
         ArrayList<Integer> acs = new ArrayList<>();
         for (int i = 0; i < titles.size(); i++) {
             Achievement actor = scrollContent.findActor(titles.get(i));
-            if(actor.getTextVisibility()){
+            if (actor.getTextVisibility()) {
                 acs.add(i);
             }
         }
@@ -278,6 +279,7 @@ public class Inventory extends Table {
         public void setTextVisibility(boolean visibility) {
             textLabel.setVisible(visibility);
         }
+
         public boolean getTextVisibility() {
             return textLabel.isVisible();
         }

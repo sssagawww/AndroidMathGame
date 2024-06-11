@@ -6,12 +6,15 @@ import static com.mygdx.game.handlers.B2DVars.BIT_PLAYER;
 import static com.mygdx.game.handlers.B2DVars.BIT_TROPA;
 import static com.mygdx.game.handlers.B2DVars.PPM;
 import static com.mygdx.game.handlers.GameStateManager.BATTLE;
+import static com.mygdx.game.handlers.GameStateManager.DUNGEON;
 import static com.mygdx.game.handlers.GameStateManager.FOREST;
 import static com.mygdx.game.handlers.GameStateManager.MAZE;
 import static com.mygdx.game.handlers.GameStateManager.MENU;
 import static com.mygdx.game.handlers.GameStateManager.PAINT;
 import static com.mygdx.game.handlers.GameStateManager.PLAY;
 import static com.mygdx.game.handlers.GameStateManager.RHYTHM;
+import static com.mygdx.game.states.Play.PREF_FOREST;
+import static com.mygdx.game.states.Play.PREF_MAZE;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
@@ -101,6 +104,7 @@ public class Forest extends GameState implements Controllable {
     private int mushrooms = 0;
     private MovableNPC npc;
     private Sound mushroomSound;
+    public static boolean progress;
 
     public Forest(GameStateManager gsm) {
         super(gsm);
@@ -149,6 +153,11 @@ public class Forest extends GameState implements Controllable {
 
         if (isStopped) {
             isStopped = false;
+            if (gsm.getLastState() == PLAY) {
+                player.getBody().setTransform(207f / PPM, 737f / PPM, 0);
+            } else if (gsm.getLastState() == MAZE) {
+                player.getBody().setTransform(1107f / PPM, 167f / PPM, 0);
+            }
             for (Map.Entry<String, MovableNPC> entry : movableNPCs.entrySet()) {
                 movableNPCs.get(entry.getKey()).setDirection(0, 0, 20, 64, 64);
             }
@@ -158,8 +167,9 @@ public class Forest extends GameState implements Controllable {
 
         if (RhythmState.isDone()) {
             RhythmState.setDone(false);
-            if(RhythmState.isStrength100()) controller.getInventory().setAchievementVisibility(2);
+            if (RhythmState.isStrength100()) controller.getInventory().setAchievementVisibility(2);
             controller.getInventory().setImgVisibility(1, true);
+            progress = true;
             npc.setDirection(1f, 0.35f, 100f, 64, 64);
             for (int i = 0; i < entities.getEntityCount(); i++) {
                 if (entities.getEntity(i).getBody().getUserData().equals("sword")) {
@@ -243,6 +253,8 @@ public class Forest extends GameState implements Controllable {
     public void dispose() {
         player.stopSounds();
         isStopped = true;
+        gsm.getPlay().getPrefs().putBoolean(PREF_FOREST, Forest.progress).flush();
+        gsm.getPlay().saveInventory();
     }
 
     private void createPlayer() {
@@ -251,7 +263,7 @@ public class Forest extends GameState implements Controllable {
         FixtureDef fdef = new FixtureDef();
 
         if (gsm.getLastState() == MAZE) {
-            bdef.position.set(1107f / PPM, 137f / PPM);
+            bdef.position.set(1107f / PPM, 167f / PPM);
         } else {
             bdef.position.set(207f / PPM, 737f / PPM);
         }
@@ -334,6 +346,9 @@ public class Forest extends GameState implements Controllable {
         entities = new PlayEntities();
 
         for (MapObject mo : mlayer.getObjects()) {
+            if (mo.getName().equals("sword") && progress) {
+                continue;
+            }
             BodyDef bdef = new BodyDef();
             bdef.type = BodyDef.BodyType.StaticBody;
 
@@ -525,24 +540,25 @@ public class Forest extends GameState implements Controllable {
             case "mushroom":
                 mushroomSound.play(1f);
                 nextState = -1;
-                if(mushrooms == 0){
+                if (mushrooms == 0) {
                     controller.getInventory().addItem("Чудесный\nгриб");
                     mushrooms++;
                     break;
                 }
                 mushrooms++;
-                if(mushrooms >= 6){
+                if (mushrooms >= 6) {
                     controller.getInventory().setAchievementVisibility(0);
                 }
                 controller.getInventory().getItem("Чудесный\nгриб").addItemCount();
                 break;
             case "next":
                 if (player.getPosition().x < 800f / PPM) nextState = PLAY;
-                else nextState = MAZE;
+                else if (MazeState.progress) nextState = MAZE;
+                else break;
                 stop();
                 break;
             case "null":
-                npc.setDirection(0, 0, 40, 64, 64);
+                npc.setDirection(0, 0, 100, 64, 64);
                 node1 = new DialogNode("Ты вытащил Меч Силы!?!?!?", 0);
                 node2 = new DialogNode("Пошли в деревню.", 1);
                 node3 = new DialogNode("Ты обязан рассказать об этом.", 2);

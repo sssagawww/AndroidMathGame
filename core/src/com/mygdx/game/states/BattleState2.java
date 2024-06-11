@@ -4,8 +4,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
@@ -16,6 +18,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -85,11 +88,11 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
         multiplexer = new InputMultiplexer();
 
         createMusic();
-        if(bossFight){
+        if (bossFight) {
             music.stop();
             game.getExampleDatabase().initializeExamples3();
             game.getStepDatabase().initializeSteps3();
-        } else if(enemy2){
+        } else if (enemy2) {
             game.getExampleDatabase().initializeExamples2();
             game.getStepDatabase().initializeSteps2();
         } else {
@@ -259,9 +262,9 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
         Body body = world.createBody(bdef);
 
         boss = new StaticNPC(body, "enemy", 5f);
-        if(bossFight){
+        if (bossFight) {
             boss = new SlimeBoss(body);
-        } else if (enemy2){
+        } else if (enemy2) {
             boss = new StaticNPC(body, "enemy2", 5f);
         }
         body.setUserData(boss);
@@ -271,9 +274,13 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
         controllerStage = new Stage(new ScreenViewport());
         controllerStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
 
-        Image exitImg = new Image(new Texture("controller/x.png"));
-        exitImg.setScale(5, 5);
-        exitImg.addListener(new InputListener() {
+        BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
+        Label.LabelStyle lstyle = new Label.LabelStyle(font, Color.DARK_GRAY);
+        lstyle.background = game.getSkin().getDrawable("GUI_img");
+        lstyle.background.setMinHeight(60f);
+
+        Label runLabel = new Label("Убежать",lstyle);
+        runLabel.addListener(new InputListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 return true;
@@ -287,7 +294,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
 
         Table controllerRoot = new Table();
         controllerRoot.setFillParent(true);
-        controllerRoot.add(exitImg).expand().align(Align.bottomLeft);
+        controllerRoot.add(runLabel).expand().pad(5f).align(Align.bottomLeft);
         controllerStage.addActor(controllerRoot);
 
         multiplexer.addProcessor(controllerStage);
