@@ -37,7 +37,7 @@ public class DialogBox extends Table {
 
         /*nextBtn = new Image(getSkin().getDrawable("next_btn"));
         nextBtn.setScale(3,3);*/
-        textLabel.addListener(new InputListener(){
+        textLabel.addListener(new InputListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 isPressed = true;
@@ -58,7 +58,7 @@ public class DialogBox extends Table {
 
     public void animateText(String text) {
         targetText = text;
-        animationTotalTime = text.length()*TIME_PER_CHARACTER;
+        animationTotalTime = text.length() * TIME_PER_CHARACTER;
         state = STATE.ANIMATING;
         animTimer = 0f;
     }
@@ -72,9 +72,9 @@ public class DialogBox extends Table {
     }
 
     private void setText(String text) {
-        if (!text.contains("\n")) {
-            text += "\n";
-        }
+        //if (!text.contains("\n")) {
+        text += "\n";
+        // }
         this.textLabel.setText(text);
     }
 
@@ -88,7 +88,7 @@ public class DialogBox extends Table {
                 animTimer = animationTotalTime;
             }
             String actuallyDisplayedText = "";
-            int charactersToDisplay = (int)((animTimer/animationTotalTime)*targetText.length());
+            int charactersToDisplay = (int) ((animTimer / animationTotalTime) * targetText.length());
             for (int i = 0; i < charactersToDisplay; i++) {
                 actuallyDisplayedText += targetText.charAt(i);
             }
