@@ -23,7 +23,7 @@ public class MushroomsRequest {
     private String winner = "";
     private boolean everyoneReady;
     private JsonReader json;
-    private final String url = "http://192.168.1.42:8080/multiplayer/";
+    private final String url = "http:-----:8080/multiplayer/";
     private final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 
     public MushroomsRequest() {
