@@ -96,7 +96,7 @@ public class PaintState extends GameState implements InputProcessor {
 
         distanceCalc = new DistanceCalc(this);
 
-        request = new MushroomsRequest();
+        request = gsm.game().getRequest();
         if (online) {
             if (Gdx.app.getType() == Application.ApplicationType.Android) {
                 playerName = "androidPlayer";

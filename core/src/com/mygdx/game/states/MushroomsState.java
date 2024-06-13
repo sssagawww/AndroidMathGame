@@ -112,7 +112,7 @@ public class MushroomsState extends GameState implements Controllable {
         }
 
         initFight();
-        request = new MushroomsRequest();
+        request = gsm.game().getRequest();
         request.join(id, playerName, MUSHROOMS_GAME, 10);
         scoreTable.addPlayerScore(playerName, playerScore);
 

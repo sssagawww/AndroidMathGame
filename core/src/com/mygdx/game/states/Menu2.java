@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
@@ -17,15 +16,16 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.UI.*;
-import com.mygdx.game.battle.examples.TrueExample;
 import com.mygdx.game.handlers.Animation;
 import com.mygdx.game.handlers.GameStateManager;
+import com.mygdx.game.multiplayer.MushroomsRequest;
 
 import static com.mygdx.game.MyGdxGame.V_HEIGHT;
 import static com.mygdx.game.MyGdxGame.V_WIDTH;
@@ -52,6 +52,7 @@ public class Menu2 extends GameState {
     private Cell cell;
     private Texture bgImg;
     private Animation animation;
+    private ConnectionMenu connectionMenu;
     private Sprite bg;
     // END UI
 
@@ -174,7 +175,11 @@ public class Menu2 extends GameState {
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                gsm.setState(MUSHROOMS);
+                if (!connectionMenu.getText().equals("") && !connectionMenu.getText().equals("Введите IP!") && !MushroomsRequest.isUnableToConnect()) {
+                    gsm.setState(MUSHROOMS);
+                } else {
+                    connectionMenu.getIpField().setMessageText("Введите IP!");
+                }
             }
         });
 
@@ -187,10 +192,15 @@ public class Menu2 extends GameState {
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 return true;
             }
+
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                PaintState.setOnline(true);
-                gsm.setState(PAINT);
+                if (!connectionMenu.getText().equals("") && !connectionMenu.getText().equals("Введите IP!") && !MushroomsRequest.isUnableToConnect()) {
+                    PaintState.setOnline(true);
+                    gsm.setState(PAINT);
+                } else {
+                    connectionMenu.getIpField().setMessageText("Введите IP!");
+                }
             }
         });
 
@@ -206,13 +216,22 @@ public class Menu2 extends GameState {
                 onlineBtns.setVisible(false);
             }
         });
+
+        connectionMenu = new ConnectionMenu(game.getSkin(), gsm);
+
+        Label.LabelStyle lStyle = new Label.LabelStyle(font, Color.BLACK);
+        Label textLabel = new Label("Режимы рассчитаны на 2 игроков.", lStyle);
+        textLabel.setFontScale(0.8f);
+
         onlineBtns = new Table(game.getSkin());
         onlineBtns.setVisible(false);
         onlineBtns.setBackground("menuBtn_up");
 
         onlineBtns.add(exitImage).align(Align.right).width(exitImage.getWidth() * 3).height(exitImage.getHeight() * 3).expand().row();
+        onlineBtns.add(connectionMenu).row();
         onlineBtns.add(mushrooms).space(10f).row();
-        onlineBtns.add(drawings).padBottom(exitImage.getHeight() * 3);
+        onlineBtns.add(drawings).row();
+        onlineBtns.add(textLabel).padBottom(exitImage.getHeight() * 3).padTop(exitImage.getHeight() * 3).row();
         cell = root.getCell(statistics);
     }
 

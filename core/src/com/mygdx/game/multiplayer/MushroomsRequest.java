@@ -23,8 +23,10 @@ public class MushroomsRequest {
     private String winner = "";
     private boolean everyoneReady;
     private JsonReader json;
-    private final String url = "http:-----:8080/multiplayer/";
+    private static String ip = "";
+    private static String url = "http://" + ip + "/multiplayer/";
     private final MediaType JSON = MediaType.get("application/json; charset=utf-8");
+    private static boolean unableToConnect = true;
 
     public MushroomsRequest() {
         client = new OkHttpClient();
@@ -103,11 +105,12 @@ public class MushroomsRequest {
         String jsonRequest = "{\"userId\":" + id + ", \"userName\": \"" + userName + "\", \"miniGame\": \"" + miniGame + "\", \"number\":" + number + "}";
         RequestBody body = RequestBody.create(jsonRequest, JSON);
 
-        Request request = new Request.Builder().url(url + "join").post(body).build();
+        Request request = new Request.Builder().url(url + "join").addHeader("SecretHeader", "super-secret-password").post(body).build();
 
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
+                unableToConnect = true;
                 System.out.println("Unable to connect! join");
             }
 
@@ -190,6 +193,28 @@ public class MushroomsRequest {
         });
     }
 
+    public void ping() {
+        Request request = new Request.Builder().url(url).addHeader("SecretHeader", "super-secret-password").get().build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                unableToConnect = true;
+                System.out.println("Unable to connect! join");
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) {
+                unableToConnect = false;
+                try {
+                    System.out.println(response.body().string());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
     public int getOpponentId() {
         return opponentId;
     }
@@ -212,5 +237,22 @@ public class MushroomsRequest {
 
     public String getWinnerName() {
         return winner;
+    }
+
+    public static boolean isUnableToConnect() {
+        return unableToConnect;
+    }
+
+    public static void setUnableToConnect(boolean b) {
+        unableToConnect = b;
+    }
+
+    public static String getIp() {
+        return ip;
+    }
+
+    public static void setIp(String ip) {
+        MushroomsRequest.ip = ip;
+        url = "http://" + ip + "/multiplayer/";
     }
 }

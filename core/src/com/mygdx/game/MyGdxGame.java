@@ -17,6 +17,7 @@ import com.mygdx.game.battle.examples.ExampleDatabase;
 import com.mygdx.game.battle.steps.StepDatabase;
 import com.mygdx.game.db.DbWrapper;
 import com.mygdx.game.handlers.*;
+import com.mygdx.game.multiplayer.MushroomsRequest;
 import com.mygdx.game.paint.Figures.Figure;
 import com.mygdx.game.paint.Figures.FiguresDatabase;
 import com.mygdx.game.paint.PixelPoint;
@@ -45,6 +46,7 @@ public class MyGdxGame implements ApplicationListener {
     private ExampleDatabase exampleDatabase;
     private FiguresDatabase figuresDatabase;
     private DbWrapper dbWrapper;
+    private MushroomsRequest request;
     public boolean save = false;
     public static float gameTime = 0;
 
@@ -124,6 +126,7 @@ public class MyGdxGame implements ApplicationListener {
         stepDatabase = new StepDatabase();
         exampleDatabase = new ExampleDatabase();
         figuresDatabase = new FiguresDatabase(this);
+        request = new MushroomsRequest();
         gsm = new GameStateManager(this);
     }
 
@@ -215,5 +218,9 @@ public class MyGdxGame implements ApplicationListener {
 
     public Stage getControllerStage() {
         return controllerStage;
+    }
+
+    public MushroomsRequest getRequest() {
+        return request;
     }
 }
