@@ -61,11 +61,16 @@ public class ConnectionMenu extends Table {
         btn.addListener(new InputListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                if (!ipField.getText().equals("") && !ipField.getText().equals("Введите IP!") && !lastText.equals(ipField.getText())) {
-                    lastText = ipField.getText();
-                    MushroomsRequest.setIp(ipField.getText());
-                    gsm.game().getRequest().ping();
+                try{
+                    if (!ipField.getText().equals("") && !ipField.getText().equals("Введите IP!") && !lastText.equals(ipField.getText())) {
+                        lastText = ipField.getText();
+                        MushroomsRequest.setIp(ipField.getText());
+                        gsm.game().getRequest().ping();
+                    }
+                } catch (Exception e){
+                    System.out.println(e.fillInStackTrace());
                 }
+
                 return true;
             }
 

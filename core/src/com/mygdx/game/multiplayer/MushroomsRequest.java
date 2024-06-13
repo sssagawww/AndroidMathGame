@@ -3,11 +3,14 @@ package com.mygdx.game.multiplayer;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.util.HashMap;
 
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -29,7 +32,15 @@ public class MushroomsRequest {
     private static boolean unableToConnect = true;
 
     public MushroomsRequest() {
-        client = new OkHttpClient();
+        client = new OkHttpClient().newBuilder().addInterceptor(new Interceptor() {
+            @NotNull
+            @Override
+            public Response intercept(@NotNull Chain chain) throws IOException {
+                Request request = chain.request();
+                Request newRequest = request.newBuilder().addHeader("SecretHeader", "super-secret-password").build();
+                return chain.proceed(newRequest);
+            }
+        }).build();
         json = new JsonReader();
     }
 
@@ -105,7 +116,7 @@ public class MushroomsRequest {
         String jsonRequest = "{\"userId\":" + id + ", \"userName\": \"" + userName + "\", \"miniGame\": \"" + miniGame + "\", \"number\":" + number + "}";
         RequestBody body = RequestBody.create(jsonRequest, JSON);
 
-        Request request = new Request.Builder().url(url + "join").addHeader("SecretHeader", "super-secret-password").post(body).build();
+        Request request = new Request.Builder().url(url + "join").post(body).build();
 
         client.newCall(request).enqueue(new Callback() {
             @Override
@@ -194,7 +205,7 @@ public class MushroomsRequest {
     }
 
     public void ping() {
-        Request request = new Request.Builder().url(url).addHeader("SecretHeader", "super-secret-password").get().build();
+        Request request = new Request.Builder().url(url).get().build();
 
         client.newCall(request).enqueue(new Callback() {
             @Override
