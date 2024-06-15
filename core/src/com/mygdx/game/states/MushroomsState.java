@@ -1,5 +1,6 @@
 package com.mygdx.game.states;
 
+import static com.mygdx.game.MyGdxGame.PREF_ID;
 import static com.mygdx.game.MyGdxGame.V_HEIGHT;
 import static com.mygdx.game.MyGdxGame.V_WIDTH;
 import static com.mygdx.game.handlers.B2DVars.BIT_PLAYER;
@@ -39,6 +40,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.UI.Controller;
 import com.mygdx.game.UI.JoyStick;
 import com.mygdx.game.UI.ScoreTable;
@@ -92,8 +94,7 @@ public class MushroomsState extends GameState implements Controllable {
     private int count = 0;
     private MushroomsRequest request;
     public static final String MUSHROOMS_GAME = "mushroomsMiniGame";
-    private final int id = (int) (Math.random() * 10000);
-    private String playerName = "pro228335";
+    private final int id = MyGdxGame.getPrefs().getInteger(PREF_ID);
 
     public MushroomsState(GameStateManager gsm) {
         super(gsm);
@@ -107,14 +108,11 @@ public class MushroomsState extends GameState implements Controllable {
         skin_this = game.getSkin();
         entities = new PlayEntities();
 
-        if (Gdx.app.getType() == Application.ApplicationType.Android) {
-            playerName = "MegaNoob:]";
-        }
-
         initFight();
         request = gsm.game().getRequest();
-        request.join(id, playerName, MUSHROOMS_GAME, 10);
-        scoreTable.addPlayerScore(playerName, playerScore);
+        request.leave(id);
+        request.join(id, MUSHROOMS_GAME, 10);
+        scoreTable.addPlayerScore(MushroomsRequest.getName(), playerScore);
 
         initJoyStick();
         initController();
@@ -131,6 +129,10 @@ public class MushroomsState extends GameState implements Controllable {
 
     @Override
     public void update(float dt) {
+        if(!MyGdxGame.active){
+            request.leave(id);
+        }
+
         handleInput();
         world.step(dt, 6, 2);
         player.update(dt);
@@ -153,7 +155,7 @@ public class MushroomsState extends GameState implements Controllable {
 
         if (requestTime >= dt * 10 && miniGameTime < 30 && request.isDone()) {
             requestTime = 0;
-            request.postInfo(id, playerName, playerScore);
+            request.postInfo(id, playerScore);
             if (opponent)
                 scoreTable.setPlayerScore(request.getOpponentName(), request.getOpponentScore());
         }
@@ -162,7 +164,7 @@ public class MushroomsState extends GameState implements Controllable {
         if (request.isReady() && readyBtnClicked) {
             mainLabel.setVisible(false);
             miniGameTime += dt;
-            scoreTable.setPlayerScore(playerName, playerScore);
+            scoreTable.setPlayerScore(MushroomsRequest.getName(), playerScore);
 
             //появление грибов
             spawnTime += dt;
@@ -346,6 +348,7 @@ public class MushroomsState extends GameState implements Controllable {
         player.stopSounds();
         isStopped = true;
         request.leave(id);
+        scoreTable.clear();
     }
 
     private void stop() {
@@ -377,7 +380,7 @@ public class MushroomsState extends GameState implements Controllable {
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                request.playerIsReady(id, playerName);
+                request.playerIsReady(id);
                 readyBtn.setVisible(false);
             }
         });

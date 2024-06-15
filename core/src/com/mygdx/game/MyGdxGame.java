@@ -3,6 +3,7 @@ package com.mygdx.game;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -49,6 +50,11 @@ public class MyGdxGame implements ApplicationListener {
     private MushroomsRequest request;
     public boolean save = false;
     public static float gameTime = 0;
+    public static boolean active = true;
+    private static Preferences prefs;
+    private static final String PREF_NAME = "position";
+    public static final String PREF_ID = "userID";
+    public static final String PREF_USERNAME = "userNAME";
 
     public MyGdxGame() {
     }
@@ -127,6 +133,11 @@ public class MyGdxGame implements ApplicationListener {
         exampleDatabase = new ExampleDatabase();
         figuresDatabase = new FiguresDatabase(this);
         request = new MushroomsRequest();
+        prefs = Gdx.app.getPreferences(PREF_NAME);
+        if(prefs.getInteger(PREF_ID)==0){
+            prefs.putInteger(PREF_ID, (int) (Math.random() * 10000)).flush();
+            prefs.putString(PREF_USERNAME, "name").flush();
+        }
         gsm = new GameStateManager(this);
     }
 
@@ -222,5 +233,9 @@ public class MyGdxGame implements ApplicationListener {
 
     public MushroomsRequest getRequest() {
         return request;
+    }
+
+    public static Preferences getPrefs() {
+        return prefs;
     }
 }

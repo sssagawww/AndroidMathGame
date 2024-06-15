@@ -1,5 +1,7 @@
 package com.mygdx.game.UI;
 
+import static com.mygdx.game.MyGdxGame.PREF_ID;
+import static com.mygdx.game.MyGdxGame.PREF_USERNAME;
 import static com.mygdx.game.MyGdxGame.V_HEIGHT;
 import static com.mygdx.game.MyGdxGame.V_WIDTH;
 
@@ -8,16 +10,15 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.utils.Align;
+import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.handlers.GameStateManager;
 import com.mygdx.game.multiplayer.MushroomsRequest;
-import com.mygdx.game.states.MushroomsState;
 
 public class ConnectionMenu extends Table {
     private Table uiTable;
@@ -49,6 +50,9 @@ public class ConnectionMenu extends Table {
         ipField.setSize(V_WIDTH / 3f, V_HEIGHT / 4f);
 
         nameField = new TextField("", tStyle);
+        if(!MyGdxGame.getPrefs().getString(PREF_USERNAME).equals("name")){
+            nameField.setText(MyGdxGame.getPrefs().getString(PREF_USERNAME));
+        }
         nameField.setMessageText("Имя игрока");
         nameField.setPosition(0, 0);
         nameField.setSize(V_WIDTH / 3f, V_HEIGHT / 4f);
@@ -65,6 +69,13 @@ public class ConnectionMenu extends Table {
                     if (!ipField.getText().equals("") && !ipField.getText().equals("Введите IP!") && !lastText.equals(ipField.getText())) {
                         lastText = ipField.getText();
                         MushroomsRequest.setIp(ipField.getText());
+                        if(!nameField.getText().equals("")){
+                            MushroomsRequest.setName(nameField.getText());
+                            MyGdxGame.getPrefs().putString(PREF_USERNAME, nameField.getText()).flush();
+                        } else {
+                            nameField.setText(MyGdxGame.getPrefs().getString(PREF_USERNAME));
+                            MushroomsRequest.setName(nameField.getText());
+                        }
                         gsm.game().getRequest().ping();
                     }
                 } catch (Exception e){
@@ -79,7 +90,8 @@ public class ConnectionMenu extends Table {
                 try {
                     Thread.sleep(100);
                     if (MushroomsRequest.isUnableToConnect()) {
-                        ipField.setText("Недействительный IP");
+                        ipField.setText("");
+                        ipField.setMessageText("Недействительный IP");
                         MushroomsRequest.setIp("");
                     } else {
                         MushroomsRequest.setUnableToConnect(false);
@@ -93,18 +105,22 @@ public class ConnectionMenu extends Table {
 
         uiTable.add(ipField).width(V_WIDTH / 3f).height(V_HEIGHT / 8f).pad(10f);
         uiTable.add(btn).align(Align.right).width(70f).height(70f).row();
-        //uiTable.add(nameField).width(V_WIDTH / 3f).height(V_HEIGHT / 8f).pad(10f).row();
+        uiTable.add(nameField).width(V_WIDTH / 3f).height(V_HEIGHT / 8f).pad(10f).row();
     }
 
-    public String getText() {
+    public String getIpText() {
         return ipField.getText();
     }
 
-    public void setText(String text) {
+    public void setIpText(String text) {
         ipField.setText(text);
     }
 
     public TextField getIpField() {
         return ipField;
+    }
+
+    public TextField getNameField() {
+        return nameField;
     }
 }

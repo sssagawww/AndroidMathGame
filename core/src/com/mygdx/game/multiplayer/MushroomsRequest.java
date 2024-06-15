@@ -28,6 +28,7 @@ public class MushroomsRequest {
     private JsonReader json;
     private static String ip = "";
     private static String url = "http://" + ip + "/multiplayer/";
+    private static String name = "name";
     private final MediaType JSON = MediaType.get("application/json; charset=utf-8");
     private static boolean unableToConnect = true;
 
@@ -44,8 +45,8 @@ public class MushroomsRequest {
         json = new JsonReader();
     }
 
-    public void postInfo(int id, String userName, float number) {
-        String jsonRequest = "{\"userId\":" + id + ", \"userName\": \"" + userName + "\", \"number\":" + number + "}";
+    public void postInfo(int id, float number) {
+        String jsonRequest = "{\"userId\":" + id + ", \"userName\": \"" + name + "\", \"number\":" + number + "}";
         RequestBody body = RequestBody.create(jsonRequest, JSON);
 
         Request request = new Request.Builder().url(url + "info").post(body).build();
@@ -72,8 +73,8 @@ public class MushroomsRequest {
         });
     }
 
-    public void playerIsReady(int id, String userName) {
-        String jsonRequest = "{\"userId\":" + id + ", \"userName\": \"" + userName + "\"}";
+    public void playerIsReady(int id) {
+        String jsonRequest = "{\"userId\":" + id + ", \"userName\": \"" + name + "\"}";
         RequestBody body = RequestBody.create(jsonRequest, JSON);
         Request request = new Request.Builder().url(url + "playerisready").post(body).build();
 
@@ -112,8 +113,8 @@ public class MushroomsRequest {
         });
     }
 
-    public void join(int id, String userName, String miniGame, float number) {
-        String jsonRequest = "{\"userId\":" + id + ", \"userName\": \"" + userName + "\", \"miniGame\": \"" + miniGame + "\", \"number\":" + number + "}";
+    public void join(int id, String miniGame, float number) {
+        String jsonRequest = "{\"userId\":" + id + ", \"userName\": \"" + name + "\", \"miniGame\": \"" + miniGame + "\", \"number\":" + number + "}";
         RequestBody body = RequestBody.create(jsonRequest, JSON);
 
         Request request = new Request.Builder().url(url + "join").post(body).build();
@@ -265,5 +266,13 @@ public class MushroomsRequest {
     public static void setIp(String ip) {
         MushroomsRequest.ip = ip;
         url = "http://" + ip + "/multiplayer/";
+    }
+
+    public static String getName() {
+        return name;
+    }
+
+    public static void setName(String name) {
+        MushroomsRequest.name = name;
     }
 }

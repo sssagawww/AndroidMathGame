@@ -32,6 +32,7 @@ public class AndroidLauncher extends AndroidApplication {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		MyGdxGame.active = true;
 		//2 вариант запуска на фулл скрин, = 1 варианту
 		/*getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
 				| View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
@@ -46,5 +47,18 @@ public class AndroidLauncher extends AndroidApplication {
 	protected void onStop() {
 		super.onStop();
 		game.dispose();
+		MyGdxGame.active = false;
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		MyGdxGame.active = false;
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		MyGdxGame.active = false;
 	}
 }

@@ -175,7 +175,7 @@ public class Menu2 extends GameState {
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                if (!connectionMenu.getText().equals("") && !connectionMenu.getText().equals("Введите IP!") && !MushroomsRequest.isUnableToConnect()) {
+                if (!connectionMenu.getIpText().equals("") && !connectionMenu.getIpText().equals("Введите IP!") && !MushroomsRequest.isUnableToConnect()) {
                     gsm.setState(MUSHROOMS);
                 } else {
                     connectionMenu.getIpField().setMessageText("Введите IP!");
@@ -195,7 +195,7 @@ public class Menu2 extends GameState {
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                if (!connectionMenu.getText().equals("") && !connectionMenu.getText().equals("Введите IP!") && !MushroomsRequest.isUnableToConnect()) {
+                if (!connectionMenu.getIpText().equals("") && !connectionMenu.getIpText().equals("Введите IP!") && !MushroomsRequest.isUnableToConnect()) {
                     PaintState.setOnline(true);
                     gsm.setState(PAINT);
                 } else {
@@ -220,8 +220,9 @@ public class Menu2 extends GameState {
         connectionMenu = new ConnectionMenu(game.getSkin(), gsm);
 
         Label.LabelStyle lStyle = new Label.LabelStyle(font, Color.BLACK);
-        Label textLabel = new Label("Режимы рассчитаны на 2 игроков.", lStyle);
+        Label textLabel = new Label("Режимы рассчитаны на 2 игроков.\nВведите IP с портом и ник, затем\nнажмите на зеленую галочку,\nчтобы подтвердить ввод.\nЕсли IP правильный,\nто он останется в поле ввода.\nИначе - сотрется.", lStyle);
         textLabel.setFontScale(0.8f);
+        textLabel.setAlignment(Align.center);
 
         onlineBtns = new Table(game.getSkin());
         onlineBtns.setVisible(false);
