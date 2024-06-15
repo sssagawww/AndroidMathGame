@@ -3,6 +3,7 @@ package com.mygdx.game;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -17,6 +18,7 @@ import com.mygdx.game.battle.examples.ExampleDatabase;
 import com.mygdx.game.battle.steps.StepDatabase;
 import com.mygdx.game.db.DbWrapper;
 import com.mygdx.game.handlers.*;
+import com.mygdx.game.multiplayer.MushroomsRequest;
 import com.mygdx.game.paint.Figures.Figure;
 import com.mygdx.game.paint.Figures.FiguresDatabase;
 import com.mygdx.game.paint.PixelPoint;
@@ -45,8 +47,14 @@ public class MyGdxGame implements ApplicationListener {
     private ExampleDatabase exampleDatabase;
     private FiguresDatabase figuresDatabase;
     private DbWrapper dbWrapper;
+    private MushroomsRequest request;
     public boolean save = false;
     public static float gameTime = 0;
+    public static boolean active = true;
+    private static Preferences prefs;
+    private static final String PREF_NAME = "position";
+    public static final String PREF_ID = "userID";
+    public static final String PREF_USERNAME = "userNAME";
 
     public MyGdxGame() {
     }
@@ -124,6 +132,12 @@ public class MyGdxGame implements ApplicationListener {
         stepDatabase = new StepDatabase();
         exampleDatabase = new ExampleDatabase();
         figuresDatabase = new FiguresDatabase(this);
+        request = new MushroomsRequest();
+        prefs = Gdx.app.getPreferences(PREF_NAME);
+        if(prefs.getInteger(PREF_ID)==0){
+            prefs.putInteger(PREF_ID, (int) (Math.random() * 10000)).flush();
+            prefs.putString(PREF_USERNAME, "name").flush();
+        }
         gsm = new GameStateManager(this);
     }
 
@@ -215,5 +229,13 @@ public class MyGdxGame implements ApplicationListener {
 
     public Stage getControllerStage() {
         return controllerStage;
+    }
+
+    public MushroomsRequest getRequest() {
+        return request;
+    }
+
+    public static Preferences getPrefs() {
+        return prefs;
     }
 }

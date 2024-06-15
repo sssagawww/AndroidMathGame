@@ -3,11 +3,14 @@ package com.mygdx.game.multiplayer;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.util.HashMap;
 
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -23,16 +26,27 @@ public class MushroomsRequest {
     private String winner = "";
     private boolean everyoneReady;
     private JsonReader json;
-    private final String url = "http:-----:8080/multiplayer/";
+    private static String ip = "";
+    private static String url = "http://" + ip + "/multiplayer/";
+    private static String name = "name";
     private final MediaType JSON = MediaType.get("application/json; charset=utf-8");
+    private static boolean unableToConnect = true;
 
     public MushroomsRequest() {
-        client = new OkHttpClient();
+        client = new OkHttpClient().newBuilder().addInterceptor(new Interceptor() {
+            @NotNull
+            @Override
+            public Response intercept(@NotNull Chain chain) throws IOException {
+                Request request = chain.request();
+                Request newRequest = request.newBuilder().addHeader("SecretHeader", "super-secret-password").build();
+                return chain.proceed(newRequest);
+            }
+        }).build();
         json = new JsonReader();
     }
 
-    public void postInfo(int id, String userName, float number) {
-        String jsonRequest = "{\"userId\":" + id + ", \"userName\": \"" + userName + "\", \"number\":" + number + "}";
+    public void postInfo(int id, float number) {
+        String jsonRequest = "{\"userId\":" + id + ", \"userName\": \"" + name + "\", \"number\":" + number + "}";
         RequestBody body = RequestBody.create(jsonRequest, JSON);
 
         Request request = new Request.Builder().url(url + "info").post(body).build();
@@ -59,8 +73,8 @@ public class MushroomsRequest {
         });
     }
 
-    public void playerIsReady(int id, String userName) {
-        String jsonRequest = "{\"userId\":" + id + ", \"userName\": \"" + userName + "\"}";
+    public void playerIsReady(int id) {
+        String jsonRequest = "{\"userId\":" + id + ", \"userName\": \"" + name + "\"}";
         RequestBody body = RequestBody.create(jsonRequest, JSON);
         Request request = new Request.Builder().url(url + "playerisready").post(body).build();
 
@@ -99,8 +113,8 @@ public class MushroomsRequest {
         });
     }
 
-    public void join(int id, String userName, String miniGame, float number) {
-        String jsonRequest = "{\"userId\":" + id + ", \"userName\": \"" + userName + "\", \"miniGame\": \"" + miniGame + "\", \"number\":" + number + "}";
+    public void join(int id, String miniGame, float number) {
+        String jsonRequest = "{\"userId\":" + id + ", \"userName\": \"" + name + "\", \"miniGame\": \"" + miniGame + "\", \"number\":" + number + "}";
         RequestBody body = RequestBody.create(jsonRequest, JSON);
 
         Request request = new Request.Builder().url(url + "join").post(body).build();
@@ -108,6 +122,7 @@ public class MushroomsRequest {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
+                unableToConnect = true;
                 System.out.println("Unable to connect! join");
             }
 
@@ -190,6 +205,28 @@ public class MushroomsRequest {
         });
     }
 
+    public void ping() {
+        Request request = new Request.Builder().url(url).get().build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                unableToConnect = true;
+                System.out.println("Unable to connect! join");
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) {
+                unableToConnect = false;
+                try {
+                    System.out.println(response.body().string());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
     public int getOpponentId() {
         return opponentId;
     }
@@ -212,5 +249,30 @@ public class MushroomsRequest {
 
     public String getWinnerName() {
         return winner;
+    }
+
+    public static boolean isUnableToConnect() {
+        return unableToConnect;
+    }
+
+    public static void setUnableToConnect(boolean b) {
+        unableToConnect = b;
+    }
+
+    public static String getIp() {
+        return ip;
+    }
+
+    public static void setIp(String ip) {
+        MushroomsRequest.ip = ip;
+        url = "http://" + ip + "/multiplayer/";
+    }
+
+    public static String getName() {
+        return name;
+    }
+
+    public static void setName(String name) {
+        MushroomsRequest.name = name;
     }
 }

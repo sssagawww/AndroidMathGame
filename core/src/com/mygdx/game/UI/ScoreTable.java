@@ -73,4 +73,8 @@ public class ScoreTable extends Table {
             l.setText(Math.round(score));
         }
     }
+
+    public void clear(){
+        players.clear();
+    }
 }

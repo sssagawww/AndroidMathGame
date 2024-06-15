@@ -30,6 +30,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.Dialog.Dialog;
 import com.mygdx.game.Dialog.DialogController;
 import com.mygdx.game.Dialog.DialogNode;
+import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.UI.DialogBox;
 import com.mygdx.game.UI.OptionBox;
 import com.mygdx.game.UI.OptionBox2;
@@ -69,8 +70,7 @@ public class PaintState extends GameState implements InputProcessor {
     private MushroomsRequest request;
     private Label readyLabel;
     private float requestTime = 0;
-    private final int id = (int) (Math.random() * 10000);
-    private String playerName = "playerName";
+    private final int id = MyGdxGame.getPrefs().getInteger(PREF_ID);
     public static final String PAINT_GAME = "paintMiniGame";
     private static boolean online;
     private boolean btnClicked;
@@ -96,12 +96,10 @@ public class PaintState extends GameState implements InputProcessor {
 
         distanceCalc = new DistanceCalc(this);
 
-        request = new MushroomsRequest();
+        request = gsm.game().getRequest();
         if (online) {
-            if (Gdx.app.getType() == Application.ApplicationType.Android) {
-                playerName = "androidPlayer";
-            }
-            request.join(id, playerName, PAINT_GAME, 0);
+            request.leave(id);
+            request.join(id, PAINT_GAME, 0);
         }
 
         initUI();
@@ -128,6 +126,9 @@ public class PaintState extends GameState implements InputProcessor {
 
     @Override
     public void update(float dt) {
+        if(!MyGdxGame.active && online){
+            request.leave(id);
+        }
         uiStage.act(dt);
         if (online) onlineStage.act(dt);
         checkBtns();
@@ -154,7 +155,7 @@ public class PaintState extends GameState implements InputProcessor {
             requestTime += dt;
             if (requestTime >= dt * 15) {
                 requestTime = 0;
-                request.postInfo(id, playerName, (float) distanceCalc.getAccuracy());
+                request.postInfo(id, (float) distanceCalc.getAccuracy());
                 ready = request.isReady();
             }
             oppScore = String.format("%.2f", 1 - request.getOpponentScore());
@@ -216,7 +217,9 @@ public class PaintState extends GameState implements InputProcessor {
 
     @Override
     public void dispose() {
-        if(online) request.leave(id);
+        if(online) {
+            request.leave(id);
+        }
         PaintState.setOnline(false);
     }
 
@@ -270,7 +273,7 @@ public class PaintState extends GameState implements InputProcessor {
             readyLabel.addListener(new InputListener() {
                 @Override
                 public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                    request.playerIsReady(id, playerName);
+                    request.playerIsReady(id);
                     return true;
                 }
 

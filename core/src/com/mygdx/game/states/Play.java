@@ -90,7 +90,6 @@ public class Play extends GameState implements Controllable {
     private int prevState = -123;
     private boolean contact = false;
     private TiledMapTileLayer dungeonLayer;
-    private static final String PREF_NAME = "position";
     private static final String PREF_X = "x";
     private static final String PREF_Y = "y";
     public static final String PREF_MAZE = "mazeProgress";
@@ -108,7 +107,7 @@ public class Play extends GameState implements Controllable {
         //music = Gdx.audio.newMusic(Gdx.files.internal("music/song.wav"));
         music = Gdx.audio.newMusic(Gdx.files.internal("music/birds.mp3"));
         rabbitSound = Gdx.audio.newMusic(Gdx.files.internal("music/rabbit.mp3"));
-        prefs = Gdx.app.getPreferences(PREF_NAME);
+        prefs = game.getPrefs();
         savePlay = game.save;
         skin_this = game.getSkin();
 
