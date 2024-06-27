@@ -16,43 +16,13 @@ public class DialogController extends InputAdapter {
         this.optionBox = optionBox;
     }
 
-    @Override
-    public boolean keyDown(int keycode) {
-        if (dialogBox.isVisible()) {
-            return true;
-        }
-        return false;
-    }
-
-    /*@Override
-    public boolean keyUp(int keycode) {
-        if (optionBox.isVisible()) {
-            if (keycode == Input.Keys.E) {
-                optionBox.moveDown();
-                return true;
-            } else if (keycode == Input.Keys.Q) {
-                optionBox.moveUp();
-                return true;
-            }
-        }
-        if (dialogGo != null && keycode == Input.Keys.X && dialogBox.isFinished()) {
-            if (dialogGo.getType() == DialogNode.NODE_TYPE.END) {
-                dialogGo = null;
-                dialogBox.setVisible(false);
-            } else if (dialogGo.getType() == DialogNode.NODE_TYPE.LINEAR) {
-                progress(0);
-            } else if (dialogGo.getType() == DialogNode.NODE_TYPE.MULTIPLE_CHOICE) {
-                progress(optionBox.getID());
-            }
-            return true;
-        }
-        if (dialogBox.isVisible()) {
-            return true;
-        }
-        return false;
-    }*/
-
     public void update(float dt) {
+        if(dialogBox.isSkipped()){
+            optionBox.setVisible(false);
+            dialogGo = null;
+            dialogBox.setVisible(false);
+        }
+
         if (dialogBox.isFinished() && dialogGo != null) {
             if (dialogGo.getType() == DialogNode.NODE_TYPE.MULTIPLE_CHOICE) {
                 optionBox.setVisible(true);

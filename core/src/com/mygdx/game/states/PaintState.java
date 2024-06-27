@@ -102,7 +102,6 @@ public class PaintState extends GameState implements InputProcessor {
             request.join(id, PAINT_GAME, 0);
         }
 
-        initUI();
         createSD();
 
         paintCam = new BoundedCamera();
@@ -117,6 +116,7 @@ public class PaintState extends GameState implements InputProcessor {
         if (figuresTypes != null) {
             figuresDatabase.loadFigures(figuresTypes);
         }
+        initUI();
     }
 
     @Override
@@ -341,7 +341,7 @@ public class PaintState extends GameState implements InputProcessor {
                 if (online) {
                     request.setPlayerReady(id, true);
                 }
-                if(points.size() != 0){
+                if (points.size() != 0) {
                     paintMenu.getBtnBox().setState(CHECK);
                     paintMenu.getBtnBox().setClicked(true);
                 }

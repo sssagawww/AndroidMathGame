@@ -156,6 +156,7 @@ public class MazeState extends GameState implements Controllable {
             dcontroller.update(dt);
             time += dt;
             if (hoodedRun && dcontroller.isFinished()) {
+                hoodedRun = false;
                 removeCollisionEntity(entities.getEntity(entities.getEntityCount() - 1).getBody());
                 entities.getEntity(entities.getEntityCount() - 1).getBody().getFixtureList().get(0).setUserData("collided");
                 entities.removeEntity(removedBody);
@@ -456,6 +457,7 @@ public class MazeState extends GameState implements Controllable {
 
         dialogueBox = new DialogBox(skin_this);
         dialogueBox.setVisible(false);
+        dialogueBox.addBtn();
 
         optionBox = new OptionBox2(skin_this);
         optionBox.setVisible(false);

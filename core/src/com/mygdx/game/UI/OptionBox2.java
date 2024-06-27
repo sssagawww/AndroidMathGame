@@ -55,7 +55,7 @@ public class OptionBox2 extends Table {
         btnNum++;
 
         btns.add(btn);
-        uiTable.add(btn).expand().align(Align.center).space(8f).padBottom(0f);
+        uiTable.add(btn).expand().align(Align.right).space(8f).padBottom(0f);
         uiTable.row();
     }
 

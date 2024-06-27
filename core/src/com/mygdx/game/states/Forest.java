@@ -414,6 +414,7 @@ public class Forest extends GameState implements Controllable {
 
         dialogBox = new DialogBox(skin_this);
         dialogBox.setVisible(false);
+        dialogBox.addBtn();
 
         optionBox = new OptionBox2(skin_this);
         optionBox.setVisible(false);
@@ -421,6 +422,7 @@ public class Forest extends GameState implements Controllable {
         Table dialogTable = new Table();
         dialogTable.add(optionBox)
                 .expand().align(Align.right)
+                .padRight((V_WIDTH/1.05f)/5f)
                 .space(8f)
                 .row();
         dialogTable.add(dialogBox)

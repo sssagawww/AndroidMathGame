@@ -29,7 +29,7 @@ public class DistanceCalc {
             }
             maxDist = Math.max(maxDist, minDist);
         }
-        return maxDist < maxLetDist;
+        return maxDist <= maxLetDist;
     }
 
     public double getAccuracy(){

@@ -251,11 +251,10 @@ public class DungeonState extends GameState implements Controllable {
                         (col + 0.2f) * tileSize / 2.5f,
                         (row + 0.4f) * tileSize / 2.5f);
                 ChainShape cs = new ChainShape();
-                Vector2[] v = new Vector2[4];
+                Vector2[] v = new Vector2[3];
                 v[0] = new Vector2(-tileSize / 6, -tileSize / 6);
                 v[1] = new Vector2(-tileSize / 6, tileSize / 6);
                 v[2] = new Vector2(tileSize / 6, tileSize / 6);
-                v[3] = new Vector2(tileSize / 6, -tileSize / 6);
                 cs.createChain(v);
                 fdef.friction = 0;
                 fdef.shape = cs;
@@ -354,6 +353,7 @@ public class DungeonState extends GameState implements Controllable {
         uiStage.addActor(dialogRoot);
 
         dialogBox = new DialogBox(skin_this);
+        dialogBox.addBtn();
         dialogBox.setVisible(false);
 
         optionBox = new OptionBox2(skin_this);
