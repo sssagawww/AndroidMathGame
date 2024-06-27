@@ -17,5 +17,5 @@ public class B2DVars {
     public static final short BIT_NOTHING = 2;
     public static final short BIT_PLAYER = 4;
     public static final short BIT_TROPA = 8;
-    public static final short BIT_PENEK = 16;
+    public static final short BIT_RABBIT = 16;
 }

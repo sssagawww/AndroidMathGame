@@ -118,7 +118,7 @@ public class Play extends GameState implements Controllable {
         createTiles();
         createNPC();
         createMovableNPC();
-        createKinematicNPC();
+        createRabbitNPC();
         createMusic();
 
         cam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
@@ -298,7 +298,7 @@ public class Play extends GameState implements Controllable {
         ps.setAsBox(35f / PPM, 45f / PPM, new Vector2(-5.4f, -3.6f), 0);
         fdef.shape = ps;
         fdef.filter.categoryBits = BIT_PLAYER;
-        fdef.filter.maskBits = BIT_TROPA;
+        fdef.filter.maskBits = BIT_TROPA | BIT_RABBIT;
         body.createFixture(fdef).setUserData("player");
         ps.dispose();
 
@@ -324,13 +324,13 @@ public class Play extends GameState implements Controllable {
         tileMapHeight = (int) tiledMap.getProperties().get("height");
 
         TiledMapTileLayer borders = (TiledMapTileLayer) tiledMap.getLayers().get("borders");
-        createLayer(borders, BIT_TROPA, BIT_PLAYER, false);
+        createLayer(borders, BIT_TROPA, (short) (BIT_PLAYER | BIT_RABBIT), false);
         TiledMapTileLayer npcCollision = (TiledMapTileLayer) tiledMap.getLayers().get("col");
         createLayer(npcCollision, BIT_PLAYER, BIT_TROPA, false);
         TiledMapTileLayer playerInvCol = (TiledMapTileLayer) tiledMap.getLayers().get("playerInvCol");
-        createLayer(playerInvCol, BIT_TROPA, BIT_PLAYER, false);
+        createLayer(playerInvCol, BIT_TROPA, (short) (BIT_PLAYER | BIT_RABBIT), false);
         TiledMapTileLayer water = (TiledMapTileLayer) tiledMap.getLayers().get("water");
-        createLayer(water, BIT_TROPA, BIT_PLAYER, false);
+        createLayer(water, BIT_TROPA, (short) (BIT_PLAYER | BIT_RABBIT), false);
         TiledMapTileLayer animated = (TiledMapTileLayer) tiledMap.getLayers().get("animated");
         createLayer(animated, BIT_TROPA, BIT_PLAYER, false);
         TiledMapTileLayer nextForest = (TiledMapTileLayer) tiledMap.getLayers().get("nextForest");
@@ -373,10 +373,11 @@ public class Play extends GameState implements Controllable {
                         (col + 0.2f) * tileSize / 2.5f,
                         (row + 0.4f) * tileSize / 2.5f);
                 ChainShape cs = new ChainShape();
-                Vector2[] v = new Vector2[3];
+                Vector2[] v = new Vector2[4];
                 v[0] = new Vector2(-tileSize / 6, -tileSize / 6);
                 v[1] = new Vector2(-tileSize / 6, tileSize / 6);
                 v[2] = new Vector2(tileSize / 6, tileSize / 6);
+                v[3] = new Vector2(tileSize / 6, -tileSize / 6);
                 cs.createChain(v);
                 fdef.friction = 0;
                 fdef.shape = cs;
@@ -448,13 +449,13 @@ public class Play extends GameState implements Controllable {
         }
     }
 
-    private void createKinematicNPC() {
+    private void createRabbitNPC() {
         MapLayer mlayer = tiledMap.getLayers().get("kinematicNpc");
         if (mlayer == null) return;
 
         for (MapObject mo : mlayer.getObjects()) {
             BodyDef bdef = new BodyDef();
-            bdef.type = BodyDef.BodyType.KinematicBody;
+            bdef.type = BodyDef.BodyType.DynamicBody;
             float x = (float) mo.getProperties().get("x") / PPM * 4f;
             float y = (float) mo.getProperties().get("y") / PPM * 4f;
             bdef.position.set(x, y);
@@ -464,9 +465,9 @@ public class Play extends GameState implements Controllable {
             CircleShape cshape = new CircleShape();
             cshape.setRadius(50f / PPM);
             cdef.shape = cshape;
-            cdef.isSensor = true;
-            cdef.filter.categoryBits = BIT_TROPA;
-            cdef.filter.maskBits = BIT_PLAYER;
+            cdef.isSensor = false;
+            cdef.filter.categoryBits = BIT_RABBIT;
+            cdef.filter.maskBits = BIT_TROPA | BIT_PLAYER;
             cshape.dispose();
 
             body.createFixture(cdef).setUserData(mo.getName());
@@ -666,6 +667,12 @@ public class Play extends GameState implements Controllable {
                     stop();
                 }
                 break;
+            case "rabbit":
+                rabbitSound.play();
+                controller.getInventory().setAchievementVisibility(1);
+                movableNPCs.get("rabbit").setTime(0);
+                movableNPCs.get("rabbit").setDirection(-movableNPCs.get("rabbit").getVelx(), -movableNPCs.get("rabbit").getVely(), 50, 58, 58);
+                break;
             case "null":
                 movableNPCs.get("hooded").setDirection(0, 0, 20, 58, 58);
                 node1 = new DialogNode("Вот мы и пришли.", 0);
@@ -674,12 +681,6 @@ public class Play extends GameState implements Controllable {
 
                 nextState = MAZE;
                 canDraw = true;
-                break;
-            case "rabbit":
-                rabbitSound.play();
-                controller.getInventory().setAchievementVisibility(1);
-                movableNPCs.get("rabbit").setTime(0);
-                movableNPCs.get("rabbit").setDirection(-movableNPCs.get("rabbit").getVelx(), -movableNPCs.get("rabbit").getVely(), 50, 58, 58);
                 break;
             default:
                 break;
