@@ -528,7 +528,7 @@ public class Play extends GameState implements Controllable {
         controllerRoot.add(controller).expand().align(Align.bottomLeft);
         controllerStage.addActor(controllerRoot);*/
 
-        if (savePlay) {
+        if (savePlay && game.getDbWrapper().getProgress().size() != 0) {
             controller.getInventory().reload(game.getDbWrapper());
         } else {
             gameTime = 0;
