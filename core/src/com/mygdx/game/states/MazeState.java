@@ -2,8 +2,6 @@ package com.mygdx.game.states;
 
 import static com.mygdx.game.MyGdxGame.V_HEIGHT;
 import static com.mygdx.game.MyGdxGame.V_WIDTH;
-import static com.mygdx.game.handlers.B2DVars.BIT_NOTHING;
-import static com.mygdx.game.handlers.B2DVars.BIT_PENEK;
 import static com.mygdx.game.handlers.B2DVars.BIT_PLAYER;
 import static com.mygdx.game.handlers.B2DVars.BIT_TROPA;
 import static com.mygdx.game.handlers.B2DVars.PPM;
@@ -158,6 +156,7 @@ public class MazeState extends GameState implements Controllable {
             dcontroller.update(dt);
             time += dt;
             if (hoodedRun && dcontroller.isFinished()) {
+                hoodedRun = false;
                 removeCollisionEntity(entities.getEntity(entities.getEntityCount() - 1).getBody());
                 entities.getEntity(entities.getEntityCount() - 1).getBody().getFixtureList().get(0).setUserData("collided");
                 entities.removeEntity(removedBody);
@@ -300,10 +299,11 @@ public class MazeState extends GameState implements Controllable {
                         (col + 0.2f) * tileSize / 2.5f,
                         (row + 0.4f) * tileSize / 2.5f);
                 ChainShape cs = new ChainShape();
-                Vector2[] v = new Vector2[3];
+                Vector2[] v = new Vector2[4];
                 v[0] = new Vector2(-tileSize / 6, -tileSize / 6);
                 v[1] = new Vector2(-tileSize / 6, tileSize / 6);
                 v[2] = new Vector2(tileSize / 6, tileSize / 6);
+                v[3] = new Vector2(tileSize / 6, -tileSize / 6);
                 cs.createChain(v);
                 fdef.friction = 0;
                 fdef.shape = cs;
@@ -457,6 +457,7 @@ public class MazeState extends GameState implements Controllable {
 
         dialogueBox = new DialogBox(skin_this);
         dialogueBox.setVisible(false);
+        dialogueBox.addBtn();
 
         optionBox = new OptionBox2(skin_this);
         optionBox.setVisible(false);

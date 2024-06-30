@@ -235,6 +235,10 @@ public class MushroomsRequest {
         return opponentScore;
     }
 
+    public void setOpponentScore(float opponentScore) {
+        this.opponentScore = opponentScore;
+    }
+
     public String getOpponentName() {
         return opponentName;
     }

@@ -307,10 +307,11 @@ public class MushroomsState extends GameState implements Controllable {
                         (col + 0.2f) * tileSize / 2.5f,
                         (row + 0.4f) * tileSize / 2.5f);
                 ChainShape cs = new ChainShape();
-                Vector2[] v = new Vector2[3];
+                Vector2[] v = new Vector2[4];
                 v[0] = new Vector2(-tileSize / 6, -tileSize / 6);
                 v[1] = new Vector2(-tileSize / 6, tileSize / 6);
                 v[2] = new Vector2(tileSize / 6, tileSize / 6);
+                v[3] = new Vector2(tileSize / 6, -tileSize / 6);
                 cs.createChain(v);
                 fdef.friction = 0;
                 fdef.shape = cs;

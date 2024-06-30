@@ -353,6 +353,7 @@ public class DungeonState extends GameState implements Controllable {
         uiStage.addActor(dialogRoot);
 
         dialogBox = new DialogBox(skin_this);
+        dialogBox.addBtn();
         dialogBox.setVisible(false);
 
         optionBox = new OptionBox2(skin_this);

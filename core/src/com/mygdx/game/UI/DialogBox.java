@@ -1,16 +1,17 @@
 package com.mygdx.game.UI;
 
+import static com.mygdx.game.MyGdxGame.V_WIDTH;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.utils.Align;
 
 public class DialogBox extends Table {
@@ -20,8 +21,12 @@ public class DialogBox extends Table {
     private float TIME_PER_CHARACTER = 0.05f;
     private STATE state = STATE.IDLE;
     private Label textLabel;
-    private Image nextBtn;
+    private Image skipBtn;
+    private Image labelBtn;
     private boolean isPressed;
+    private boolean isSkipped;
+    private Table textTable;
+    private Table uiTable;
 
     private enum STATE {
         ANIMATING,
@@ -30,13 +35,13 @@ public class DialogBox extends Table {
 
     public DialogBox(Skin skin) {
         super(skin);
-        this.setBackground("GUI_img");
+        uiTable = new Table(skin);
+        textTable = new Table(skin);
+        textTable.setBackground("GUI_img");
+
         BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
         Label.LabelStyle lstyle = new Label.LabelStyle(font, Color.BLACK);
         textLabel = new Label("\n", lstyle);
-
-        /*nextBtn = new Image(getSkin().getDrawable("next_btn"));
-        nextBtn.setScale(3,3);*/
         textLabel.addListener(new InputListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
@@ -50,10 +55,41 @@ public class DialogBox extends Table {
             }
         });
 
+        //значок, что нужно нажимать на диалог для продолжения
+        labelBtn = new Image(new Texture("controller/labelBtn.png"));
+        labelBtn.addListener(new InputListener() {
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                isPressed = true;
+                return true;
+            }
 
-        //textLabel.setFontScale(0.8f);
-        this.add(textLabel).expand().align(Align.left).padTop(20f).padLeft(15f).padRight(15f).padBottom(-10f).row();
-        //this.add(nextBtn).expand().align(Align.left).padTop(20f).padLeft(25f).padRight(25f).padBottom(-10f);
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                isPressed = false;
+            }
+        });
+
+        //значок пропуска
+        skipBtn = new Image(new Texture("controller/skipBtn.png"));
+        skipBtn.addListener(new InputListener() {
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                isSkipped = true;
+                isPressed = true;
+                return true;
+            }
+
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                isSkipped = false;
+                isPressed = false;
+            }
+        });
+
+        textTable.add(textLabel).expand().align(Align.left).padTop(20f).padLeft(15f).padRight(15f).padBottom(-10f);
+        uiTable.add(textTable).center();
+        this.add(uiTable).width(V_WIDTH/1.05f);
     }
 
     public void animateText(String text) {
@@ -109,5 +145,26 @@ public class DialogBox extends Table {
 
     public void setPressed(boolean pressed) {
         isPressed = pressed;
+    }
+
+    public boolean isSkipped() {
+        return isSkipped;
+    }
+
+    public void setSkipped(boolean skipped) {
+        isSkipped = skipped;
+    }
+
+    public Image getSkipBtn() {
+        return skipBtn;
+    }
+
+    public Image getLabelBtn() {
+        return labelBtn;
+    }
+
+    public void addBtn(){
+        textTable.add(labelBtn).width(labelBtn.getWidth() * 2f).height(labelBtn.getHeight() * 2f);
+        this.add(skipBtn).align(Align.center).width(skipBtn.getWidth() * 4f).height(skipBtn.getHeight() * 4f).right().expand();
     }
 }

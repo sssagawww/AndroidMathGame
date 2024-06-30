@@ -54,10 +54,8 @@ public class RhythmMenu extends Table {
     public RhythmMenu(Skin skin, boolean bossFight) {
         super(skin);
         this.bossFight = bossFight;
-        //this.setDebug(true);
         strengthTable = new Table();
         strengthTable.setBackground(skin.getDrawable(("menuBtn_up")));
-        this.add(strengthTable);
         drawables = new ArrayList<>();
 
         sound = Gdx.audio.newSound(Gdx.files.internal("music/sound3.wav"));
@@ -116,6 +114,7 @@ public class RhythmMenu extends Table {
             }
         });
 
+        //двигающаяся шкала и прогресс мини-игры
         createBars();
 
         Texture finalTex = MyGdxGame.res.getTexture("finalSword");
@@ -156,6 +155,13 @@ public class RhythmMenu extends Table {
         timeLabel.setText("0,00");
         timeLabel.setAlignment(Align.top);
 
+        Label.LabelStyle tStyle = new Label.LabelStyle(font, Color.BLACK);
+        tStyle.background = getSkin().getDrawable("menuBtn_down");
+
+        Label trainingLabel = new Label("Выбери вовремя большую силу, а потом нажми\nна кнопку \"Тянуть\", когда на счетчике будет 0-1 секунд.", tStyle);
+        trainingLabel.setFontScale(0.8f);
+        trainingLabel.setAlignment(Align.center);
+
         Table playerTable = new Table();
         Table bottomTable = new Table(skin);
         bottomTable.setBackground("menuBtn_down");
@@ -163,13 +169,15 @@ public class RhythmMenu extends Table {
         bottomTable.add(percentsLabel).align(Align.left).padLeft(25f);
 
         playerTable.add(playerImage).align(Align.center).width(V_HEIGHT / 1.5f).height(V_HEIGHT / 1.5f).expand().row();
-        playerTable.add(bottomTable).bottom();
+        playerTable.add(bottomTable).bottom().row();
+        playerTable.add(trainingLabel).height(playerTable.getPrefHeight()/8f).padTop(20f);
 
         Table rightTable = new Table(skin);
         rightTable.setBackground("menuBtn_down");
-        rightTable.add(clickBtn).expand().align(Align.right).row();
+        rightTable.add(clickBtn).expand().align(Align.center).row();
         rightTable.add(timeLabel);
 
+        this.add(strengthTable);
         this.add(playerTable).expand();
         this.add(rightTable);
     }

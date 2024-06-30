@@ -28,7 +28,7 @@ public class MyContactListener implements com.badlogic.gdx.physics.box2d.Contact
                     state.removeCollisionEntity(fb.getBody());
                 }
             }
-        } else if (fa.getUserData() == null && fb.getUserData() != "player"){
+        } else if (fa.getUserData() == null && fb.getUserData() != "player" && !fb.getUserData().equals("rabbit")){
             state.loadStage("null", null);
         }
         System.out.println(fa.getUserData() + " contact with " + fb.getUserData());

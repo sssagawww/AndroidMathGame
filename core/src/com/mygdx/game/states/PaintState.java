@@ -102,7 +102,6 @@ public class PaintState extends GameState implements InputProcessor {
             request.join(id, PAINT_GAME, 0);
         }
 
-        initUI();
         createSD();
 
         paintCam = new BoundedCamera();
@@ -117,6 +116,7 @@ public class PaintState extends GameState implements InputProcessor {
         if (figuresTypes != null) {
             figuresDatabase.loadFigures(figuresTypes);
         }
+        initUI();
     }
 
     @Override
@@ -126,7 +126,7 @@ public class PaintState extends GameState implements InputProcessor {
 
     @Override
     public void update(float dt) {
-        if(!MyGdxGame.active && online){
+        if (!MyGdxGame.active && online) {
             request.leave(id);
         }
         uiStage.act(dt);
@@ -134,9 +134,9 @@ public class PaintState extends GameState implements InputProcessor {
         checkBtns();
         dcontroller.update(dt);
 
-        if(done && online){
-            time+=dt;
-            if(time >= 2){
+        if (done && online) {
+            time += dt;
+            if (time >= 2) {
                 time = 0;
                 done = false;
                 gsm.setState(gsm.getLastState());
@@ -217,7 +217,7 @@ public class PaintState extends GameState implements InputProcessor {
 
     @Override
     public void dispose() {
-        if(online) {
+        if (online) {
             request.leave(id);
         }
         PaintState.setOnline(false);
@@ -341,8 +341,10 @@ public class PaintState extends GameState implements InputProcessor {
                 if (online) {
                     request.setPlayerReady(id, true);
                 }
-                paintMenu.getBtnBox().setState(CHECK);
-                paintMenu.getBtnBox().setClicked(true);
+                if (points.size() != 0) {
+                    paintMenu.getBtnBox().setState(CHECK);
+                    paintMenu.getBtnBox().setClicked(true);
+                }
             }
         });
         table.add(btn).width(100f).height(100f);
@@ -375,11 +377,15 @@ public class PaintState extends GameState implements InputProcessor {
             case OK:
                 node = new DialogNode("Получилось! Молодец!", 0);
                 if (online) {
-                    if((1 - distanceCalc.getAccuracy()) >  1 - request.getOpponentScore()){
+                    if (request.getOpponentScore() == 0) {
+                        request.setOpponentScore(1);
+                    }
+                    if ((1 - distanceCalc.getAccuracy()) > 1 - request.getOpponentScore()) {
                         count++;
                     } else {
                         oppCount++;
                     }
+                    oppScore = String.format("%.2f", 1 - request.getOpponentScore());
                     node = new DialogNode(String.format("%.2f", 1 - distanceCalc.getAccuracy()) + " : " + oppScore, 0);
                 }
                 startDialogController();
@@ -387,11 +393,15 @@ public class PaintState extends GameState implements InputProcessor {
             case WRONG:
                 node = new DialogNode("Попробуй еще раз!", 0);
                 if (online) {
-                    if((1 - distanceCalc.getAccuracy()) >  1 - request.getOpponentScore()){
+                    if (request.getOpponentScore() == 0) {
+                        request.setOpponentScore(1);
+                    }
+                    if ((1 - distanceCalc.getAccuracy()) > 1 - request.getOpponentScore()) {
                         count++;
                     } else {
                         oppCount++;
                     }
+                    oppScore = String.format("%.2f", 1 - request.getOpponentScore());
                     node = new DialogNode(String.format("%.2f", 1 - distanceCalc.getAccuracy()) + " : " + oppScore, 0);
                 }
                 startDialogController();
@@ -399,8 +409,8 @@ public class PaintState extends GameState implements InputProcessor {
             case DONE:
                 paintMenu.getBtnBox().setState(FINISH);
                 done = true;
-                if(online){
-                    if(count > oppCount){
+                if (online) {
+                    if (count > oppCount) {
                         node = new DialogNode("Вы победили!", 0);
                     } else {
                         node = new DialogNode("Вы проиграли!", 0);
