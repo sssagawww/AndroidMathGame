@@ -52,6 +52,8 @@ import com.mygdx.game.handlers.GameStateManager;
 import com.mygdx.game.handlers.MyContactListener;
 import com.mygdx.game.multiplayer.MushroomsRequest;
 
+import jdk.internal.access.JavaIOFileDescriptorAccess;
+
 public class MushroomsState extends GameState implements Controllable {
     private Box2DDebugRenderer b2dr;
     private InputMultiplexer multiplexer;
@@ -95,6 +97,8 @@ public class MushroomsState extends GameState implements Controllable {
     private MushroomsRequest request;
     public static final String MUSHROOMS_GAME = "mushroomsMiniGame";
     private final int id = MyGdxGame.getPrefs().getInteger(PREF_ID);
+    private boolean touchStarted = false;
+    private Vector2 touchStartPos;
 
     public MushroomsState(GameStateManager gsm) {
         super(gsm);
@@ -189,11 +193,26 @@ public class MushroomsState extends GameState implements Controllable {
             controller.setMenuPressed(false);
         }
 
-        if (Gdx.input.isTouched() && !controller.isInventoryVisible()/* && !dialogueBox.isVisible()*/) {
+        if (Gdx.input.isTouched() && !controller.isInventoryVisible()) {
+            // Получаем координаты касания
             mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
             joyCam.unproject(mouse);
-            joyStick.update(mouse.x, mouse.y);
+
+            // Если касание только началось
+            if (!touchStarted) {
+                touchStarted = true;
+                touchStartPos.set(mouse.x, mouse.y);
+
+                // Устанавливаем джойстик в точку касания
+                joyStick.setPos(touchStartPos.x, touchStartPos.y);
+            } else {
+                // Обновляем положение джойстика с учетом движения пальца
+                joyStick.update(mouse.x, mouse.y);
+            }
         } else {
+            // Сбрасываем состояние касания
+            touchStarted = false;
+            // Возвращаем джойстик в исходное положение
             joyStick.setDefaultPos();
         }
 

@@ -63,6 +63,8 @@ import com.mygdx.game.handlers.MyContactListener;
 import java.util.HashMap;
 import java.util.Map;
 
+import jdk.internal.access.JavaIOFileDescriptorAccess;
+
 public class Forest extends GameState implements Controllable {
     private MyGdxGame game;
     private boolean debug = false;
@@ -105,6 +107,8 @@ public class Forest extends GameState implements Controllable {
     private MovableNPC npc;
     private Sound mushroomSound;
     public static boolean progress;
+    private boolean touchStarted = false;
+    private Vector2 touchStartPos;
 
     public Forest(GameStateManager gsm) {
         super(gsm);
@@ -188,10 +192,25 @@ public class Forest extends GameState implements Controllable {
         darkStage.act(dt);
 
         if (Gdx.input.isTouched() && !controller.isInventoryVisible() && !dialogBox.isVisible()) {
+            // Получаем координаты касания
             mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
             joyCam.unproject(mouse);
-            joyStick.update(mouse.x, mouse.y);
+
+            // Если касание только началось
+            if (!touchStarted) {
+                touchStarted = true;
+                touchStartPos.set(mouse.x, mouse.y);
+
+                // Устанавливаем джойстик в точку касания
+                joyStick.setPos(touchStartPos.x, touchStartPos.y);
+            } else {
+                // Обновляем положение джойстика с учетом движения пальца
+                joyStick.update(mouse.x, mouse.y);
+            }
         } else {
+            // Сбрасываем состояние касания
+            touchStarted = false;
+            // Возвращаем джойстик в исходное положение
             joyStick.setDefaultPos();
         }
 
