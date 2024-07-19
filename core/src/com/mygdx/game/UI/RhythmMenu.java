@@ -159,7 +159,7 @@ public class RhythmMenu extends Table {
         tStyle.background = getSkin().getDrawable("menuBtn_down");
 
         Label trainingLabel = new Label("Выбери вовремя большую силу, а потом нажми\nна кнопку \"Тянуть\", когда на счетчике будет 0-1 секунд.", tStyle);
-        trainingLabel.setFontScale(0.8f);
+        trainingLabel.setFontScale(0.9f);
         trainingLabel.setAlignment(Align.center);
 
         Table playerTable = new Table();
