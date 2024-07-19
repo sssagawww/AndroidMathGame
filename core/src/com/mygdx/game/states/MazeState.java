@@ -93,7 +93,7 @@ public class MazeState extends GameState implements Controllable {
     private boolean debug = false;
     public static boolean progress;
     private boolean touchStarted = false;
-    private Vector2 touchStartPos;
+    private Vector2 touchStartPos = new Vector2();
 
     public MazeState(GameStateManager gsm) {
         super(gsm);

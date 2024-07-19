@@ -102,7 +102,7 @@ public class BossFightState extends GameState implements Controllable {
     private Music music;
     private float bossPositionY;
     private boolean touchStarted = false;
-    private Vector2 touchStartPos;
+    private Vector2 touchStartPos = new Vector2();
 
     public BossFightState(GameStateManager gsm) {
         super(gsm);

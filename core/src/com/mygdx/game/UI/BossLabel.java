@@ -26,7 +26,7 @@ import com.github.tommyettinger.textra.TypingLabel;
 
 public class BossLabel extends Table {
     private Table uiTable;
-    private Font font = new Font(String.valueOf(Gdx.files.internal("mcRus.fnt")));
+    private Font font = new Font(getSkin().getFont("font"));
     private TypingLabel label;
     private ProgressBar hpBar;
     private Table hpTable;
@@ -52,7 +52,7 @@ public class BossLabel extends Table {
         this.add(uiTable).width(V_WIDTH).height(V_HEIGHT);
 
 
-        BitmapFont labelFont = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
+        BitmapFont labelFont = getSkin().getFont("font");
         Label.LabelStyle lstyle = new Label.LabelStyle(labelFont, Color.BLACK);
         style = new TextButton.TextButtonStyle();
         style.font = labelFont;

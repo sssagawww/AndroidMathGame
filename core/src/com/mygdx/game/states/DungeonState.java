@@ -105,7 +105,7 @@ public class DungeonState extends GameState implements Controllable {
     private long soundId;
     public static boolean progress;
     private boolean touchStarted = false;
-    private Vector2 touchStartPos;
+    private Vector2 touchStartPos = new Vector2();
 
     public DungeonState(GameStateManager gsm) {
         super(gsm);

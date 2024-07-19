@@ -134,7 +134,7 @@ public class RhythmMenu extends Table {
         playerImageSize = size / 1.65f;
 
         //стиль для label
-        BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
+        BitmapFont font = getSkin().getFont("font");
         Label.LabelStyle lstyle = new Label.LabelStyle(font, Color.BLACK);
         lstyle.background = getSkin().getDrawable("borders");
 
@@ -183,7 +183,7 @@ public class RhythmMenu extends Table {
     }
 
     private void createBtnStyle() {
-        BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
+        BitmapFont font = getSkin().getFont("font");
         style = new TextButton.TextButtonStyle();
         style.font = font;
         style.fontColor = Color.BLACK;

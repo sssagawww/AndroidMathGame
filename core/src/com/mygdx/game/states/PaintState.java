@@ -293,7 +293,7 @@ public class PaintState extends GameState implements InputProcessor {
         Table table = new Table();
         table.add(initBtn()).expand().align(Align.bottomRight).width(100f).height(100f).pad(15f);
         table.add(paintMenu).expand().align(Align.right);
-        root.add(menuImg).expand().align(Align.topLeft).padTop(65f);
+        root.add(menuImg).expand().align(Align.topLeft).padTop(75f);
         root.add(table).expand().align(Align.bottomRight).padBottom(10f);
 
         Table dialogRoot = new Table();

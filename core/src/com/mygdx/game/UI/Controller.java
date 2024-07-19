@@ -75,11 +75,11 @@ public class Controller extends Table {
 
         //добавление в таблицу и выравнивание
         Table table = new Table();
-        table.add(menuImg).width(menuImg.getWidth() * 5).height(menuImg.getHeight() * 5).align(Align.topLeft).row();
-        table.add(settingsImg).width(settingsImg.getWidth() * 5).height(settingsImg.getHeight() * 5).align(Align.topRight);
+        table.add(menuImg).width(menuImg.getWidth() * 5.8f).height(menuImg.getHeight() * 5.8f).align(Align.topLeft).row();
+        table.add(settingsImg).width(settingsImg.getWidth() * 5.8f).height(settingsImg.getHeight() * 5.8f).align(Align.topRight);
         this.add(table).top();
         this.add(inventory).expand().align(Align.center);
-        this.add(inventImg).width(inventImg.getWidth() * 5).height(inventImg.getHeight() * 5).align(Align.topRight).padRight(15f);
+        this.add(inventImg).width(inventImg.getWidth() * 5.8f).height(inventImg.getHeight() * 5.8f).align(Align.topRight).padRight(15f);
         cell = getCell(inventory);
     }
 

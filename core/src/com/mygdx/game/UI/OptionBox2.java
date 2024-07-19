@@ -29,9 +29,8 @@ public class OptionBox2 extends Table {
 
     public void addBtn(String btnText) {
         int num = btnNum;
-        BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
         style = new TextButton.TextButtonStyle();
-        style.font = font;
+        style.font = getSkin().getFont("font");
         style.fontColor = Color.BLACK;
         style.downFontColor = Color.BLACK;
 

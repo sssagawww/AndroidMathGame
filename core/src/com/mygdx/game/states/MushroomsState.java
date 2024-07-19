@@ -98,7 +98,7 @@ public class MushroomsState extends GameState implements Controllable {
     public static final String MUSHROOMS_GAME = "mushroomsMiniGame";
     private final int id = MyGdxGame.getPrefs().getInteger(PREF_ID);
     private boolean touchStarted = false;
-    private Vector2 touchStartPos;
+    private Vector2 touchStartPos = new Vector2();
 
     public MushroomsState(GameStateManager gsm) {
         super(gsm);
