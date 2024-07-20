@@ -42,7 +42,7 @@ public class PaintMenu extends Table {
         this.setBackground("menuBtn_up");
         //uiTable.setDebug(true);
 
-        BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
+        BitmapFont font = getSkin().getFont("font");
         lstyle = new Label.LabelStyle(font, Color.BLACK);
         lstyle.background = getSkin().getDrawable("borders");
 

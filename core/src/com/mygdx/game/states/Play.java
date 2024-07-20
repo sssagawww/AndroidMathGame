@@ -96,6 +96,9 @@ public class Play extends GameState implements Controllable {
     public static final String PREF_FOREST = "forestProgress";
     public static final String PREF_DUNGEON = "dungeonProgress";
 
+    private boolean touchStarted = false;
+    private Vector2 touchStartPos = new Vector2();
+
     public Play(GameStateManager gsm) {
         super(gsm);
         world = new World(new Vector2(0, 0), true);
@@ -147,10 +150,10 @@ public class Play extends GameState implements Controllable {
 
         player.updatePL();
 
-        if (controller.getSoundSettings().getSliderBg().isDragging()){
+        if (controller.getSoundSettings().getSliderBg().isDragging()) {
             music.setVolume(getBgVolume());
         }
-        if (controller.getSoundSettings().getSliderSoundEff().isDragging()){
+        if (controller.getSoundSettings().getSliderSoundEff().isDragging()) {
             rabbitSound.setVolume(controller.getSoundSettings().getSliderSoundEff().getPercent());
         }
 
@@ -166,7 +169,7 @@ public class Play extends GameState implements Controllable {
                 player.getBody().setTransform(475, 185f, 0);
             }
 
-            if(gsm.getLastState() != PLAY && gsm.getLastState() != NEW_GAME){
+            if (gsm.getLastState() != PLAY && gsm.getLastState() != NEW_GAME) {
                 music.setLooping(true);
                 music.play();
             }
@@ -191,12 +194,33 @@ public class Play extends GameState implements Controllable {
 
         //обновление джойстика
         if (Gdx.input.isTouched() && !controller.isInventoryVisible() && !dialogBox.isVisible()) {
+            // Получаем координаты касания
             mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
             joyCam.unproject(mouse);
-            joyStick.update(mouse.x, mouse.y);
+
+            // Если касание только началось
+            if (!touchStarted) {
+                touchStarted = true;
+                touchStartPos.set(mouse.x, mouse.y);
+
+                // Устанавливаем джойстик в точку касания
+                joyStick.setPos(touchStartPos.x, touchStartPos.y);
+            } else {
+                // Обновляем положение джойстика с учетом движения пальца
+                joyStick.update(mouse.x, mouse.y);
+            }
         } else {
+            // Сбрасываем состояние касания
+            touchStarted = false;
+            // Возвращаем джойстик в исходное положение
             joyStick.setDefaultPos();
         }
+
+// Проверка на открытые элементы (уже есть в вашем коде)
+        if (!controller.isInventoryVisible() && !dialogBox.isVisible()) {
+            // ... ваш код ...
+        }
+
 
         //можно начать бой
         if (canDraw) {
@@ -346,7 +370,7 @@ public class Play extends GameState implements Controllable {
         TiledMapTileLayer nextBoss = (TiledMapTileLayer) tiledMap.getLayers().get("nextBoss");
         createLayer(nextBoss, BIT_TROPA, BIT_PLAYER, true);
 
-        if(DungeonState.progress){
+        if (DungeonState.progress) {
             dungeonLayer = (TiledMapTileLayer) tiledMap.getLayers().get("trap");
             createLayer(dungeonLayer, BIT_TROPA, BIT_PLAYER, false);
             dungeonLayer.setVisible(true);
@@ -501,7 +525,7 @@ public class Play extends GameState implements Controllable {
         Table dialogTable = new Table();
         dialogTable.add(optionBox)
                 .expand().align(Align.right)
-                .padRight((V_WIDTH/1.05f)/5f)
+                .padRight((V_WIDTH / 1.05f) / 5f)
                 .space(8f)
                 .row();
         dialogTable.add(dialogBox)
@@ -664,7 +688,7 @@ public class Play extends GameState implements Controllable {
                 stop();
                 break;
             case "nextBoss":
-                if(controller.getInventory().getArtefacts() >= 3){
+                if (controller.getInventory().getArtefacts() >= 3) {
                     nextState = BOSSFIGHT;
                     stop();
                 }

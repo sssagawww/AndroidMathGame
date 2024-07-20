@@ -31,11 +31,11 @@ public class SoundSettings extends Table {
         super(skin);
         this.skin = skin;
         uiTable = new Table();
-        this.add(uiTable).width(V_WIDTH / 3f).height(V_HEIGHT / 2f);
+        this.add(uiTable).width(V_WIDTH / 2.2f).height(V_HEIGHT / 2f);
         this.setBackground("menuBtn_up");
 
         BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
-        font.getData().setScale(0.7f);
+        font.getData().setScale(0.9f);
         lstyle = new Label.LabelStyle(font, Color.DARK_GRAY);
         titleStyle = new Label.LabelStyle(font, Color.BLACK);
 
@@ -46,8 +46,9 @@ public class SoundSettings extends Table {
         exitImage = new Image(skin.getDrawable("wrong"));
 
         sliderStyle = new Slider.SliderStyle();
-        sliderStyle.knob = skin.getDrawable("menuBtn_up");
-        sliderStyle.background = skin.getDrawable("menuBtn_up");
+        sliderStyle.knob = skin.getDrawable("sliderKnob");
+        sliderStyle.knob.setMinHeight(V_HEIGHT/12f);
+        sliderStyle.background = skin.getDrawable("sliderKnob");
 
         sliderBG = new Slider(0, 100, 1, false, sliderStyle);
         sliderBG.setVisualPercent(Global.backgroundVolume);
@@ -76,13 +77,13 @@ public class SoundSettings extends Table {
         });
 
         uiTable.add(titleLabel).center();
-        uiTable.add(exitImage).width(exitImage.getWidth() * 3).height(exitImage.getHeight() * 3).right().row();
+        uiTable.add(exitImage).width(exitImage.getWidth() * 4).height(exitImage.getHeight() * 4).right().row();
 
         Table bottomTable = new Table();
         bottomTable.add(bgSoundsLbl).pad(15f);
-        bottomTable.add(sliderBG).align(Align.topLeft).pad(15f).row();
+        bottomTable.add(sliderBG).width(V_WIDTH/6f).align(Align.topLeft).pad(15f).row();
         bottomTable.add(soundEffLbl).pad(15f);
-        bottomTable.add(sliderSoundEff).pad(15f);
+        bottomTable.add(sliderSoundEff).width(V_WIDTH/6f).pad(15f);
         uiTable.add(bottomTable).expand().center();
     }
 

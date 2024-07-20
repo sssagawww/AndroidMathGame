@@ -177,16 +177,20 @@ public class Inventory extends Table {
         if (items.findActor("nothing") != null) {
             items.removeActor(nothingLabel);
         }
-        Item actor = new Item(name);
-        itemsList.put(name, actor);
-        items.add(actor).padRight(15f).padLeft(15f);
+        if (itemsList.containsKey(name)) {
+            getItem(name).addItemCount();
+        } else {
+            Item actor = new Item(name);
+            itemsList.put(name, actor);
+            items.add(actor).padRight(15f).padLeft(15f);
+        }
     }
 
     public void removeItem(String name) {
         items.removeActor(itemsList.get(name));
         itemsList.remove(name);
         System.out.println(itemsList + " itemsList");
-        if (itemsList == null) {
+        if (itemsList.size() == 0) {
             items.add(nothingLabel);
         }
     }

@@ -63,6 +63,8 @@ import com.mygdx.game.handlers.MyContactListener;
 import java.util.HashMap;
 import java.util.Map;
 
+import jdk.internal.access.JavaIOFileDescriptorAccess;
+
 public class Forest extends GameState implements Controllable {
     private MyGdxGame game;
     private boolean debug = false;
@@ -99,12 +101,14 @@ public class Forest extends GameState implements Controllable {
     private BoundedCamera forCam;
     private boolean isStopped;
     private int nextState;
-    private int[] backgroundLayers = {0, 1, 2};
-    private int[] foregroundLayers = {3, 4, 5, 6, 7, 8};
+    private int[] backgroundLayers = {0, 1, 2, 3};
+    private int[] foregroundLayers = {4, 5, 6, 7, 8, 9};
     private int mushrooms = 0;
     private MovableNPC npc;
     private Sound mushroomSound;
     public static boolean progress;
+    private boolean touchStarted = false;
+    private Vector2 touchStartPos = new Vector2();
 
     public Forest(GameStateManager gsm) {
         super(gsm);
@@ -188,10 +192,25 @@ public class Forest extends GameState implements Controllable {
         darkStage.act(dt);
 
         if (Gdx.input.isTouched() && !controller.isInventoryVisible() && !dialogBox.isVisible()) {
+            // Получаем координаты касания
             mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
             joyCam.unproject(mouse);
-            joyStick.update(mouse.x, mouse.y);
+
+            // Если касание только началось
+            if (!touchStarted) {
+                touchStarted = true;
+                touchStartPos.set(mouse.x, mouse.y);
+
+                // Устанавливаем джойстик в точку касания
+                joyStick.setPos(touchStartPos.x, touchStartPos.y);
+            } else {
+                // Обновляем положение джойстика с учетом движения пальца
+                joyStick.update(mouse.x, mouse.y);
+            }
         } else {
+            // Сбрасываем состояние касания
+            touchStarted = false;
+            // Возвращаем джойстик в исходное положение
             joyStick.setDefaultPos();
         }
 
@@ -422,7 +441,7 @@ public class Forest extends GameState implements Controllable {
         Table dialogTable = new Table();
         dialogTable.add(optionBox)
                 .expand().align(Align.right)
-                .padRight((V_WIDTH/1.05f)/5f)
+                .padRight((V_WIDTH / 1.05f) / 5f)
                 .space(8f)
                 .row();
         dialogTable.add(dialogBox)

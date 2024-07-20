@@ -44,7 +44,7 @@ public class BtnBox extends Table {
     }
 
     public void addBtn(String btnText, final STATES newState) {
-        BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
+        BitmapFont font = getSkin().getFont("font");
         style = new TextButton.TextButtonStyle();
         style.font = font;
         style.fontColor = Color.BLACK;

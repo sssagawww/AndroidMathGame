@@ -61,6 +61,8 @@ import com.mygdx.game.handlers.Controllable;
 import com.mygdx.game.handlers.GameStateManager;
 import com.mygdx.game.handlers.MyContactListener;
 
+import jdk.internal.access.JavaIOFileDescriptorAccess;
+
 public class BossFightState extends GameState implements Controllable {
 
     private BoundedCamera b2dCam;
@@ -99,6 +101,8 @@ public class BossFightState extends GameState implements Controllable {
     private boolean end;
     private Music music;
     private float bossPositionY;
+    private boolean touchStarted = false;
+    private Vector2 touchStartPos = new Vector2();
 
     public BossFightState(GameStateManager gsm) {
         super(gsm);
@@ -208,11 +212,26 @@ public class BossFightState extends GameState implements Controllable {
             }
         }
 
-        if (Gdx.input.isTouched() && !controller.isInventoryVisible() && !dialogueBox.isVisible() && !fight) {
+        if (Gdx.input.isTouched() && !controller.isInventoryVisible() && !dialogueBox.isVisible()) {
+            // Получаем координаты касания
             mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
             joyCam.unproject(mouse);
-            joyStick.update(mouse.x, mouse.y);
+
+            // Если касание только началось
+            if (!touchStarted) {
+                touchStarted = true;
+                touchStartPos.set(mouse.x, mouse.y);
+
+                // Устанавливаем джойстик в точку касания
+                joyStick.setPos(touchStartPos.x, touchStartPos.y);
+            } else {
+                // Обновляем положение джойстика с учетом движения пальца
+                joyStick.update(mouse.x, mouse.y);
+            }
         } else {
+            // Сбрасываем состояние касания
+            touchStarted = false;
+            // Возвращаем джойстик в исходное положение
             joyStick.setDefaultPos();
         }
 

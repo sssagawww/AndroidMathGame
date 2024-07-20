@@ -134,7 +134,7 @@ public class RhythmMenu extends Table {
         playerImageSize = size / 1.65f;
 
         //стиль для label
-        BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
+        BitmapFont font = getSkin().getFont("font");
         Label.LabelStyle lstyle = new Label.LabelStyle(font, Color.BLACK);
         lstyle.background = getSkin().getDrawable("borders");
 
@@ -159,7 +159,7 @@ public class RhythmMenu extends Table {
         tStyle.background = getSkin().getDrawable("menuBtn_down");
 
         Label trainingLabel = new Label("Выбери вовремя большую силу, а потом нажми\nна кнопку \"Тянуть\", когда на счетчике будет 0-1 секунд.", tStyle);
-        trainingLabel.setFontScale(0.8f);
+        trainingLabel.setFontScale(0.9f);
         trainingLabel.setAlignment(Align.center);
 
         Table playerTable = new Table();
@@ -183,7 +183,7 @@ public class RhythmMenu extends Table {
     }
 
     private void createBtnStyle() {
-        BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
+        BitmapFont font = getSkin().getFont("font");
         style = new TextButton.TextButtonStyle();
         style.font = font;
         style.fontColor = Color.BLACK;

@@ -33,6 +33,8 @@ public class SkinManager {
         skin.add("menuBtn_up", menuBtn_up);
         NinePatch menuBtn_down = new NinePatch(uiAtlas2.findRegion("menuBtn_down"), 10, 10, 10, 10);
         skin.add("menuBtn_down", menuBtn_down);
+        NinePatch sliderKnob = new NinePatch(uiAtlas2.findRegion("menuBtn_down"), 10, 10, 10, 10);
+        skin.add("sliderKnob", sliderKnob);
         NinePatch borders = new NinePatch(uiAtlas2.findRegion("borders"), 10, 10, 10, 10);
         skin.add("borders", borders);
         NinePatch label = new NinePatch(uiAtlas.findRegion("label"), 10, 10, 5, 5);
@@ -57,6 +59,7 @@ public class SkinManager {
         skin.add("arrow", uiAtlas3.findRegion("arrow"), TextureRegion.class);
         skin.add("next_btn", uiAtlas2.findRegion("next_btn"), TextureRegion.class);
         BitmapFont font = assetManager.get("mcRus.fnt", BitmapFont.class);
+        font.getData().setScale(1.2f);
         skin.add("font", font);
 
         skin.add("ok", uiAtlas.findRegion("ok"), TextureRegion.class);

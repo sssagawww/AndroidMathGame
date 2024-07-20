@@ -39,8 +39,7 @@ public class DialogBox extends Table {
         textTable = new Table(skin);
         textTable.setBackground("GUI_img");
 
-        BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
-        Label.LabelStyle lstyle = new Label.LabelStyle(font, Color.BLACK);
+        Label.LabelStyle lstyle = new Label.LabelStyle(getSkin().getFont("font"), Color.BLACK);
         textLabel = new Label("\n", lstyle);
         textLabel.addListener(new InputListener() {
             @Override

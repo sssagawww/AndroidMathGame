@@ -60,6 +60,8 @@ import com.mygdx.game.paint.Figures.FiguresDatabase;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import jdk.internal.access.JavaIOFileDescriptorAccess;
+
 public class DungeonState extends GameState implements Controllable {
     private Player2 player;
     private float tileMapHeight;
@@ -102,6 +104,8 @@ public class DungeonState extends GameState implements Controllable {
     private Sound openingDoorSound;
     private long soundId;
     public static boolean progress;
+    private boolean touchStarted = false;
+    private Vector2 touchStartPos = new Vector2();
 
     public DungeonState(GameStateManager gsm) {
         super(gsm);
@@ -157,10 +161,25 @@ public class DungeonState extends GameState implements Controllable {
         }
 
         if (Gdx.input.isTouched() && !controller.isInventoryVisible() && !dialogBox.isVisible()) {
+            // Получаем координаты касания
             mouse.set(Gdx.input.getX(), Gdx.input.getY(), 0);
             joyCam.unproject(mouse);
-            joyStick.update(mouse.x, mouse.y);
+
+            // Если касание только началось
+            if (!touchStarted) {
+                touchStarted = true;
+                touchStartPos.set(mouse.x, mouse.y);
+
+                // Устанавливаем джойстик в точку касания
+                joyStick.setPos(touchStartPos.x, touchStartPos.y);
+            } else {
+                // Обновляем положение джойстика с учетом движения пальца
+                joyStick.update(mouse.x, mouse.y);
+            }
         } else {
+            // Сбрасываем состояние касания
+            touchStarted = false;
+            // Возвращаем джойстик в исходное положение
             joyStick.setDefaultPos();
         }
 
