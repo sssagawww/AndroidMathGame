@@ -25,10 +25,8 @@ import com.mygdx.game.Dialog.Dialog;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.UI.Controller;
 import com.mygdx.game.UI.DialogBox;
-import com.mygdx.game.UI.Inventory;
 import com.mygdx.game.UI.JoyStick;
 import com.mygdx.game.UI.OptionBox2;
-import com.mygdx.game.db.Progress;
 import com.mygdx.game.entities.MovableNPC;
 import com.mygdx.game.entities.PlayEntities;
 import com.mygdx.game.entities.Player2;
@@ -87,15 +85,10 @@ public class Play extends GameState implements Controllable {
     // --------- END JoyStick ---------
     private boolean isStopped;
     private int nextState;
-    private int prevState = -123;
-    private boolean contact = false;
+    private boolean contact;
     private TiledMapTileLayer dungeonLayer;
-    private static final String PREF_X = "x";
-    private static final String PREF_Y = "y";
-    public static final String PREF_MAZE = "mazeProgress";
-    public static final String PREF_FOREST = "forestProgress";
-    public static final String PREF_DUNGEON = "dungeonProgress";
-
+    public static final String PREF_X = "x";
+    public static final String PREF_Y = "y";
     private boolean touchStarted = false;
     private Vector2 touchStartPos = new Vector2();
 
@@ -113,6 +106,7 @@ public class Play extends GameState implements Controllable {
         prefs = game.getPrefs();
         savePlay = game.save;
         skin_this = game.getSkin();
+        contact = false;
 
         initUI();
         initJoyStick();
@@ -216,12 +210,6 @@ public class Play extends GameState implements Controllable {
             joyStick.setDefaultPos();
         }
 
-// Проверка на открытые элементы (уже есть в вашем коде)
-        if (!controller.isInventoryVisible() && !dialogBox.isVisible()) {
-            // ... ваш код ...
-        }
-
-
         //можно начать бой
         if (canDraw) {
             uiStage.act(dt);
@@ -313,6 +301,9 @@ public class Play extends GameState implements Controllable {
             savePlay = false;
         } else {
             prefs.clear();
+            MazeState.progress = false;
+            Forest.progress = false;
+            DungeonState.progress = false;
             bdef.position.set(607f / PPM, 337f / PPM);
         }
 
@@ -555,13 +546,6 @@ public class Play extends GameState implements Controllable {
         controllerRoot.add(controller).expand().align(Align.bottomLeft);
         controllerStage.addActor(controllerRoot);*/
 
-        if (savePlay && game.getDbWrapper().getProgress().size() != 0) {
-            controller.getInventory().reload(game.getDbWrapper());
-        } else {
-            gameTime = 0;
-            game.getDbWrapper().clearAll();
-        }
-
         System.out.println(game.getDbWrapper().getProgress() + " saved progress");
         multiplexer.addProcessor(controllerStage);
         Gdx.input.setInputProcessor(multiplexer);
@@ -588,21 +572,12 @@ public class Play extends GameState implements Controllable {
     }
 
     public void save() {
+        gsm.setLastState(PLAY);
         prefs.putFloat(PREF_X, player.getPosition().x).flush();
         prefs.putFloat(PREF_Y, player.getPosition().y).flush();
-        prefs.putBoolean(PREF_MAZE, MazeState.progress).flush();
-        prefs.putBoolean(PREF_FOREST, Forest.progress).flush();
-        prefs.putBoolean(PREF_DUNGEON, DungeonState.progress).flush();
 
         //сохранение прогресса (инвентаря)
-        saveInventory();
-    }
-
-    public void saveInventory() {
-        Inventory inventory = controller.getInventory();
-        Progress progress = new Progress(inventory.getImgVisibility(0), inventory.getImgVisibility(1), inventory.getImgVisibility(2), inventory.getArtefacts(),
-                inventory.getAchievementsVisibility(), inventory.getItems(), gameTime);
-        game.getDbWrapper().saveProgress(progress);
+        game.saveProgress();
     }
 
     @Override

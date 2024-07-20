@@ -1,20 +1,16 @@
 package com.mygdx.game.states;
 
-import static com.mygdx.game.MyGdxGame.V_HEIGHT;
-import static com.mygdx.game.MyGdxGame.V_WIDTH;
 import static com.mygdx.game.handlers.B2DVars.BIT_PLAYER;
 import static com.mygdx.game.handlers.B2DVars.BIT_TROPA;
 import static com.mygdx.game.handlers.B2DVars.PPM;
 import static com.mygdx.game.handlers.GameStateManager.BATTLE;
-import static com.mygdx.game.handlers.GameStateManager.DUNGEON;
 import static com.mygdx.game.handlers.GameStateManager.FOREST;
 import static com.mygdx.game.handlers.GameStateManager.MAZE;
 import static com.mygdx.game.handlers.GameStateManager.MENU;
 import static com.mygdx.game.handlers.GameStateManager.PAINT;
 import static com.mygdx.game.handlers.GameStateManager.PLAY;
 import static com.mygdx.game.handlers.GameStateManager.RHYTHM;
-import static com.mygdx.game.states.Play.PREF_FOREST;
-import static com.mygdx.game.states.Play.PREF_MAZE;
+import static com.mygdx.game.MyGdxGame.*;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
@@ -62,8 +58,6 @@ import com.mygdx.game.handlers.MyContactListener;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import jdk.internal.access.JavaIOFileDescriptorAccess;
 
 public class Forest extends GameState implements Controllable {
     private MyGdxGame game;
@@ -272,8 +266,8 @@ public class Forest extends GameState implements Controllable {
     public void dispose() {
         player.stopSounds();
         isStopped = true;
-        gsm.getPlay().getPrefs().putBoolean(PREF_FOREST, Forest.progress).flush();
-        gsm.getPlay().saveInventory();
+        gsm.game().getPrefs().putBoolean(PREF_FOREST, Forest.progress).flush();
+        gsm.game().saveProgress();
     }
 
     private void createPlayer() {

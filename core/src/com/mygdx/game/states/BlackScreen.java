@@ -84,6 +84,7 @@ public class BlackScreen extends GameState {
             if(finalTitles){
                 gsm.setState(MENU);
             } else {
+                game.save = false;
                 gsm.setState(NEW_GAME);
             }
         } else if (curPhrase + 1 == phrases.size()) {

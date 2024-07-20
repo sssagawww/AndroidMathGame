@@ -1,7 +1,6 @@
 package com.mygdx.game.states;
 
-import static com.mygdx.game.MyGdxGame.V_HEIGHT;
-import static com.mygdx.game.MyGdxGame.V_WIDTH;
+import static com.mygdx.game.MyGdxGame.*;
 import static com.mygdx.game.handlers.B2DVars.BIT_PLAYER;
 import static com.mygdx.game.handlers.B2DVars.BIT_TROPA;
 import static com.mygdx.game.handlers.B2DVars.PPM;
@@ -10,7 +9,6 @@ import static com.mygdx.game.handlers.GameStateManager.FOREST;
 import static com.mygdx.game.handlers.GameStateManager.MAZE;
 import static com.mygdx.game.handlers.GameStateManager.MENU;
 import static com.mygdx.game.handlers.GameStateManager.PAINT;
-import static com.mygdx.game.states.Play.PREF_MAZE;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
@@ -42,6 +40,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.Dialog.Dialog;
 import com.mygdx.game.Dialog.DialogController;
 import com.mygdx.game.Dialog.DialogNode;
+import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.UI.Controller;
 import com.mygdx.game.UI.DialogBox;
 import com.mygdx.game.UI.JoyStick;
@@ -52,8 +51,6 @@ import com.mygdx.game.handlers.BoundedCamera;
 import com.mygdx.game.handlers.Controllable;
 import com.mygdx.game.handlers.GameStateManager;
 import com.mygdx.game.handlers.MyContactListener;
-
-import jdk.internal.access.JavaIOFileDescriptorAccess;
 
 public class MazeState extends GameState implements Controllable {
     private Box2DDebugRenderer b2dr;
@@ -75,8 +72,6 @@ public class MazeState extends GameState implements Controllable {
     private ShapeRenderer shapeRenderer;
     private Vector3 mouse;
     private Stage darkStage;
-    /*private Stage controllerStage;
-    private Controller controller;*/
     private PlayEntities entities;
     private boolean isStopped;
     private boolean canDraw;
@@ -369,8 +364,8 @@ public class MazeState extends GameState implements Controllable {
     public void dispose() {
         player.stopSounds();
         isStopped = true;
-        gsm.getPlay().getPrefs().putBoolean(PREF_MAZE, MazeState.progress).flush();
-        gsm.getPlay().saveInventory();
+        MyGdxGame.getPrefs().putBoolean(PREF_MAZE, MazeState.progress).flush();
+        gsm.game().saveProgress();
     }
 
     private void stop() {
