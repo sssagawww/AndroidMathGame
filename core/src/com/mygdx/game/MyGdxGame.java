@@ -56,6 +56,7 @@ public class MyGdxGame implements ApplicationListener {
     public static final String PREF_ID = "userID";
     public static final String PREF_USERNAME = "userNAME";
     public static final String PREF_MAZE = "mazeProgress";
+    public static final String PREF_MAZE_HOODED = "mazeHoodedRun";
     public static final String PREF_FOREST = "forestProgress";
     public static final String PREF_DUNGEON = "dungeonProgress";
     public static final String PREF_STATE = "lastState";
@@ -202,6 +203,7 @@ public class MyGdxGame implements ApplicationListener {
         getDbWrapper().saveProgress(progress);
 
         prefs.putBoolean(PREF_MAZE, MazeState.progress).flush();
+        prefs.putBoolean(PREF_MAZE_HOODED, MazeState.hoodedRun).flush();
         prefs.putBoolean(PREF_FOREST, Forest.progress).flush();
         prefs.putBoolean(PREF_DUNGEON, DungeonState.progress).flush();
         prefs.putInteger(PREF_STATE, gsm.getLastState()).flush();

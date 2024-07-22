@@ -117,6 +117,7 @@ public class Play extends GameState implements Controllable {
         createMovableNPC();
         createRabbitNPC();
         createMusic();
+        storyNext();
 
         cam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
         b2dCam = new BoundedCamera(); //рисует дебаг коллизию?
@@ -160,7 +161,7 @@ public class Play extends GameState implements Controllable {
             if (gsm.getLastState() == DUNGEON) {
                 player.getBody().setTransform(205f, 80f, 0);
             } else if (gsm.getLastState() == FOREST) {
-                player.getBody().setTransform(475, 185f, 0);
+                player.getBody().setTransform(475f, 185f, 0);
             }
 
             if (gsm.getLastState() != PLAY && gsm.getLastState() != NEW_GAME) {
@@ -275,11 +276,13 @@ public class Play extends GameState implements Controllable {
         //рисует UI, когда произошло взаимодействие
         if (canDraw) {
             uiStage.draw();
-            if (optionBox.getBtnId() == 0 && optionBox.isClicked() && contactBody.getFixtureList().get(0).getUserData().equals("hooded")) {
-                movableNPCs.get("hooded").setDirection(1, -0.5f, 20, 58, 58);
-                contact = true;
-            } else if (contactBody.getFixtureList().get(0).getUserData().equals("npc") && !dcontroller.isFinished()) {
-                checkDeal();
+            if (contactBody != null) {
+                if (optionBox.getBtnId() == 0 && optionBox.isClicked() && contactBody.getFixtureList().get(0).getUserData().equals("hooded")) {
+                    movableNPCs.get("hooded").setDirection(1, -0.5f, 20, 58, 58);
+                    contact = true;
+                } else if (contactBody.getFixtureList().get(0).getUserData().equals("npc") && !dcontroller.isFinished()) {
+                    checkDeal();
+                }
             }
         }
 
@@ -295,6 +298,7 @@ public class Play extends GameState implements Controllable {
             bdef.position.x = prefs.getFloat(PREF_X, 607f / PPM);
             bdef.position.y = prefs.getFloat(PREF_Y, 337f / PPM);
             MazeState.progress = prefs.getBoolean(PREF_MAZE, false);
+            MazeState.hoodedRun = prefs.getBoolean(PREF_MAZE_HOODED, false);
             Forest.progress = prefs.getBoolean(PREF_FOREST, false);
             DungeonState.progress = prefs.getBoolean(PREF_DUNGEON, false);
             game.save = false;
@@ -302,6 +306,7 @@ public class Play extends GameState implements Controllable {
         } else {
             prefs.clear();
             MazeState.progress = false;
+            MazeState.hoodedRun = false;
             Forest.progress = false;
             DungeonState.progress = false;
             bdef.position.set(607f / PPM, 337f / PPM);
@@ -328,6 +333,12 @@ public class Play extends GameState implements Controllable {
         player = new Player2(body);
         player.setState(this);
         body.setUserData(player);
+
+        if (gsm.getLastState() == DUNGEON) {
+            player.getBody().setTransform(205f, 80f, 0);
+        } else if (gsm.getLastState() == FOREST) {
+            player.getBody().setTransform(475f, 185f, 0);
+        }
     }
 
     private void createTiles() {
@@ -564,6 +575,7 @@ public class Play extends GameState implements Controllable {
 
     @Override
     public void dispose() {
+        gsm.setLastState(PLAY);
         save();
         music.stop();
         rabbitSound.stop();

@@ -3,6 +3,7 @@ package com.mygdx.game.states;
 import static com.mygdx.game.MyGdxGame.PREF_DUNGEON;
 import static com.mygdx.game.MyGdxGame.PREF_FOREST;
 import static com.mygdx.game.MyGdxGame.PREF_MAZE;
+import static com.mygdx.game.MyGdxGame.PREF_MAZE_HOODED;
 import static com.mygdx.game.MyGdxGame.PREF_STATE;
 import static com.mygdx.game.MyGdxGame.V_HEIGHT;
 import static com.mygdx.game.MyGdxGame.V_WIDTH;
@@ -303,6 +304,7 @@ public class DungeonState extends GameState implements Controllable {
         }
 
         MazeState.progress = game.getPrefs().getBoolean(PREF_MAZE, false);
+        MazeState.hoodedRun = game.getPrefs().getBoolean(PREF_MAZE_HOODED, false);
         Forest.progress = game.getPrefs().getBoolean(PREF_FOREST, false);
         DungeonState.progress = game.getPrefs().getBoolean(PREF_DUNGEON, false);
 

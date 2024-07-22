@@ -4,13 +4,17 @@ import static com.mygdx.game.handlers.B2DVars.BIT_PLAYER;
 import static com.mygdx.game.handlers.B2DVars.BIT_TROPA;
 import static com.mygdx.game.handlers.B2DVars.PPM;
 import static com.mygdx.game.handlers.GameStateManager.BATTLE;
+import static com.mygdx.game.handlers.GameStateManager.DUNGEON;
 import static com.mygdx.game.handlers.GameStateManager.FOREST;
 import static com.mygdx.game.handlers.GameStateManager.MAZE;
 import static com.mygdx.game.handlers.GameStateManager.MENU;
+import static com.mygdx.game.handlers.GameStateManager.NEW_GAME;
 import static com.mygdx.game.handlers.GameStateManager.PAINT;
 import static com.mygdx.game.handlers.GameStateManager.PLAY;
 import static com.mygdx.game.handlers.GameStateManager.RHYTHM;
 import static com.mygdx.game.MyGdxGame.*;
+import static com.mygdx.game.states.Play.PREF_X;
+import static com.mygdx.game.states.Play.PREF_Y;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
@@ -266,8 +270,10 @@ public class Forest extends GameState implements Controllable {
     public void dispose() {
         player.stopSounds();
         isStopped = true;
-        gsm.game().getPrefs().putBoolean(PREF_FOREST, Forest.progress).flush();
-        gsm.game().saveProgress();
+        gsm.setLastState(FOREST);
+        MyGdxGame.getPrefs().putFloat(PREF_X, player.getPosition().x).flush();
+        MyGdxGame.getPrefs().putFloat(PREF_Y, player.getPosition().y).flush();
+        game.saveProgress();
     }
 
     private void createPlayer() {
@@ -275,11 +281,19 @@ public class Forest extends GameState implements Controllable {
         PolygonShape ps = new PolygonShape();
         FixtureDef fdef = new FixtureDef();
 
-        if (gsm.getLastState() == MAZE) {
+        if(game.getPrefs().getInteger(PREF_STATE, NEW_GAME) == FOREST){
+            bdef.position.x = game.getPrefs().getFloat(PREF_X, 207f / PPM);
+            bdef.position.y = game.getPrefs().getFloat(PREF_Y, 737f / PPM);
+        } else if (gsm.getLastState() == MAZE) {
             bdef.position.set(1107f / PPM, 167f / PPM);
         } else {
             bdef.position.set(207f / PPM, 737f / PPM);
         }
+
+        MazeState.progress = game.getPrefs().getBoolean(PREF_MAZE, false);
+        MazeState.hoodedRun = game.getPrefs().getBoolean(PREF_MAZE_HOODED, false);
+        Forest.progress = game.getPrefs().getBoolean(PREF_FOREST, false);
+        DungeonState.progress = game.getPrefs().getBoolean(PREF_DUNGEON, false);
 
         bdef.type = BodyDef.BodyType.DynamicBody;
         Body body = world.createBody(bdef);
@@ -454,17 +468,6 @@ public class Forest extends GameState implements Controllable {
     }
 
     private void initController() {
-        /*controllerStage = new Stage(new ScreenViewport());
-        controllerStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
-
-        //controller = new Controller(skin_this);
-        controller.setVisible(true);
-
-        Table controllerRoot = new Table();
-        controllerRoot.setFillParent(true);
-        controllerRoot.add(controller).expand().align(Align.bottomLeft);
-        controllerStage.addActor(controllerRoot);*/
-
         multiplexer.addProcessor(controllerStage);
         Gdx.input.setInputProcessor(multiplexer);
     }

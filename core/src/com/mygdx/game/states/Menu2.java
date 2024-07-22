@@ -260,7 +260,8 @@ public class Menu2 extends GameState {
                 cell.setActor(onlineBtns);
                 break;
             case SAVE:
-                play.save();//?
+                gsm.setLastState(MyGdxGame.getPrefs().getInteger(PREF_STATE, NEW_GAME));
+                game.saveProgress();
                 break;
             case STATISTICS:
                 statistics.setVisible(!statistics.isVisible());

@@ -117,7 +117,7 @@ public class Controller extends Table {
     }
 
     public boolean isAllArtefacts() {
-        if(inventory.getArtefacts() == 3){
+        if(inventory.getArtefacts() == 3 || (inventory.getImgVisibility(0) && inventory.getImgVisibility(1) && inventory.getImgVisibility(2))){
             return true;
         } else {
             return false;

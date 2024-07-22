@@ -45,6 +45,7 @@ public class BlackScreen extends GameState {
         }
         initUI();
 
+        gsm.setLastState(BLACK_SCREEN);
         Gdx.input.setInputProcessor(multiplexer);
     }
 
