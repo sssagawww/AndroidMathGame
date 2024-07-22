@@ -1,15 +1,19 @@
 package com.mygdx.game.states;
 
+import static com.mygdx.game.MyGdxGame.PREF_DUNGEON;
+import static com.mygdx.game.MyGdxGame.PREF_FOREST;
+import static com.mygdx.game.MyGdxGame.PREF_MAZE;
+import static com.mygdx.game.MyGdxGame.PREF_MAZE_HOODED;
+import static com.mygdx.game.MyGdxGame.PREF_STATE;
 import static com.mygdx.game.MyGdxGame.V_HEIGHT;
 import static com.mygdx.game.MyGdxGame.V_WIDTH;
-import static com.mygdx.game.UI.BtnBox.STATES.FINISH;
 import static com.mygdx.game.paint.Figures.FiguresDatabase.FIGURES_TYPES;
 import static com.mygdx.game.handlers.B2DVars.BIT_PLAYER;
 import static com.mygdx.game.handlers.B2DVars.BIT_TROPA;
 import static com.mygdx.game.handlers.B2DVars.PPM;
 import static com.mygdx.game.handlers.GameStateManager.*;
-import static com.mygdx.game.states.Play.PREF_DUNGEON;
-import static com.mygdx.game.states.Play.PREF_FOREST;
+import static com.mygdx.game.states.Play.PREF_X;
+import static com.mygdx.game.states.Play.PREF_Y;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
@@ -24,7 +28,6 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -55,12 +58,9 @@ import com.mygdx.game.handlers.BoundedCamera;
 import com.mygdx.game.handlers.Controllable;
 import com.mygdx.game.handlers.GameStateManager;
 import com.mygdx.game.handlers.MyContactListener;
-import com.mygdx.game.paint.Figures.FiguresDatabase;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-
-import jdk.internal.access.JavaIOFileDescriptorAccess;
 
 public class DungeonState extends GameState implements Controllable {
     private Player2 player;
@@ -79,11 +79,10 @@ public class DungeonState extends GameState implements Controllable {
     private OrthogonalTiledMapRenderer tmr;
     private BodyDef bdef;
     private JoyStick joyStick;
+    private BoundedCamera dunCam;
     private BoundedCamera joyCam;
     private ShapeRenderer shapeRenderer;
     private Vector3 mouse;
-    /*private Controller controller;
-    private Stage controllerStage;*/
     private boolean isStopped = false;
     private boolean canDraw = false;
     private Stage uiStage;
@@ -125,9 +124,18 @@ public class DungeonState extends GameState implements Controllable {
         createTiles();
         createNPC();
 
+        if(controller.getInventory().getItems().containsKey("Ключ")){
+            earnedKey = true;
+        }
+        if(controller.getInventory().getImgVisibility(2)){
+            earnedAmulet = true;
+        }
+
         openingDoorSound = Gdx.audio.newSound(Gdx.files.internal("music/door_opening.mp3"));
 
-        cam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
+        dunCam = new BoundedCamera();
+        dunCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
+        dunCam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
         b2dCam = new BoundedCamera(); //рисует дебаг коллизию?
         b2dCam.setToOrtho(false, V_WIDTH / PPM, V_HEIGHT / PPM); // /2?
         b2dCam.setBounds(0, (tileMapWidth * tileSize) / PPM, 0, (tileMapHeight * tileSize) / PPM);
@@ -194,22 +202,19 @@ public class DungeonState extends GameState implements Controllable {
         }
 
         controllerStage.act(dt);
-
-
     }
 
     @Override
     public void render() {
         Gdx.gl20.glClearColor(0, 0, 0, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        cam.setPosition(player.getPosition().x * PPM + V_WIDTH / 35, player.getPosition().y * PPM + V_HEIGHT / 35);
-        //cam.position.set(player.getPosition().x * PPM / 2, player.getPosition().y * PPM / 2, 0);
-        cam.update();
+        dunCam.setPosition(player.getPosition().x * PPM + V_WIDTH / 35, player.getPosition().y * PPM + V_HEIGHT / 35);
+        dunCam.update();
 
-        tmr.setView(cam);
+        tmr.setView(dunCam);
         tmr.render();
 
-        sb.setProjectionMatrix(cam.combined); //https://stackoverflow.com/questions/33703663/understanding-the-libgdx-projection-matrix - объяснение
+        sb.setProjectionMatrix(dunCam.combined);
         player.render(sb, 80f, 86.6f);
         if (!reloading) {
             entities.render(sb, 4.5f, 4.5f);
@@ -291,7 +296,17 @@ public class DungeonState extends GameState implements Controllable {
         PolygonShape ps = new PolygonShape();
         FixtureDef fdef = new FixtureDef();
 
-        bdef.position.set(607f / PPM, 337f / PPM);
+        if(game.getPrefs().getInteger(PREF_STATE, NEW_GAME) == DUNGEON){
+            bdef.position.x = game.getPrefs().getFloat(PREF_X, 607f / PPM);
+            bdef.position.y = game.getPrefs().getFloat(PREF_Y, 337f / PPM);
+        } else {
+            bdef.position.set(607f / PPM, 337f / PPM);
+        }
+
+        MazeState.progress = game.getPrefs().getBoolean(PREF_MAZE, false);
+        MazeState.hoodedRun = game.getPrefs().getBoolean(PREF_MAZE_HOODED, false);
+        Forest.progress = game.getPrefs().getBoolean(PREF_FOREST, false);
+        DungeonState.progress = game.getPrefs().getBoolean(PREF_DUNGEON, false);
 
         bdef.type = BodyDef.BodyType.DynamicBody;
         Body body = world.createBody(bdef);
@@ -336,17 +351,6 @@ public class DungeonState extends GameState implements Controllable {
     }
 
     private void initController() {
-        /*controllerStage = new Stage(new ScreenViewport());
-        controllerStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
-
-        controller = new Controller(skin_this);
-        controller.setVisible(true);
-
-        Table controllerRoot = new Table();
-        controllerRoot.setFillParent(true);
-        controllerRoot.add(controller).expand().align(Align.bottomLeft);
-        controllerStage.addActor(controllerRoot);*/
-
         multiplexer.addProcessor(controllerStage);
         Gdx.input.setInputProcessor(multiplexer);
     }
@@ -530,8 +534,10 @@ public class DungeonState extends GameState implements Controllable {
     public void dispose() {
         player.stopSounds();
         isStopped = true;
-        gsm.getPlay().getPrefs().putBoolean(PREF_DUNGEON, DungeonState.progress).flush();
-        gsm.getPlay().saveInventory();
+        gsm.setLastState(DUNGEON);
+        MyGdxGame.getPrefs().putFloat(PREF_X, player.getPosition().x).flush();
+        MyGdxGame.getPrefs().putFloat(PREF_Y, player.getPosition().y).flush();
+        game.saveProgress();
     }
 
     @Override

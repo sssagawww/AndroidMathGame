@@ -57,6 +57,10 @@ public class GameStateManager {
             return new BattleState2(this);
         } else if (state == NEW_GAME) {
             play = new Play(this);
+            forest = null;
+            mazeState = null;
+            dungeonState = null;
+            bossFightState = null;
             return play;
         } else if (state == PAINT) {
             return new PaintState(this, paintArgs);

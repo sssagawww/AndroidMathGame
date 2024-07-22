@@ -1,5 +1,10 @@
 package com.mygdx.game.states;
 
+import static com.mygdx.game.MyGdxGame.PREF_DUNGEON;
+import static com.mygdx.game.MyGdxGame.PREF_FOREST;
+import static com.mygdx.game.MyGdxGame.PREF_MAZE;
+import static com.mygdx.game.MyGdxGame.PREF_MAZE_HOODED;
+import static com.mygdx.game.MyGdxGame.PREF_STATE;
 import static com.mygdx.game.MyGdxGame.V_HEIGHT;
 import static com.mygdx.game.MyGdxGame.V_WIDTH;
 import static com.mygdx.game.handlers.B2DVars.BIT_PLAYER;
@@ -8,9 +13,14 @@ import static com.mygdx.game.handlers.B2DVars.PPM;
 import static com.mygdx.game.handlers.GameStateManager.BATTLE;
 import static com.mygdx.game.handlers.GameStateManager.BLACK_SCREEN;
 import static com.mygdx.game.handlers.GameStateManager.BOSSFIGHT;
+import static com.mygdx.game.handlers.GameStateManager.FOREST;
+import static com.mygdx.game.handlers.GameStateManager.MAZE;
 import static com.mygdx.game.handlers.GameStateManager.MENU;
+import static com.mygdx.game.handlers.GameStateManager.NEW_GAME;
 import static com.mygdx.game.handlers.GameStateManager.PAINT;
 import static com.mygdx.game.handlers.GameStateManager.RHYTHM;
+import static com.mygdx.game.states.Play.PREF_X;
+import static com.mygdx.game.states.Play.PREF_Y;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
@@ -47,6 +57,7 @@ import com.github.tommyettinger.textra.TypingLabel;
 import com.mygdx.game.Dialog.Dialog;
 import com.mygdx.game.Dialog.DialogController;
 import com.mygdx.game.Dialog.DialogNode;
+import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.UI.BossLabel;
 import com.mygdx.game.UI.Controller;
 import com.mygdx.game.UI.DialogBox;
@@ -338,7 +349,17 @@ public class BossFightState extends GameState implements Controllable {
         PolygonShape ps = new PolygonShape();
         FixtureDef fdef = new FixtureDef();
 
-        bdef.position.set(1000f / PPM, 150f / PPM);
+        if(game.getPrefs().getInteger(PREF_STATE, NEW_GAME) == BOSSFIGHT){
+            bdef.position.x = game.getPrefs().getFloat(PREF_X, 1000f / PPM);
+            bdef.position.y = game.getPrefs().getFloat(PREF_Y, 150f / PPM);
+        }  else {
+            bdef.position.set(1000f / PPM, 150f / PPM);
+        }
+
+        MazeState.progress = game.getPrefs().getBoolean(PREF_MAZE, false);
+        MazeState.hoodedRun = game.getPrefs().getBoolean(PREF_MAZE_HOODED, false);
+        Forest.progress = game.getPrefs().getBoolean(PREF_FOREST, false);
+        DungeonState.progress = game.getPrefs().getBoolean(PREF_DUNGEON, false);
 
         bdef.type = BodyDef.BodyType.DynamicBody;
         Body body = world.createBody(bdef);
@@ -353,33 +374,6 @@ public class BossFightState extends GameState implements Controllable {
         player = new Player2(body);
         player.setState(this);
         body.setUserData(player);
-    }
-
-    private void createNPC() {
-        MapLayer mlayer = tiledMap.getLayers().get("exit");
-        if (mlayer == null) return;
-        entities = new PlayEntities();
-
-        for (MapObject mo : mlayer.getObjects()) {
-            BodyDef bdef = new BodyDef();
-            bdef.type = BodyDef.BodyType.StaticBody;
-            float x = (float) mo.getProperties().get("x") / PPM * 4f;
-            float y = (float) mo.getProperties().get("y") / PPM * 4f;
-            bdef.position.set(x, y);
-
-            Body body = world.createBody(bdef);
-            FixtureDef cdef = new FixtureDef();
-            CircleShape cshape = new CircleShape();
-            cshape.setRadius(50f / PPM);
-            cdef.shape = cshape;
-            cdef.isSensor = true;
-            cdef.filter.categoryBits = BIT_TROPA;
-            cdef.filter.maskBits = BIT_PLAYER;
-            cshape.dispose();
-
-            body.createFixture(cdef).setUserData(mo.getName());
-            entities.addEntity(body, mo.getName());
-        }
     }
 
     private void createSlime() {
@@ -477,7 +471,6 @@ public class BossFightState extends GameState implements Controllable {
         shapeRenderer = new ShapeRenderer();
         shapeRenderer.setProjectionMatrix(joyCam.combined);
         mouse = new Vector3();
-
     }
 
     private void checkBtns() {
@@ -583,5 +576,9 @@ public class BossFightState extends GameState implements Controllable {
     public void dispose() {
         player.stopSounds();
         isStopped = true;
+        gsm.setLastState(BOSSFIGHT);
+        MyGdxGame.getPrefs().putFloat(PREF_X, player.getPosition().x).flush();
+        MyGdxGame.getPrefs().putFloat(PREF_Y, player.getPosition().y).flush();
+        game.saveProgress();
     }
 }

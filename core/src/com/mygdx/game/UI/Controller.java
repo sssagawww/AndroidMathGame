@@ -15,6 +15,7 @@ import com.badlogic.gdx.utils.Align;
 /*сетаются кнопки контроллера на экране: каждая из них просто картинка, ставящая true or false для переменной btnNamePressed, когда на неё нажимают.
 Player2 проверяет состояние переменной и ставит нужную траекторию, если она true*/
 public class Controller extends Table {
+    private Skin skin;
     private Image settingsImg;
     private boolean menuPressed;
     private Image menuImg;
@@ -26,6 +27,7 @@ public class Controller extends Table {
     public Controller(Skin skin) {
         super(skin);
         this.setFillParent(true);
+        this.skin = skin;
 
         inventory = new Inventory(skin, this);
         inventory.setVisible(false);
@@ -83,6 +85,11 @@ public class Controller extends Table {
         cell = getCell(inventory);
     }
 
+    public void resetInventory(){
+        inventory = new Inventory(skin, this);
+        inventory.setVisible(false);
+    }
+
     public SoundSettings getSoundSettings() {
         return soundSettings;
     }
@@ -110,7 +117,7 @@ public class Controller extends Table {
     }
 
     public boolean isAllArtefacts() {
-        if(inventory.getArtefacts() == 3){
+        if(inventory.getArtefacts() == 3 || (inventory.getImgVisibility(0) && inventory.getImgVisibility(1) && inventory.getImgVisibility(2))){
             return true;
         } else {
             return false;

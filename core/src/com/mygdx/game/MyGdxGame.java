@@ -14,17 +14,17 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.UI.Controller;
+import com.mygdx.game.UI.Inventory;
 import com.mygdx.game.battle.examples.ExampleDatabase;
 import com.mygdx.game.battle.steps.StepDatabase;
 import com.mygdx.game.db.DbWrapper;
+import com.mygdx.game.db.Progress;
 import com.mygdx.game.handlers.*;
 import com.mygdx.game.multiplayer.MushroomsRequest;
-import com.mygdx.game.paint.Figures.Figure;
 import com.mygdx.game.paint.Figures.FiguresDatabase;
-import com.mygdx.game.paint.PixelPoint;
-
-import java.util.ArrayList;
-import java.util.Arrays;
+import com.mygdx.game.states.DungeonState;
+import com.mygdx.game.states.Forest;
+import com.mygdx.game.states.MazeState;
 
 public class MyGdxGame implements ApplicationListener {
     private static int width;
@@ -55,6 +55,11 @@ public class MyGdxGame implements ApplicationListener {
     private static final String PREF_NAME = "position";
     public static final String PREF_ID = "userID";
     public static final String PREF_USERNAME = "userNAME";
+    public static final String PREF_MAZE = "mazeProgress";
+    public static final String PREF_MAZE_HOODED = "mazeHoodedRun";
+    public static final String PREF_FOREST = "forestProgress";
+    public static final String PREF_DUNGEON = "dungeonProgress";
+    public static final String PREF_STATE = "lastState";
 
     public MyGdxGame() {
     }
@@ -189,6 +194,19 @@ public class MyGdxGame implements ApplicationListener {
 
     @Override
     public void resume() {
+    }
+
+    public void saveProgress() {
+        Inventory inventory = controller.getInventory();
+        Progress progress = new Progress(inventory.getImgVisibility(0), inventory.getImgVisibility(1), inventory.getImgVisibility(2), inventory.getArtefacts(),
+                inventory.getAchievementsVisibility(), inventory.getItems(), gameTime);
+        getDbWrapper().saveProgress(progress);
+
+        prefs.putBoolean(PREF_MAZE, MazeState.progress).flush();
+        prefs.putBoolean(PREF_MAZE_HOODED, MazeState.hoodedRun).flush();
+        prefs.putBoolean(PREF_FOREST, Forest.progress).flush();
+        prefs.putBoolean(PREF_DUNGEON, DungeonState.progress).flush();
+        prefs.putInteger(PREF_STATE, gsm.getLastState()).flush();
     }
 
     public Skin getSkin() {

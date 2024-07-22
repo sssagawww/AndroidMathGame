@@ -27,10 +27,9 @@ import com.mygdx.game.handlers.Animation;
 import com.mygdx.game.handlers.GameStateManager;
 import com.mygdx.game.multiplayer.MushroomsRequest;
 
-import static com.mygdx.game.MyGdxGame.V_HEIGHT;
-import static com.mygdx.game.MyGdxGame.V_WIDTH;
 import static com.mygdx.game.UI.BtnBox.STATES.*;
 import static com.mygdx.game.handlers.GameStateManager.*;
+import static com.mygdx.game.MyGdxGame.*;
 
 public class Menu2 extends GameState {
     private MyGdxGame game;
@@ -239,6 +238,11 @@ public class Menu2 extends GameState {
     private void checkBtns() {
         switch (btnBox.getState()) {
             case MENU_TO_PLAY:
+                BlackScreen.setFinalTitles(false);
+                MyGdxGame.getPrefs().clear();
+                controller.resetInventory();
+                gameTime = 0;
+                game.getDbWrapper().clearAll();
                 gsm.setState(BLACK_SCREEN);
                 break;
             case EXIT:
@@ -247,14 +251,17 @@ public class Menu2 extends GameState {
                 break;
             case SAVE_GAME:
                 game.save = true;
-                gsm.setState(NEW_GAME);
+                if (game.getDbWrapper().getProgress().size() != 0)
+                    controller.getInventory().reload(game.getDbWrapper());
+                gsm.setState(MyGdxGame.getPrefs().getInteger(PREF_STATE, NEW_GAME));
                 break;
             case ONLINE:
                 onlineBtns.setVisible(!onlineBtns.isVisible());
                 cell.setActor(onlineBtns);
                 break;
             case SAVE:
-                play.save();
+                gsm.setLastState(MyGdxGame.getPrefs().getInteger(PREF_STATE, NEW_GAME));
+                game.saveProgress();
                 break;
             case STATISTICS:
                 statistics.setVisible(!statistics.isVisible());

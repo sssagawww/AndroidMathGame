@@ -1,7 +1,6 @@
 package com.mygdx.game.states;
 
-import static com.mygdx.game.MyGdxGame.V_HEIGHT;
-import static com.mygdx.game.MyGdxGame.V_WIDTH;
+import static com.mygdx.game.MyGdxGame.*;
 import static com.mygdx.game.handlers.B2DVars.BIT_PLAYER;
 import static com.mygdx.game.handlers.B2DVars.BIT_TROPA;
 import static com.mygdx.game.handlers.B2DVars.PPM;
@@ -9,8 +8,10 @@ import static com.mygdx.game.handlers.GameStateManager.BATTLE;
 import static com.mygdx.game.handlers.GameStateManager.FOREST;
 import static com.mygdx.game.handlers.GameStateManager.MAZE;
 import static com.mygdx.game.handlers.GameStateManager.MENU;
+import static com.mygdx.game.handlers.GameStateManager.NEW_GAME;
 import static com.mygdx.game.handlers.GameStateManager.PAINT;
-import static com.mygdx.game.states.Play.PREF_MAZE;
+import static com.mygdx.game.states.Play.PREF_X;
+import static com.mygdx.game.states.Play.PREF_Y;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
@@ -42,6 +43,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.Dialog.Dialog;
 import com.mygdx.game.Dialog.DialogController;
 import com.mygdx.game.Dialog.DialogNode;
+import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.UI.Controller;
 import com.mygdx.game.UI.DialogBox;
 import com.mygdx.game.UI.JoyStick;
@@ -52,8 +54,6 @@ import com.mygdx.game.handlers.BoundedCamera;
 import com.mygdx.game.handlers.Controllable;
 import com.mygdx.game.handlers.GameStateManager;
 import com.mygdx.game.handlers.MyContactListener;
-
-import jdk.internal.access.JavaIOFileDescriptorAccess;
 
 public class MazeState extends GameState implements Controllable {
     private Box2DDebugRenderer b2dr;
@@ -75,12 +75,9 @@ public class MazeState extends GameState implements Controllable {
     private ShapeRenderer shapeRenderer;
     private Vector3 mouse;
     private Stage darkStage;
-    /*private Stage controllerStage;
-    private Controller controller;*/
     private PlayEntities entities;
     private boolean isStopped;
     private boolean canDraw;
-    private boolean hoodedRun;
     private Stage uiStage;
     private Dialog dialog;
     private DialogController dcontroller;
@@ -92,6 +89,7 @@ public class MazeState extends GameState implements Controllable {
     private Body removedBody;
     private boolean debug = false;
     public static boolean progress;
+    public static boolean hoodedRun;
     private boolean touchStarted = false;
     private Vector2 touchStartPos = new Vector2();
 
@@ -174,8 +172,7 @@ public class MazeState extends GameState implements Controllable {
             uiStage.act(dt);
             dcontroller.update(dt);
             time += dt;
-            if (hoodedRun && dcontroller.isFinished()) {
-                hoodedRun = false;
+            if (hoodedRun && dcontroller.isFinished() && progress && entities.getEntity(entities.getEntityCount() - 1).getBody().getFixtureList().get(0).getUserData().equals("hooded")) {
                 removeCollisionEntity(entities.getEntity(entities.getEntityCount() - 1).getBody());
                 entities.getEntity(entities.getEntityCount() - 1).getBody().getFixtureList().get(0).setUserData("collided");
                 entities.removeEntity(removedBody);
@@ -227,7 +224,7 @@ public class MazeState extends GameState implements Controllable {
         entities = new PlayEntities();
 
         for (MapObject mo : mlayer.getObjects()) {
-            if (mo.getName().equals("hooded") && progress) {
+            if (mo.getName().equals("hooded") && hoodedRun) {
                 continue;
             }
             BodyDef bdef = new BodyDef();
@@ -244,7 +241,7 @@ public class MazeState extends GameState implements Controllable {
                 cshape.setRadius(30f / PPM);
             }
             cdef.shape = cshape;
-            cdef.isSensor = true;
+            cdef.isSensor = false;
             cdef.filter.categoryBits = BIT_TROPA;
             cdef.filter.maskBits = BIT_PLAYER;
             cshape.dispose();
@@ -259,11 +256,19 @@ public class MazeState extends GameState implements Controllable {
         PolygonShape ps = new PolygonShape();
         FixtureDef fdef = new FixtureDef();
 
-        if (gsm.getLastState() == FOREST) {
+        if(game.getPrefs().getInteger(PREF_STATE, NEW_GAME) == MAZE){
+            bdef.position.x = game.getPrefs().getFloat(PREF_X, 607f / PPM);
+            bdef.position.y = game.getPrefs().getFloat(PREF_Y, 337f / PPM);
+        } else if (gsm.getLastState() == FOREST) {
             bdef.position.set(137f / PPM, 637f / PPM);
         } else {
             bdef.position.set(607f / PPM, 337f / PPM);
         }
+
+        MazeState.hoodedRun = game.getPrefs().getBoolean(PREF_MAZE_HOODED, false);
+        MazeState.progress = game.getPrefs().getBoolean(PREF_MAZE, false);
+        Forest.progress = game.getPrefs().getBoolean(PREF_FOREST, false);
+        DungeonState.progress = game.getPrefs().getBoolean(PREF_DUNGEON, false);
 
         bdef.type = BodyDef.BodyType.DynamicBody;
         Body body = world.createBody(bdef);
@@ -361,6 +366,37 @@ public class MazeState extends GameState implements Controllable {
         darkStage.addActor(root);
     }
 
+    private void initFight() {
+        skin_this = game.getSkin();
+        uiStage = new Stage(new ScreenViewport());
+        uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+
+        dialogRoot = new Table();
+        dialogRoot.setFillParent(true);
+        uiStage.addActor(dialogRoot);
+
+        dialogueBox = new DialogBox(skin_this);
+        dialogueBox.setVisible(false);
+        dialogueBox.addBtn();
+
+        optionBox = new OptionBox2(skin_this);
+        optionBox.setVisible(false);
+
+        Table dialogTable = new Table();
+        dialogTable.add(dialogueBox)
+                .expand().align(Align.bottom)
+                .space(8f)
+                .row();
+
+        dialogRoot.add(dialogTable).expand().align(Align.bottom).pad(15f);
+
+        dcontroller = new DialogController(dialogueBox, optionBox);
+        multiplexer.addProcessor(uiStage);
+        Gdx.input.setInputProcessor(multiplexer);
+
+        dialog = new Dialog();
+    }
+
     @Override
     public void handleInput() {
     }
@@ -369,8 +405,10 @@ public class MazeState extends GameState implements Controllable {
     public void dispose() {
         player.stopSounds();
         isStopped = true;
-        gsm.getPlay().getPrefs().putBoolean(PREF_MAZE, MazeState.progress).flush();
-        gsm.getPlay().saveInventory();
+        gsm.setLastState(MAZE);
+        MyGdxGame.getPrefs().putFloat(PREF_X, player.getPosition().x).flush();
+        MyGdxGame.getPrefs().putFloat(PREF_Y, player.getPosition().y).flush();
+        game.saveProgress();
     }
 
     private void stop() {
@@ -418,6 +456,7 @@ public class MazeState extends GameState implements Controllable {
                     dcontroller.startDialog(dialog);
                     nextState = -1;
                     canDraw = true;
+                    progress = true;
                 }
                 break;
             case "hooded":
@@ -439,7 +478,6 @@ public class MazeState extends GameState implements Controllable {
                 nextState = -1;
                 canDraw = true;
                 hoodedRun = true;
-                progress = true;
                 break;
             case "next":
                 nextState = FOREST;
@@ -463,41 +501,5 @@ public class MazeState extends GameState implements Controllable {
     @Override
     public JoyStick getJoyStick() {
         return joyStick;
-    }
-
-    private void initFight() {
-        skin_this = game.getSkin();
-        uiStage = new Stage(new ScreenViewport());
-        uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
-
-        dialogRoot = new Table();
-        dialogRoot.setFillParent(true);
-        uiStage.addActor(dialogRoot);
-
-        dialogueBox = new DialogBox(skin_this);
-        dialogueBox.setVisible(false);
-        dialogueBox.addBtn();
-
-        optionBox = new OptionBox2(skin_this);
-        optionBox.setVisible(false);
-
-        Table dialogTable = new Table();
-        dialogTable.add(dialogueBox)
-                .expand().align(Align.bottom)
-                .space(8f)
-                .row();
-
-        dialogRoot.add(dialogTable).expand().align(Align.bottom).pad(15f);
-
-        dcontroller = new DialogController(dialogueBox, optionBox);
-        multiplexer.addProcessor(uiStage); //не нагружает ли большое кол-во процессов программу?
-        //multiplexer.addProcessor(dcontroller);
-        Gdx.input.setInputProcessor(multiplexer);
-
-        dialog = new Dialog();
-        /*DialogNode node1 = new DialogNode("Враг атакует!", 0);
-
-        dialog.addNode(node1);
-        dcontroller.startDialog(dialog);*/
     }
 }

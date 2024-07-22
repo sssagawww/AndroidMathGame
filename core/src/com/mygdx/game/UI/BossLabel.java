@@ -51,7 +51,6 @@ public class BossLabel extends Table {
         uiTable = new Table();
         this.add(uiTable).width(V_WIDTH).height(V_HEIGHT);
 
-
         BitmapFont labelFont = getSkin().getFont("font");
         Label.LabelStyle lstyle = new Label.LabelStyle(labelFont, Color.BLACK);
         style = new TextButton.TextButtonStyle();
@@ -82,7 +81,7 @@ public class BossLabel extends Table {
         timeTable = new Table(skin);
         timeTable.setBackground(skin.getDrawable("GUI_img"));
         timeTable.add(timeImage).width(V_HEIGHT / 8f).height(V_HEIGHT / 8f).expand().padRight(15f).left();
-        timeTable.add(label).width(V_WIDTH / 2.5f).height(V_HEIGHT / 8f).expand().right();
+        timeTable.add(label).width(V_WIDTH / 2f).height(V_HEIGHT / 8f).expand().right();
         timeTable.setVisible(false);
 
         hpTable.add(labelTable).height(V_HEIGHT / 10f).row();
@@ -109,9 +108,9 @@ public class BossLabel extends Table {
         paintBtn = addBtn("Провести\nпалочкой", ATTACK_STATES.PAINT_ATTACK);
         rhythmBtn = addBtn("Взмахнуть\nмечом", ATTACK_STATES.RHYTHM_ATTACK);
 
-        btnsTable.add(mathBtn).align(Align.bottom).width(V_WIDTH / 3.5f).height(100f).space(25f);
-        btnsTable.add(paintBtn).align(Align.bottom).width(V_WIDTH / 3.5f).height(100f).space(25f);
-        btnsTable.add(rhythmBtn).align(Align.bottom).width(V_WIDTH / 3.5f).height(100f).space(25f);
+        btnsTable.add(mathBtn).align(Align.bottom).width(V_WIDTH / 3.5f).height(120f).space(25f);
+        btnsTable.add(paintBtn).align(Align.bottom).width(V_WIDTH / 3.5f).height(120f).space(25f);
+        btnsTable.add(rhythmBtn).align(Align.bottom).width(V_WIDTH / 3.5f).height(120f).space(25f);
     }
 
     private TextButton addBtn(String btnText, final ATTACK_STATES newState) {
