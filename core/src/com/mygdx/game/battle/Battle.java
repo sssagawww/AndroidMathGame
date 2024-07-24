@@ -5,7 +5,6 @@ import com.mygdx.game.battle.events.B_TextEvent;
 import com.mygdx.game.battle.events.BattleEvent;
 import com.mygdx.game.battle.events.BattleEventPlayer;
 import com.mygdx.game.battle.events.BattleEventQueue;
-import com.mygdx.game.battle.examples.EXAMPLE_NUM;
 import com.mygdx.game.battle.examples.Example;
 import com.mygdx.game.battle.steps.STEP_BOOLEAN;
 import com.mygdx.game.battle.steps.Step;
@@ -29,14 +28,14 @@ public class Battle implements BattleEventQueue {
     public int currentIndex;
     public int currentAnswer;
     public int currentStepNum;
-    public boolean isRight = false;
+    private int randomNum;
 
     public Battle(BattleEntity player, BattleEntity enemy) {
         this.player = player;
         this.enemy = enemy;
         mechanics = new BattleMechanics();
         this.state = STATE.READY_TO_PROGRESS;
-        currentIndex = 1;
+        currentIndex = 0;
         currentAnswer = 0;
         currentStepNum = 0;
     }
@@ -71,21 +70,24 @@ public class Battle implements BattleEventQueue {
             battleTarget = player;
         }
 
-        Step step = battleUser.getSteps(input);
+        Step step = battleUser.getStep(input);
 
-        //queueEvent(new B_TextEvent(battleUser.getName() + " атакует!", 0.5f));
-
-        if (player.getBoolean(input + currentStepNum) == STEP_BOOLEAN.RIGHT && battleUser == player) {
+        if (player.getStepBoolean(input + currentStepNum - randomNum) == STEP_BOOLEAN.RIGHT && battleUser == player) {
             if (mechanics.attemptHit(step, battleUser, battleTarget)) {
                 queueEvent(new B_TextEvent("Правильный ответ. Атака!", 0.5f));
                 step.useMove(mechanics, battleUser, battleTarget, entity, this);
             }
-        } else if (player.getBoolean(input + currentStepNum) == STEP_BOOLEAN.WRONG && battleUser == player) {
+        } else if (player.getStepBoolean(input + currentStepNum - randomNum) == STEP_BOOLEAN.WRONG && battleUser == player) {
             queueEvent(new B_TextEvent("Неправильный ответ. Промах!", 0.5f));
         } else if (battleUser == enemy) {
-            queueEvent(new B_TextEvent(battleUser.getName() + " атакует!", 0.5f));
-            if (mechanics.attemptHit(step, battleUser, battleTarget)) {
-                step.useMove(mechanics, battleUser, battleTarget, entity, this);
+            double p = Math.random();
+            if (p <= 0.5) {
+                queueEvent(new B_TextEvent(battleUser.getName() + " атакует!", 0.5f));
+                if (mechanics.attemptHit(step, battleUser, battleTarget)) {
+                    step.useMove(mechanics, battleUser, battleTarget, entity, this);
+                }
+            } else {
+                queueEvent(new B_TextEvent(battleUser.getName() + " промахнулся!", 0.5f));
             }
             currentStepNum++;
         }
@@ -100,44 +102,46 @@ public class Battle implements BattleEventQueue {
     }
 
     public void playAnswers(StepsDetails steps, SelectionBtnBox selectionBox) {
+        int prevNum;
+        int randomStepNum = 0;
         System.out.println(currentAnswer + " currentAnswer");
+        randomNum = (int) (Math.random() * 3);
         for (int i = 0; i <= 3; i++) {
+            prevNum = randomStepNum;
+            randomStepNum = (int) Math.floor(Math.random() * player.getSteps().size() - 1);
+            if (randomStepNum == prevNum || randomStepNum == currentIndex - 1 || randomStepNum == -1)
+                randomStepNum = (int) Math.floor(Math.random() * player.getSteps().size() - 1);
+
             String label = "---";
-            steps = player.getDetails(currentAnswer + i);
+            steps = player.getDetails(randomStepNum);
             if (steps != null) {
                 label = steps.getName();
             }
-            selectionBox.setLabel(i, label);
+            if (i != randomNum) {
+                selectionBox.setLabel(i, label);
+            } else {
+                steps = player.getDetails(currentIndex - 1);
+
+                label = steps.getName();
+                selectionBox.setLabel(i, label);
+            }
             System.out.println(steps.getStepBoolean());
         }
         currentAnswer++;
     }
 
-    public void playExamples(Example example) { //if else???
-        for (int i = 0; i < 10; i++) {
+    public void playExamples(Example example) {
+        for (int i = 0; i < player.getSteps().size(); i++) {
             player.setStepBoolean(i, STEP_BOOLEAN.WRONG);
         }
-        System.out.println(example.getList());
-        Example thisEx = example;
-        if (example.getList() == EXAMPLE_NUM.EXAMPLE_1) {
-            queueEvent(new B_TextEvent(thisEx.getName(), true));
-            player.setStepBoolean(1, STEP_BOOLEAN.RIGHT);
-            currentIndex++;
-        } else if (example.getList() == EXAMPLE_NUM.EXAMPLE_2) {
-            queueEvent(new B_TextEvent(thisEx.getName(), true));
-            player.setStepBoolean(3, STEP_BOOLEAN.RIGHT);
-            currentIndex++;
-        } else if (example.getList() == EXAMPLE_NUM.EXAMPLE_3) {
-            queueEvent(new B_TextEvent(thisEx.getName(), true));
-            player.setStepBoolean(2, STEP_BOOLEAN.RIGHT);
-            currentIndex++;
-        } else if (example.getList() == EXAMPLE_NUM.EXAMPLE_4) {
-            queueEvent(new B_TextEvent(thisEx.getName(), true));
-            player.setStepBoolean(6, STEP_BOOLEAN.RIGHT);
-            currentIndex++;
-        } else if (example.getList() == EXAMPLE_NUM.EXAMPLE_5) {
-            queueEvent(new B_TextEvent(thisEx.getName(), true));
-            player.setStepBoolean(7, STEP_BOOLEAN.RIGHT);
+
+        for (int i = 0; i < player.getSteps().size(); i++) {
+            if (player.getStep(i).getName().equals(player.getMap().get(example.getName()))) {
+                queueEvent(new B_TextEvent(example.getName(), true));
+                player.setStepBoolean(i, STEP_BOOLEAN.RIGHT);
+                currentIndex++;
+                break;
+            }
         }
     }
 
