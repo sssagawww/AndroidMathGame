@@ -90,9 +90,6 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
             music.stop();
             /*game.getExampleDatabase().initializeExamples3();
             game.getStepDatabase().initializeSteps3();*/
-        } else if (enemy2) {
-            /*game.getExampleDatabase().initializeExamples2();
-            game.getStepDatabase().initializeSteps2();*/
         } else {
             /*game.getExampleDatabase().initializeExamples();
             game.getStepDatabase().initializeSteps();*/

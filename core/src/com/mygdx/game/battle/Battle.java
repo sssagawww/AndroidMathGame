@@ -81,7 +81,7 @@ public class Battle implements BattleEventQueue {
             queueEvent(new B_TextEvent("Неправильный ответ. Промах!", 0.5f));
         } else if (battleUser == enemy) {
             double p = Math.random();
-            if (p <= 0.5) {
+            if (p <= 0.6) {
                 queueEvent(new B_TextEvent(battleUser.getName() + " атакует!", 0.5f));
                 if (mechanics.attemptHit(step, battleUser, battleTarget)) {
                     step.useMove(mechanics, battleUser, battleTarget, entity, this);
