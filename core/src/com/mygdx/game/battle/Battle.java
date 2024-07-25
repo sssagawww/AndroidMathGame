@@ -11,6 +11,8 @@ import com.mygdx.game.battle.steps.Step;
 import com.mygdx.game.battle.steps.StepsDetails;
 import com.mygdx.game.entities.BattleEntity;
 
+import java.util.ArrayList;
+
 public class Battle implements BattleEventQueue {
     public enum STATE {
         READY_TO_PROGRESS,
@@ -102,14 +104,14 @@ public class Battle implements BattleEventQueue {
     }
 
     public void playAnswers(StepsDetails steps, SelectionBtnBox selectionBox) {
-        int prevNum;
-        int randomStepNum = 0;
+        ArrayList<Integer> prevNums = new ArrayList<>();
+        int randomStepNum = -1;
         System.out.println(currentAnswer + " currentAnswer");
-        randomNum = (int) (Math.random() * 3);
+        randomNum = (int) (Math.random() * 4);
         for (int i = 0; i <= 3; i++) {
-            prevNum = randomStepNum;
-            randomStepNum = (int) Math.floor(Math.random() * player.getSteps().size() - 1);
-            if (randomStepNum == prevNum || randomStepNum == currentIndex - 1 || randomStepNum == -1)
+            prevNums.add(randomStepNum);
+            randomStepNum = (int) Math.floor(Math.random() * player.getSteps().size());
+            if (prevNums.contains(randomStepNum) || randomStepNum == currentIndex - 1 || randomStepNum == -1)
                 randomStepNum = (int) Math.floor(Math.random() * player.getSteps().size() - 1);
 
             String label = "---";
@@ -127,6 +129,7 @@ public class Battle implements BattleEventQueue {
             }
             System.out.println(steps.getStepBoolean());
         }
+        prevNums.clear();
         currentAnswer++;
     }
 

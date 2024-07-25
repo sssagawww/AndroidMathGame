@@ -22,6 +22,7 @@ public class BattleEntity {
     private int currentHP;
     private ArrayList<Step> steps = new ArrayList<>();
     private ArrayList<Example> examples = new ArrayList<>();
+    private int count = 8;
 
     public BattleEntity(String name) {
         this.name = name;
@@ -39,12 +40,19 @@ public class BattleEntity {
     public static BattleEntity generateEntity(String name, StepDatabase stepDatabase, ExampleDatabase exampleDatabase) {
         BattleEntity entity = new BattleEntity(name);
 
-        for (int i = 0; i < stepDatabase.getSteps().size(); i++) {
-            entity.addStep(stepDatabase.getStep(i));
+        for (int i = 0; i < entity.count; i++) {
+            int r = (int) Math.floor(Math.random() * exampleDatabase.getExamples().size());
+            if (entity.getExamples().contains(exampleDatabase.getExample(r))) {
+                r = (int) Math.floor(Math.random() * exampleDatabase.getExamples().size());
+            }
+            entity.addExample(exampleDatabase.getExample(r));
+            entity.addStep(stepDatabase.getStep(r));
         }
 
-        for (int i = 0; i < exampleDatabase.getExamples().size(); i++) {
-            entity.addExample(exampleDatabase.getExample(i));
+        for (int i = 0; i < stepDatabase.getSteps().size() - entity.count; i++) {
+            if (!entity.getSteps().contains(stepDatabase.getStep(i))) {
+                entity.addStep(stepDatabase.getStep(i));
+            }
         }
 
         entity.createMap(stepDatabase, exampleDatabase);
@@ -116,7 +124,7 @@ public class BattleEntity {
     }
 
     public STEP_BOOLEAN getStepBoolean(int index) {
-        if(index<0){
+        if (index < 0) {
             return WRONG;
         }
         return steps.get(index).getStepBoolean();
