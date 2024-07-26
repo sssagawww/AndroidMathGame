@@ -73,8 +73,6 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
     private Queue<BattleEvent> queue = new ArrayDeque<BattleEvent>();
     private Battle battle;
     private B2DSprite boss;
-    private Texture tex;
-    private Texture texEnemy;
     private Music music;
     private static boolean done;
     private static boolean bossFight;
@@ -90,23 +88,21 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
         createMusic();
         if (bossFight) {
             music.stop();
-            game.getExampleDatabase().initializeExamples3();
-            game.getStepDatabase().initializeSteps3();
-        } else if (enemy2) {
-            game.getExampleDatabase().initializeExamples2();
-            game.getStepDatabase().initializeSteps2();
+            /*game.getExampleDatabase().initializeExamples3();
+            game.getStepDatabase().initializeSteps3();*/
         } else {
-            game.getExampleDatabase().initializeExamples();
-            game.getStepDatabase().initializeSteps();
+            /*game.getExampleDatabase().initializeExamples();
+            game.getStepDatabase().initializeSteps();*/
+            game.getExampleDatabase().initializeAllExamples();
+            game.getStepDatabase().initializeAllSteps();
         }
 
         fightCam = new BoundedCamera();
         fightCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
         fightCam.setBounds(0, 4864, 0, 2688);
 
-        tex = MyGdxGame.res.getTexture("enemy");
-        battle = new Battle(BattleEntity.generateEntity("Игрок", tex, game.getStepDatabase(), game.getExampleDatabase()),
-                BattleEntity.generateEntity("Враг", texEnemy, game.getStepDatabase(), game.getExampleDatabase()));
+        battle = new Battle(BattleEntity.generateEntity("Игрок", game.getStepDatabase(), game.getExampleDatabase()),
+                BattleEntity.generateEntity("Враг", game.getStepDatabase(), game.getExampleDatabase()));
         battle.setEventPlayer(this);
 
         //battleRenderer = new BattleRenderer(game.getAssetManager());

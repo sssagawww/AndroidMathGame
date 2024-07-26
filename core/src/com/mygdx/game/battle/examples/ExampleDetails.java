@@ -3,12 +3,10 @@ package com.mygdx.game.battle.examples;
 public class ExampleDetails {
    private EXAMPLE_NUM exampleList;
    private String name;
-   private int num;
 
-   public ExampleDetails(EXAMPLE_NUM list, String name, int num){
+   public ExampleDetails(EXAMPLE_NUM list, String name){
       this.exampleList = list;
       this.name = name;
-      this.num = num;
    }
 
    public EXAMPLE_NUM getExampleList() {
@@ -21,9 +19,5 @@ public class ExampleDetails {
 
    public String getName() {
       return name;
-   }
-
-   public int getNum() {
-      return num;
    }
 }

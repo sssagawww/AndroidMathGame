@@ -132,6 +132,7 @@ public class MazeState extends GameState implements Controllable {
                 BattleState2.setDone(false);
                 entities.removeEntity(removedBody);
                 removedBody.getFixtureList().get(0).setUserData("collided");
+                removedBody.getFixtureList().get(0).setSensor(true);
             }
             isStopped = false;
             multiplexer.addProcessor(controllerStage);
@@ -242,6 +243,9 @@ public class MazeState extends GameState implements Controllable {
             }
             cdef.shape = cshape;
             cdef.isSensor = false;
+            if (mo.getName().equals("chest")) {
+                cdef.isSensor = true;
+            }
             cdef.filter.categoryBits = BIT_TROPA;
             cdef.filter.maskBits = BIT_PLAYER;
             cshape.dispose();

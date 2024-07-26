@@ -1,6 +1,7 @@
 package com.mygdx.game.entities;
 
-import com.badlogic.gdx.graphics.Texture;
+import static com.mygdx.game.battle.steps.STEP_BOOLEAN.WRONG;
+
 import com.mygdx.game.battle.STAT;
 import com.mygdx.game.battle.examples.Example;
 import com.mygdx.game.battle.examples.ExampleDatabase;
@@ -9,6 +10,7 @@ import com.mygdx.game.battle.steps.Step;
 import com.mygdx.game.battle.steps.StepDatabase;
 import com.mygdx.game.battle.steps.StepsDetails;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,17 +18,18 @@ public class BattleEntity {
     private String name;
     private int level;
     private Map<STAT, Integer> stats;
+    private HashMap<String, String> map;
     private int currentHP;
-    private Step[] steps = new Step[10];
-    private Example[] examples = new Example[6];
-    private Texture tex;
+    private ArrayList<Step> steps = new ArrayList<>();
+    private ArrayList<Example> examples = new ArrayList<>();
+    private int count = 8;
 
-    public BattleEntity(String name, Texture tex){
+    public BattleEntity(String name) {
         this.name = name;
-        this.tex = tex;
         this.level = 5; //?
 
-        stats = new HashMap<STAT, Integer>();
+        map = new HashMap<>();
+        stats = new HashMap<>();
         for (STAT stat : STAT.values()) {
             stats.put(stat, 15);
         }
@@ -34,35 +37,49 @@ public class BattleEntity {
         currentHP = stats.get(STAT.HP);
     }
 
-    public static BattleEntity generateEntity(String name, Texture tex, StepDatabase stepDatabase, ExampleDatabase exampleDatabase) {
-        BattleEntity entity = new BattleEntity(name, tex);
+    public static BattleEntity generateEntity(String name, StepDatabase stepDatabase, ExampleDatabase exampleDatabase) {
+        BattleEntity entity = new BattleEntity(name);
 
-        for (int i = 0; i < 10; i++){
-            entity.setSteps(i, stepDatabase.getSteps(i));
+        for (int i = 0; i < entity.count; i++) {
+            int r = (int) Math.floor(Math.random() * exampleDatabase.getExamples().size());
+            if (entity.getExamples().contains(exampleDatabase.getExample(r))) {
+                r = (int) Math.floor(Math.random() * exampleDatabase.getExamples().size());
+            }
+            entity.addExample(exampleDatabase.getExample(r));
+            entity.addStep(stepDatabase.getStep(r));
         }
 
-        /*entity.setSteps(0, stepDatabase.getSteps(0));
-        entity.setSteps(1, stepDatabase.getSteps(1));
-        entity.setSteps(2, stepDatabase.getSteps(2));
-        entity.setSteps(3, stepDatabase.getSteps(3));*/
+        for (int i = 0; i < stepDatabase.getSteps().size() - entity.count; i++) {
+            if (!entity.getSteps().contains(stepDatabase.getStep(i))) {
+                entity.addStep(stepDatabase.getStep(i));
+            }
+        }
 
-        entity.setExamples(1, exampleDatabase.getExample(0)); //setExamples начинается с 1, а должен с 0 <-- fix?
+        entity.createMap(stepDatabase, exampleDatabase);
+
+        /*entity.setExamples(1, exampleDatabase.getExample(0)); //setExamples начинается с 1, а должен с 0
         entity.setExamples(2, exampleDatabase.getExample(1));
         entity.setExamples(3, exampleDatabase.getExample(2));
         entity.setExamples(4, exampleDatabase.getExample(3));
-        entity.setExamples(5, exampleDatabase.getExample(4));
+        entity.setExamples(5, exampleDatabase.getExample(4));*/
 
         return entity;
     }
 
-    public void applyDamage(int amount){
+    public void applyDamage(int amount) {
         currentHP -= amount;
         if (currentHP < 0) {
             currentHP = 0;
         }
     }
 
-    public boolean isDefeated(){
+    private void createMap(StepDatabase stepDatabase, ExampleDatabase exampleDatabase) {
+        for (int i = 0; i < exampleDatabase.getExamples().size(); i++) {
+            map.put(exampleDatabase.getExample(i).getName(), stepDatabase.getStep(i).getName());
+        }
+    }
+
+    public boolean isDefeated() {
         return currentHP == 0;
     }
 
@@ -76,10 +93,6 @@ public class BattleEntity {
 
     public int getLevel() {
         return level;
-    }
-
-    public Texture getTex() {
-        return tex;
     }
 
     public int getStats(STAT stat) {
@@ -98,31 +111,46 @@ public class BattleEntity {
         this.currentHP = currentHitpoints;
     }
 
-    public Step getSteps(int index) {
-        return steps[index].clone();
+    public Step getStep(int index) {
+        return steps.get(index);
     }
 
-    public void setSteps(int index, Step step) {
-        steps[index] = step;
+    public void addStep(Step step) {
+        steps.add(step);
     }
 
     public StepsDetails getDetails(int index) {
-        return steps[index].getStepDetails();
+        return steps.get(index).getStepDetails();
     }
 
-    public STEP_BOOLEAN getBoolean(int index) {
-        return steps[index].getStepBoolean();
+    public STEP_BOOLEAN getStepBoolean(int index) {
+        if (index < 0) {
+            return WRONG;
+        }
+        return steps.get(index).getStepBoolean();
     }
 
-    public void setStepBoolean(int index, STEP_BOOLEAN stepBoolean){
-        steps[index].setStepBoolean(stepBoolean);
+    public void setStepBoolean(int index, STEP_BOOLEAN stepBoolean) {
+        steps.get(index).setStepBoolean(stepBoolean);
     }
 
-    public Example getExamples(int index) {
-        return examples[index].clone();
+    public Example getExample(int index) {
+        return examples.get(index);
     }
 
-    public void setExamples(int index, Example example) {
-        examples[index] = example;
+    public void addExample(Example example) {
+        examples.add(example);
+    }
+
+    public ArrayList<Step> getSteps() {
+        return steps;
+    }
+
+    public ArrayList<Example> getExamples() {
+        return examples;
+    }
+
+    public HashMap<String, String> getMap() {
+        return map;
     }
 }
