@@ -114,6 +114,9 @@ public class Battle implements BattleEventQueue {
             if (prevNums.contains(randomStepNum) || randomStepNum == currentIndex - 1 || randomStepNum == -1)
                 randomStepNum = (int) Math.floor(Math.random() * player.getSteps().size() - 1);
 
+            if(randomStepNum == -1)
+                randomStepNum = 0;
+
             String label = "---";
             steps = player.getDetails(randomStepNum);
             if (steps != null) {

@@ -175,6 +175,7 @@ public class MazeState extends GameState implements Controllable {
             time += dt;
             if (hoodedRun && dcontroller.isFinished() && progress && entities.getEntity(entities.getEntityCount() - 1).getBody().getFixtureList().get(0).getUserData().equals("hooded")) {
                 removeCollisionEntity(entities.getEntity(entities.getEntityCount() - 1).getBody());
+                entities.getEntity(entities.getEntityCount() - 1).getBody().getFixtureList().get(0).setSensor(true);
                 entities.getEntity(entities.getEntityCount() - 1).getBody().getFixtureList().get(0).setUserData("collided");
                 entities.removeEntity(removedBody);
                 //entities.getEntity(entities.getEntityCount()-1).getBody().setLinearVelocity(-1,1);
