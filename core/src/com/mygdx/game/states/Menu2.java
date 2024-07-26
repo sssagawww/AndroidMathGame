@@ -253,14 +253,14 @@ public class Menu2 extends GameState {
                 game.save = true;
                 if (game.getDbWrapper().getProgress().size() != 0)
                     controller.getInventory().reload(game.getDbWrapper());
-                gsm.setState(MyGdxGame.getPrefs().getInteger(PREF_STATE, NEW_GAME));
+                gsm.setState(MyGdxGame.getPrefs().getInteger(PREF_STATE, BLACK_SCREEN));
                 break;
             case ONLINE:
                 onlineBtns.setVisible(!onlineBtns.isVisible());
                 cell.setActor(onlineBtns);
                 break;
             case SAVE:
-                gsm.setLastState(MyGdxGame.getPrefs().getInteger(PREF_STATE, NEW_GAME));
+                gsm.setLastState(MyGdxGame.getPrefs().getInteger(PREF_STATE, BLACK_SCREEN));
                 game.saveProgress();
                 break;
             case STATISTICS:
