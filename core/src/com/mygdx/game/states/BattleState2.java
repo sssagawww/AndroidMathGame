@@ -88,14 +88,9 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
         createMusic();
         if (bossFight) {
             music.stop();
-            /*game.getExampleDatabase().initializeExamples3();
-            game.getStepDatabase().initializeSteps3();*/
-        } else {
-            /*game.getExampleDatabase().initializeExamples();
-            game.getStepDatabase().initializeSteps();*/
-            game.getExampleDatabase().initializeAllExamples();
-            game.getStepDatabase().initializeAllSteps();
         }
+        game.getExampleDatabase().initializeAllExamples();
+        game.getStepDatabase().initializeAllSteps();
 
         fightCam = new BoundedCamera();
         fightCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
