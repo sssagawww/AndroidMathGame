@@ -18,6 +18,9 @@ jobs:
           distribution: 'corretto'
           java-version: '17'
           
+      - name: Grant permission
+        run: chmod -R 777 ./gradlew
+          
       - name: Build APK
         run: ./gradlew assembleRelease
       - name: Build AAB
