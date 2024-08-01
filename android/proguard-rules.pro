@@ -41,3 +41,5 @@
 }
 -keep class com.orm.** { *; }
 -keep class com.mygdx.game.** { *; }
+-keep class com.google.gson.** { *; }
+-keep public class com.badlogic.gdx.** { *; }
