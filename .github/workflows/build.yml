@@ -25,4 +25,11 @@ jobs:
         run: ./gradlew assembleRelease
       - name: Build AAB
         run: ./gradlew bundleRelease   
-      
+        
+      - uses: actions/upload-artifact@v4
+        with:
+          name: builds
+          path: |
+            app/build/outputs/apk/release/
+            app/build/outputs/bundle/release/
+
