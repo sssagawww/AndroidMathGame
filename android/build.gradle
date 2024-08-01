@@ -1,6 +1,7 @@
 android {
     buildToolsVersion "34.0.0"
     compileSdkVersion 34
+    namespace "com.mygdx.game"
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
