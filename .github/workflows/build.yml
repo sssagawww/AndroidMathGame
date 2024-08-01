@@ -28,7 +28,7 @@ jobs:
           java-version: '17'
       - name: Make gradlew executable
         run: chmod +x ./gradlew
-      - run: ./gradlew build --warning-mode=all
+      - run: ./gradlew build --warning-mode=all -stacktrace
 
       - name: Decode Keystore
         run: |
