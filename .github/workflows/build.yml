@@ -25,6 +25,7 @@ jobs:
         with:
           distribution: 'corretto'
           java-version: '17'
+      - run: ./gradlew build --warning-mode=all
 
       - name: Decode Keystore
         run: |
