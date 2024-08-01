@@ -26,9 +26,6 @@ jobs:
         with:
           distribution: 'corretto'
           java-version: '17'
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
-      - run: ./gradlew build --warning-mode=all -stacktrace
 
       - name: Decode Keystore
         run: |
@@ -58,5 +55,5 @@ jobs:
         with:
           name: builds
           path: |
-            app/build/outputs/apk/release/
-            app/build/outputs/bundle/release/
+            android/build/outputs/apk/release/
+            android/build/outputs/bundle/release/
