@@ -36,3 +36,10 @@
    boolean reportFixture(long);
    float   reportRayFixture(long, float, float, float, float, float);
 }
+-keep public class * extends com.orm.SugarRecord {
+  public protected *;
+}
+-keep class com.orm.** { *; }
+-keep class com.mygdx.game.** { *; }
+-keep class com.google.gson.** { *; }
+-keep public class com.badlogic.gdx.** { *; }
