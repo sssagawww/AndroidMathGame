@@ -38,7 +38,7 @@ public class PaintMenu extends Table {
         period = 60;
 
         uiTable = new Table();
-        this.add(uiTable).width(V_WIDTH / 3.5f).height(V_HEIGHT);
+        this.add(uiTable).width(Gdx.graphics.getWidth() / 3.5f).height(Gdx.graphics.getHeight());
         this.setBackground("menuBtn_up");
         //uiTable.setDebug(true);
 

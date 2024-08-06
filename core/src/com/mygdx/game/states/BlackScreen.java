@@ -1,8 +1,6 @@
 package com.mygdx.game.states;
 
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.*;
-import static com.mygdx.game.MyGdxGame.V_HEIGHT;
-import static com.mygdx.game.MyGdxGame.V_WIDTH;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
@@ -97,7 +95,7 @@ public class BlackScreen extends GameState {
 
     public void initUI() {
         uiStage = new Stage(new ScreenViewport());
-        uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+        uiStage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 
         Table root = new Table();
         root.setFillParent(true);

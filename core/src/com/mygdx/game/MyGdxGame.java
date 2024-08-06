@@ -122,7 +122,7 @@ public class MyGdxGame implements ApplicationListener {
         skin = SkinManager.generateSkin(assetManager);
 
         controllerStage = new Stage(new ScreenViewport());
-        controllerStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+        controllerStage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
         controller = new Controller(skin);
         controller.setVisible(true);
 
@@ -133,7 +133,7 @@ public class MyGdxGame implements ApplicationListener {
 
         sb = new SpriteBatch();
         cam = new BoundedCamera();
-        cam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
+        cam.setToOrtho(false, (float) (Gdx.graphics.getWidth()), (float) (Gdx.graphics.getHeight()));
         stepDatabase = new StepDatabase();
         exampleDatabase = new ExampleDatabase();
         figuresDatabase = new FiguresDatabase(this);

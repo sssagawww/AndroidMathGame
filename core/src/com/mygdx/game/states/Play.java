@@ -121,9 +121,9 @@ public class Play extends GameState implements Controllable {
 
         cam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
         b2dCam = new BoundedCamera(); //рисует дебаг коллизию?
-        b2dCam.setToOrtho(false, V_WIDTH / PPM, V_HEIGHT / PPM); // /2?
+        b2dCam.setToOrtho(false, Gdx.graphics.getWidth() / PPM, Gdx.graphics.getHeight() / PPM); // /2?
         b2dCam.setBounds(0, (tileMapWidth * tileSize) / PPM, 0, (tileMapHeight * tileSize) / PPM);
-        System.out.println("V_HEIGHT: " + MyGdxGame.V_HEIGHT + " player: " + player.getPosition().x + " " + player.getPosition().y);
+        System.out.println("Gdx.graphics.getHeight: " + Gdx.graphics.getHeight() + " player: " + player.getPosition().x + " " + player.getPosition().y);
     }
 
     @Override
@@ -134,6 +134,8 @@ public class Play extends GameState implements Controllable {
     public void update(float dt) {
         handleInput();
         world.step(dt, 6, 2);
+
+        //отрисовка игрока и нпс
         player.update(dt);
         entities.update(dt);
         for (Map.Entry<String, MovableNPC> entry : movableNPCs.entrySet()) {
@@ -142,9 +144,9 @@ public class Play extends GameState implements Controllable {
         }
 
         movableNPCs.get("rabbit").randomDirection(30, dt);
-
         player.updatePL();
 
+        //изменение громкости
         if (controller.getSoundSettings().getSliderBg().isDragging()) {
             music.setVolume(getBgVolume());
         }
@@ -211,7 +213,7 @@ public class Play extends GameState implements Controllable {
             joyStick.setDefaultPos();
         }
 
-        //можно начать бой
+        //отрисовка UI, когда произошло взаимодействие
         if (canDraw) {
             uiStage.act(dt);
             dcontroller.update(dt);
@@ -235,23 +237,18 @@ public class Play extends GameState implements Controllable {
         controllerStage.act(dt);
     }
 
-    private float getBgVolume() {
-        return controller.getSoundSettings().getSliderBg().getPercent();
-    }
-
     @Override
     public void render() {
         Gdx.gl20.glClearColor(0, 0, 0, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        cam.setPosition(player.getPosition().x * PPM + V_WIDTH / 35, player.getPosition().y * PPM + V_HEIGHT / 35);
-        //cam.position.set(player.getPosition().x * PPM / 2, player.getPosition().y * PPM / 2, 0);
+        cam.setPosition(player.getPosition().x * PPM, player.getPosition().y * PPM);
         cam.update();
 
-        //рисует карту из Tiled
+        //отрисовка верхних слоев карты из Tiled
         tmr.setView(cam);
         tmr.render(backgroundLayers);
 
-        //рисует игрока и нпс
+        //отрисовка игрока и нпс
         sb.setProjectionMatrix(cam.combined); //https://stackoverflow.com/questions/33703663/understanding-the-libgdx-projection-matrix - объяснение
         player.render(sb, 80f, 86.6f);
 
@@ -262,18 +259,20 @@ public class Play extends GameState implements Controllable {
             npc.render(sb, npc.getWidth() * 1.5f, npc.getHeight() * 1.5f);
         }
 
+        //отрисовка нижних слоев карты из Tiled
         tmr.render(foregroundLayers);
 
-        //рисует коллизию
+        //отрисовка коллизии в дебаг режиме
         if (debug) {
             b2dCam.position.set(player.getPosition().x, player.getPosition().y, 0);
             b2dCam.update();
             b2dr.render(world, b2dCam.combined);
         }
 
+        //отрисовка джойстика
         joyStick.render(shapeRenderer);
 
-        //рисует UI, когда произошло взаимодействие
+        //отрисовка UI, когда произошло взаимодействие
         if (canDraw) {
             uiStage.draw();
             if (contactBody != null) {
@@ -286,6 +285,7 @@ public class Play extends GameState implements Controllable {
             }
         }
 
+        //отрисовка кнопок контроллера
         controllerStage.draw();
     }
 
@@ -419,7 +419,6 @@ public class Play extends GameState implements Controllable {
             }
         }
     }
-
     private void createNPC() {
         MapLayer mlayer = tiledMap.getLayers().get("npcLayer");
         if (mlayer == null) return;
@@ -511,7 +510,7 @@ public class Play extends GameState implements Controllable {
     private void initUI() {
         skin_this = game.getSkin();
         uiStage = new Stage(new ScreenViewport());
-        uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+        uiStage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 
         dialogRoot = new Table();
         dialogRoot.setFillParent(true);
@@ -527,7 +526,7 @@ public class Play extends GameState implements Controllable {
         Table dialogTable = new Table();
         dialogTable.add(optionBox)
                 .expand().align(Align.right)
-                .padRight((V_WIDTH / 1.05f) / 5f)
+                .padRight((Gdx.graphics.getWidth() / 1.05f) / 5f)
                 .space(8f)
                 .row();
         dialogTable.add(dialogBox)
@@ -546,17 +545,6 @@ public class Play extends GameState implements Controllable {
     }
 
     private void initController() {
-        /*controllerStage = new Stage(new ScreenViewport());
-        controllerStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
-
-        //controller = new Controller(skin_this);
-        controller.setVisible(true);
-
-        Table controllerRoot = new Table();
-        controllerRoot.setFillParent(true);
-        controllerRoot.add(controller).expand().align(Align.bottomLeft);
-        controllerStage.addActor(controllerRoot);*/
-
         System.out.println(game.getDbWrapper().getProgress() + " saved progress");
         multiplexer.addProcessor(controllerStage);
         Gdx.input.setInputProcessor(multiplexer);
@@ -564,8 +552,8 @@ public class Play extends GameState implements Controllable {
 
     private void initJoyStick() {
         joyCam = new BoundedCamera();
-        joyCam.setBounds(0, V_WIDTH, 0, V_HEIGHT);
-        joyCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
+        joyCam.setBounds(0, Gdx.graphics.getWidth(), 0, Gdx.graphics.getHeight());
+        joyCam.setToOrtho(false, (float) (Gdx.graphics.getWidth()), (float) (Gdx.graphics.getHeight()));
 
         joyStick = new JoyStick(200, 200, 200);
         shapeRenderer = new ShapeRenderer();
@@ -793,6 +781,10 @@ public class Play extends GameState implements Controllable {
         canDraw = false;
     }
 
+    private float getBgVolume() {
+        return controller.getSoundSettings().getSliderBg().getPercent();
+    }
+
     public Player2 getPlayer() {
         return player;
     }
@@ -803,9 +795,5 @@ public class Play extends GameState implements Controllable {
 
     public JoyStick getJoyStick() {
         return joyStick;
-    }
-
-    public Preferences getPrefs() {
-        return prefs;
     }
 }

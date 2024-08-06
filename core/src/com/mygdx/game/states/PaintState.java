@@ -105,8 +105,8 @@ public class PaintState extends GameState implements InputProcessor {
         createSD();
 
         paintCam = new BoundedCamera();
-        paintCam.setBounds(0, V_WIDTH, 0, V_HEIGHT);
-        paintCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
+        paintCam.setBounds(0, Gdx.graphics.getWidth(), 0, Gdx.graphics.getHeight());
+        paintCam.setToOrtho(false, (float) (Gdx.graphics.getWidth()), (float) (Gdx.graphics.getHeight()));
 
         Gdx.input.setInputProcessor(multiplexer);
     }
@@ -239,7 +239,7 @@ public class PaintState extends GameState implements InputProcessor {
 
     public void initUI() {
         uiStage = new Stage(new ScreenViewport());
-        uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+        uiStage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 
         Table root = new Table();
         root.setFillParent(true);
@@ -263,7 +263,7 @@ public class PaintState extends GameState implements InputProcessor {
         });
 
         onlineStage = new Stage(new ScreenViewport());
-        onlineStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+        onlineStage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
         if (online) {
             BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
             Label.LabelStyle lstyle = new Label.LabelStyle(font, Color.BLACK);
@@ -287,7 +287,7 @@ public class PaintState extends GameState implements InputProcessor {
             Table onlineRoot = new Table();
             onlineRoot.setFillParent(true);
             onlineStage.addActor(onlineRoot);
-            onlineRoot.add(readyLabel).width(V_WIDTH).height(V_HEIGHT / 4f).expand(true, false);
+            onlineRoot.add(readyLabel).width(Gdx.graphics.getWidth()).height(Gdx.graphics.getHeight() / 4f).expand(true, false);
         }
 
         Table table = new Table();
@@ -494,7 +494,7 @@ public class PaintState extends GameState implements InputProcessor {
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        if (screenX < V_WIDTH / 1.55f && screenY < V_HEIGHT) {
+        if (screenX < Gdx.graphics.getWidth() / 1.55f && screenY < Gdx.graphics.getHeight()) {
             skippedPoints.add(points.size() - 1);
         }
         return false;
@@ -507,8 +507,8 @@ public class PaintState extends GameState implements InputProcessor {
 
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
-        if (screenX < V_WIDTH / 1.55f && screenY < V_HEIGHT) {
-            points.add(new PixelPoint(screenX, V_HEIGHT - screenY));
+        if (screenX < Gdx.graphics.getWidth() / 1.55f && screenY < Gdx.graphics.getHeight()) {
+            points.add(new PixelPoint(screenX, Gdx.graphics.getHeight() - screenY));
             //arr.add(new Vector2(points.get(points.size()-1).getX(), points.get(points.size()-1).getY()));
             /*Vector2 newPoint = new Vector2(getPoints().get(points.size()-1).getX(), getPoints().get(points.size()-1).getY());
             if(!arr.contains(newPoint,false)){

@@ -35,17 +35,11 @@ import com.mygdx.game.entities.SlimeBoss;
 import com.mygdx.game.entities.StaticNPC;
 import com.mygdx.game.handlers.BoundedCamera;
 import com.mygdx.game.handlers.GameStateManager;
-import com.mygdx.game.handlers.MyContactListener;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
 
-import static com.mygdx.game.MyGdxGame.V_HEIGHT;
-import static com.mygdx.game.MyGdxGame.V_WIDTH;
 import static com.mygdx.game.handlers.B2DVars.*;
-import static com.mygdx.game.handlers.GameStateManager.FOREST;
-import static com.mygdx.game.handlers.GameStateManager.MAZE;
-import static com.mygdx.game.handlers.GameStateManager.MENU;
 
 public class BattleState2 extends GameState implements BattleEventPlayer {
     private MyGdxGame game;
@@ -93,7 +87,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
         game.getStepDatabase().initializeAllSteps();
 
         fightCam = new BoundedCamera();
-        fightCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
+        fightCam.setToOrtho(false, (float) (Gdx.graphics.getWidth()), (float) (Gdx.graphics.getHeight()));
         fightCam.setBounds(0, 4864, 0, 2688);
 
         battle = new Battle(BattleEntity.generateEntity("Игрок", game.getStepDatabase(), game.getExampleDatabase()),
@@ -164,7 +158,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
         //Gdx.input.setInputProcessor(bcontroller);
         Gdx.gl20.glClearColor(0, 0, 0, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        fightCam.setPosition(V_WIDTH / 2f, V_HEIGHT / 2f);
+        fightCam.setPosition(Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 2f);
         fightCam.update();
 
         //draw map
@@ -185,7 +179,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
 
     private void initUI() {
         uiStage = new Stage(new ScreenViewport());
-        uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+        uiStage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 
         dialogRoot = new Table();
         dialogRoot.setFillParent(true);
@@ -238,7 +232,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
 
     private void createLayers() {
         tiledMap = new TmxMapLoader().load("sprites/mystic_woods_free_2.1/fightmap2.tmx");
-        tmr = new OrthogonalTiledMapRenderer(tiledMap, 4); // !!!
+        tmr = new OrthogonalTiledMapRenderer(tiledMap, 5);
         tileSize = (int) tiledMap.getProperties().get("tilewidth");
 
         tileMapWidth = (int) tiledMap.getProperties().get("width");
@@ -249,7 +243,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
         BodyDef bdef = new BodyDef();
 
         bdef.type = BodyDef.BodyType.StaticBody;
-        bdef.position.set((V_WIDTH / 2f) / PPM - 5, (V_HEIGHT / 2f) / PPM);
+        bdef.position.set((Gdx.graphics.getWidth() / 2f) / PPM, (Gdx.graphics.getHeight() / 2f) / PPM);
         Body body = world.createBody(bdef);
 
         boss = new StaticNPC(body, "enemy", 5f);
@@ -263,7 +257,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
 
     private void initController() {
         controllerStage = new Stage(new ScreenViewport());
-        controllerStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+        controllerStage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 
         BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
         Label.LabelStyle lstyle = new Label.LabelStyle(font, Color.DARK_GRAY);

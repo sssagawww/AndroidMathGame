@@ -112,10 +112,10 @@ public class MazeState extends GameState implements Controllable {
         initFight();
 
         mazeCam = new BoundedCamera();
-        mazeCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
+        mazeCam.setToOrtho(false, (float) (Gdx.graphics.getWidth()), (float) (Gdx.graphics.getHeight()));
         mazeCam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
         b2dCam = new BoundedCamera();
-        b2dCam.setToOrtho(false, V_WIDTH / PPM, V_HEIGHT / PPM);
+        b2dCam.setToOrtho(false, Gdx.graphics.getWidth() / PPM, Gdx.graphics.getHeight() / PPM);
         b2dCam.setBounds(0, (tileMapWidth * tileSize) / PPM, 0, (tileMapHeight * tileSize) / PPM);
     }
 
@@ -193,7 +193,7 @@ public class MazeState extends GameState implements Controllable {
     public void render() {
         Gdx.gl20.glClearColor(0, 0, 0, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        mazeCam.setPosition(player.getPosition().x * PPM + V_WIDTH / 35, player.getPosition().y * PPM + V_HEIGHT / 35);
+        mazeCam.setPosition(player.getPosition().x * PPM, player.getPosition().y * PPM);
         mazeCam.update();
 
         tmr.setView(mazeCam);
@@ -352,8 +352,8 @@ public class MazeState extends GameState implements Controllable {
 
     private void initJoyStick() {
         joyCam = new BoundedCamera();
-        joyCam.setBounds(0, V_WIDTH, 0, V_HEIGHT);
-        joyCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT)); //не хватало этой строчки
+        joyCam.setBounds(0, Gdx.graphics.getWidth(), 0, Gdx.graphics.getHeight());
+        joyCam.setToOrtho(false, (float) (Gdx.graphics.getWidth()), (float) (Gdx.graphics.getHeight())); //не хватало этой строчки
 
         joyStick = new JoyStick(200, 200, 200);
         shapeRenderer = new ShapeRenderer();
@@ -367,14 +367,14 @@ public class MazeState extends GameState implements Controllable {
         root.setFillParent(true);
         root.add(image).center();
         darkStage = new Stage(new ScreenViewport());
-        darkStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+        darkStage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
         darkStage.addActor(root);
     }
 
     private void initFight() {
         skin_this = game.getSkin();
         uiStage = new Stage(new ScreenViewport());
-        uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+        uiStage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 
         dialogRoot = new Table();
         dialogRoot.setFillParent(true);

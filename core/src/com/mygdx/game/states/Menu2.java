@@ -8,9 +8,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TmxMapLoader;
-import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -23,7 +20,6 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.UI.*;
-import com.mygdx.game.handlers.Animation;
 import com.mygdx.game.handlers.GameStateManager;
 import com.mygdx.game.multiplayer.MushroomsRequest;
 
@@ -33,14 +29,7 @@ import static com.mygdx.game.MyGdxGame.*;
 
 public class Menu2 extends GameState {
     private MyGdxGame game;
-    private Play play;
-    private TiledMap tiledMap;
-    private OrthogonalTiledMapRenderer tmr;
-    private float tileSize;
-    private int tileMapWidth;
-    private int tileMapHeight;
     private InputMultiplexer multiplexer;
-    // UI
     private Table root;
     private Stage uiStage;
     private Statistics statistics;
@@ -49,30 +38,20 @@ public class Menu2 extends GameState {
     private BtnBox btnBox;
     private Table onlineBtns;
     private Cell cell;
-    private Texture bgImg;
-    private Animation animation;
     private ConnectionMenu connectionMenu;
     private Sprite bg;
-    // END UI
 
     public Menu2(GameStateManager gsm) {
         super(gsm);
         game = gsm.game();
-        play = gsm.getPlay();
         multiplexer = new InputMultiplexer();
 
-        /*Texture tex = MyGdxGame.res.getTexture("gnomik");
-        TextureRegion[] sprites = TextureRegion.split(tex, 120, 129)[3];
-        animation = new Animation(sprites, 1/10f);
-        bgImg = new Texture("UI/bg.png");*/
-
-        bg = new Sprite(new Texture("UI/menu.png"));
+        bg = new Sprite(new Texture("UI/menu2.png"));
         font.setColor(Color.BLACK);
         layout = new GlyphLayout(font, "Quenta");
 
         init();
-        createLayers();
-        cam.setBounds(0, V_WIDTH, 0, V_HEIGHT); //? //4864 2688
+        cam.setBounds(0, Gdx.graphics.getWidth(), 0, Gdx.graphics.getHeight()); //? //4864 2688
     }
 
 
@@ -84,7 +63,6 @@ public class Menu2 extends GameState {
     @Override
     public void update(float dt) {
         uiStage.act(dt);
-        //animation.update(dt);
         checkBtns();
     }
 
@@ -95,39 +73,21 @@ public class Menu2 extends GameState {
         cam.setPosition(0, 0);
         cam.update();
 
-        /*tmr.setView(cam);
-        tmr.render();*/
-
         sb.setProjectionMatrix(cam.combined);
 
         sb.begin();
-
-        sb.draw(bg, 0, 0, V_WIDTH, V_HEIGHT);
-
-        /*sb.draw(bgImg, 0, 0, V_WIDTH, V_HEIGHT);
-        sb.draw(animation.getFrame(), V_WIDTH - V_WIDTH/3f, 0);*/
-
-        /*font.getData().setScale(2);
+        sb.draw(bg, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        font.getData().setScale(Gdx.graphics.getHeight()/250f);
         layout.setText(font, "Quenta");
-        font.draw(sb, layout, V_WIDTH / 2f - layout.width / 2, V_HEIGHT / 2f + layout.height + 80);*/
+        font.draw(sb, layout, Gdx.graphics.getWidth() / 2f - layout.width / 2, Gdx.graphics.getHeight() / 2f + layout.height);
         sb.end();
 
         uiStage.draw();
     }
 
-    private void createLayers() {
-        tiledMap = new TmxMapLoader().load("sprites/mystic_woods_free_2.1/menu.tmx");
-        //tmr = new OrthogonalTiledMapRenderer(tiledMap, 3.82f); // !!!
-        tmr = new OrthogonalTiledMapRenderer(tiledMap, V_WIDTH / (tiledMap.getProperties().get("width", Integer.class) * 16f));
-        tileSize = (int) tiledMap.getProperties().get("tilewidth");
-
-        tileMapWidth = (int) tiledMap.getProperties().get("width");
-        tileMapHeight = (int) tiledMap.getProperties().get("height");
-    }
-
     private void init() {
         uiStage = new Stage(new ScreenViewport());
-        uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+        uiStage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 
         root = new Table();
         root.setFillParent(true);
@@ -148,7 +108,7 @@ public class Menu2 extends GameState {
 
         table.add(btnBox);
         root.add(table).expand().align(Align.bottom).padBottom(100f).expand();
-        root.add(statistics).width(V_WIDTH / 2f).right().padRight(25f);
+        root.add(statistics).width(Gdx.graphics.getWidth() / 2f).right().padRight(25f);
         createOnlineBtns();
 
         multiplexer.addProcessor(uiStage);

@@ -129,10 +129,10 @@ public class Forest extends GameState implements Controllable {
         initFight();
 
         forCam = new BoundedCamera();
-        forCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
+        forCam.setToOrtho(false, (float) (Gdx.graphics.getWidth()), (float) (Gdx.graphics.getHeight()));
         forCam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
         b2dCam = new BoundedCamera();
-        b2dCam.setToOrtho(false, V_WIDTH / PPM, V_HEIGHT / PPM);
+        b2dCam.setToOrtho(false, Gdx.graphics.getWidth() / PPM, Gdx.graphics.getHeight() / PPM);
         b2dCam.setBounds(0, (tileMapWidth * tileSize) / PPM, 0, (tileMapHeight * tileSize) / PPM);
     }
 
@@ -229,7 +229,7 @@ public class Forest extends GameState implements Controllable {
     public void render() {
         Gdx.gl20.glClearColor(0, 0, 0, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        forCam.setPosition(player.getPosition().x * PPM + V_WIDTH / 35, player.getPosition().y * PPM + V_HEIGHT / 35);
+        forCam.setPosition(player.getPosition().x * PPM, player.getPosition().y * PPM);
         forCam.update();
 
         tmr.setView(forCam);
@@ -433,7 +433,7 @@ public class Forest extends GameState implements Controllable {
     private void initFight() {
         skin_this = game.getSkin();
         uiStage = new Stage(new ScreenViewport());
-        uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+        uiStage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 
         dialogRoot = new Table();
         dialogRoot.setFillParent(true);
@@ -449,7 +449,7 @@ public class Forest extends GameState implements Controllable {
         Table dialogTable = new Table();
         dialogTable.add(optionBox)
                 .expand().align(Align.right)
-                .padRight((V_WIDTH / 1.05f) / 5f)
+                .padRight((Gdx.graphics.getWidth() / 1.05f) / 5f)
                 .space(8f)
                 .row();
         dialogTable.add(dialogBox)
@@ -474,8 +474,8 @@ public class Forest extends GameState implements Controllable {
 
     private void initJoyStick() {
         joyCam = new BoundedCamera();
-        joyCam.setBounds(0, V_WIDTH, 0, V_HEIGHT);
-        joyCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
+        joyCam.setBounds(0, Gdx.graphics.getWidth(), 0, Gdx.graphics.getHeight());
+        joyCam.setToOrtho(false, (float) (Gdx.graphics.getWidth()), (float) (Gdx.graphics.getHeight()));
 
         joyStick = new JoyStick(200, 200, 200);
         shapeRenderer = new ShapeRenderer();
@@ -489,7 +489,7 @@ public class Forest extends GameState implements Controllable {
         root.setFillParent(true);
         root.add(image).center();
         darkStage = new Stage(new ScreenViewport());
-        darkStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+        darkStage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
         darkStage.addActor(root);
     }
 

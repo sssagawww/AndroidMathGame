@@ -16,6 +16,7 @@
         android:usesCleartextTraffic="true"
         tools:ignore="UnusedAttribute"
         tools:replace="android:icon"
+        android:theme="@style/MainTheme"
         android:name="com.orm.SugarApp">
         <activity
             android:name="com.mygdx.game.AndroidLauncher"

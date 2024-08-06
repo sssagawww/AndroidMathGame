@@ -1,15 +1,12 @@
 package com.mygdx.game.states;
 
 import static com.mygdx.game.MyGdxGame.PREF_ID;
-import static com.mygdx.game.MyGdxGame.V_HEIGHT;
-import static com.mygdx.game.MyGdxGame.V_WIDTH;
 import static com.mygdx.game.handlers.B2DVars.BIT_PLAYER;
 import static com.mygdx.game.handlers.B2DVars.BIT_TROPA;
 import static com.mygdx.game.handlers.B2DVars.PPM;
 import static com.mygdx.game.handlers.GameStateManager.MENU;
 import static com.mygdx.game.handlers.GameStateManager.MUSHROOMS;
 
-import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.audio.Sound;
@@ -124,10 +121,10 @@ public class MushroomsState extends GameState implements Controllable {
         createTiles();
 
         pickCam = new BoundedCamera();
-        pickCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
+        pickCam.setToOrtho(false, (float) (Gdx.graphics.getWidth()), (float) (Gdx.graphics.getHeight()));
         pickCam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
         b2dCam = new BoundedCamera();
-        b2dCam.setToOrtho(false, V_WIDTH / PPM, V_HEIGHT / PPM);
+        b2dCam.setToOrtho(false, Gdx.graphics.getWidth() / PPM, Gdx.graphics.getHeight() / PPM);
         b2dCam.setBounds(0, (tileMapWidth * tileSize) / PPM, 0, (tileMapHeight * tileSize) / PPM);
     }
 
@@ -224,7 +221,7 @@ public class MushroomsState extends GameState implements Controllable {
     public void render() {
         Gdx.gl20.glClearColor(0, 0, 0, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        pickCam.setPosition(player.getPosition().x * PPM + V_WIDTH / 35, player.getPosition().y * PPM + V_HEIGHT / 35);
+        pickCam.setPosition(player.getPosition().x * PPM, player.getPosition().y * PPM);
         pickCam.update();
 
         tmr.setView(pickCam);
@@ -350,8 +347,8 @@ public class MushroomsState extends GameState implements Controllable {
 
     private void initJoyStick() {
         joyCam = new BoundedCamera();
-        joyCam.setBounds(0, V_WIDTH, 0, V_HEIGHT);
-        joyCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
+        joyCam.setBounds(0, Gdx.graphics.getWidth(), 0, Gdx.graphics.getHeight());
+        joyCam.setToOrtho(false, (float) (Gdx.graphics.getWidth()), (float) (Gdx.graphics.getHeight()));
 
         joyStick = new JoyStick(200, 200, 200);
         shapeRenderer = new ShapeRenderer();
@@ -380,7 +377,7 @@ public class MushroomsState extends GameState implements Controllable {
 
     private void initFight() {
         uiStage = new Stage(new ScreenViewport());
-        uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+        uiStage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 
         BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
         Label.LabelStyle lstyle = new Label.LabelStyle(font, Color.BLACK);
@@ -413,7 +410,7 @@ public class MushroomsState extends GameState implements Controllable {
         topTable.setFillParent(true);
         topTable.add(mainLabel).align(Align.top).expand(true, false).row();
         rightTable.add(scoreTable).right().row();
-        rightTable.add(readyBtn).width(V_WIDTH / 15f).height(V_WIDTH / 15f).right();
+        rightTable.add(readyBtn).width(Gdx.graphics.getWidth() / 15f).height(Gdx.graphics.getWidth() / 15f).right();
         topTable.add(rightTable).right().expand();
 
         uiStage.addActor(topTable);
