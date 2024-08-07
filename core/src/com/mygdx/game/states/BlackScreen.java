@@ -7,6 +7,7 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.Value;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.github.tommyettinger.textra.Font;
@@ -105,7 +106,7 @@ public class BlackScreen extends GameState {
         label = new TypingLabel(phrases.get(curPhrase), font);
         label.addAction(sequence(alpha(0f), fadeIn(2f)));
         label.setAlignment(Align.center);
-        root.add(label);
+        root.add(label).center().padTop(Value.percentHeight(.03f, root));
 
         animatedTime = label.getTextSpeed() * phrases.get(curPhrase).length();
 

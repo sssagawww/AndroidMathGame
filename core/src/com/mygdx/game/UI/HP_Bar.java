@@ -8,7 +8,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Widget;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 
 public class HP_Bar extends Widget {
-    private Skin skin;
     private float hpAmount = 1f;
     private Drawable green;
     private Drawable yellow;
@@ -19,7 +18,6 @@ public class HP_Bar extends Widget {
 
     public HP_Bar(Skin skin){
         super();
-        this.skin = skin;
         green = skin.getDrawable("green");
         yellow = skin.getDrawable("yellow");
         red = skin.getDrawable("red");
@@ -75,6 +73,6 @@ public class HP_Bar extends Widget {
 
     public void displayHPLeft(float hp) {
         this.hpAmount = hp;
-        hpAmount = MathUtils.clamp(hpAmount, 0f, 1f); //clamp - значение не выйдет за пределы
+        hpAmount = MathUtils.clamp(hpAmount, 0f, 1f); //значение не выйдет за пределы 0 или 1
     }
 }

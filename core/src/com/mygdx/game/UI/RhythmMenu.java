@@ -1,7 +1,5 @@
 package com.mygdx.game.UI;
 
-import static com.mygdx.game.MyGdxGame.V_HEIGHT;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
@@ -16,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Value;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
@@ -46,7 +45,7 @@ public class RhythmMenu extends Table {
     private boolean percent100;
     private boolean strength100;
     private float speed = 1;
-    private float size = V_HEIGHT / 1.5f * 1.34f;
+    private float size = Gdx.graphics.getHeight() / 1.5f * 1.34f;
     private float playerImageX;
     private float playerImageSize;
     private boolean bossFight;
@@ -165,10 +164,10 @@ public class RhythmMenu extends Table {
         Table playerTable = new Table();
         Table bottomTable = new Table(skin);
         bottomTable.setBackground("menuBtn_down");
-        bottomTable.add(progressBar).width(500f).align(Align.center);
+        bottomTable.add(progressBar).width(Gdx.graphics.getWidth()/3f).align(Align.center);
         bottomTable.add(percentsLabel).align(Align.left).padLeft(25f);
 
-        playerTable.add(playerImage).align(Align.center).width(V_HEIGHT / 1.5f).height(V_HEIGHT / 1.5f).expand().row();
+        playerTable.add(playerImage).align(Align.center).width(Gdx.graphics.getHeight() / 1.5f).height(Gdx.graphics.getHeight() / 1.5f).expand().row();
         playerTable.add(bottomTable).bottom().row();
         playerTable.add(trainingLabel).height(playerTable.getPrefHeight()/8f).padTop(20f);
 
@@ -199,7 +198,7 @@ public class RhythmMenu extends Table {
         strengthBarStyle.knobBefore.setMinWidth(80f);
         strengthBar = new ProgressBar(0, 100, .1f, true, strengthBarStyle);
         strengthBar.setAnimateDuration(.15f);
-        strengthTable.add(strengthBar).width(150f).height(200f).row();
+        strengthTable.add(strengthBar).height(Value.percentHeight(0.4f, this)).row();
 
         ProgressBar.ProgressBarStyle progressBarStyle = new ProgressBar.ProgressBarStyle(getSkin().getDrawable("GUI_img"), getSkin().getDrawable("prLine"));
         progressBarStyle.background.setMinHeight(40f);

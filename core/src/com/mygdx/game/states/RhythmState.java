@@ -80,7 +80,7 @@ public class RhythmState extends GameState {
         sb.setProjectionMatrix(rhCam.combined);
 
         sb.begin();
-        sb.draw(bg, -Gdx.graphics.getWidth() / 4f, 0);
+        sb.draw(bg, Gdx.graphics.getWidth() / 2f - (Gdx.graphics.getWidth() * 1.2f) / 2f, 0, Gdx.graphics.getWidth() * 1.2f, Gdx.graphics.getHeight() * 1.2f);
         sb.end();
 
         uiStage.draw();

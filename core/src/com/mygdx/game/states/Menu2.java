@@ -16,6 +16,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Value;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.MyGdxGame;
@@ -104,10 +105,7 @@ public class Menu2 extends GameState {
         statistics = new Statistics(game.getSkin());
         statistics.setVisible(false);
 
-        Table table = new Table();
-
-        table.add(btnBox);
-        root.add(table).expand().align(Align.bottom).padBottom(100f).expand();
+        root.add(btnBox).align(Align.bottom).padBottom(Value.percentHeight(.1f, root)).expand();
         root.add(statistics).width(Gdx.graphics.getWidth() / 2f).right().padRight(25f);
         createOnlineBtns();
 

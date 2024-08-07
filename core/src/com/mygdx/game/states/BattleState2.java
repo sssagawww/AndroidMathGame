@@ -59,7 +59,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
     private Table statusBoxRoot;
     private SelectionBtnBox selectionBtnBox;
     private StatusBox statusBox;
-    private PlayerStatusBox playerStatus;
+    private StatusBox playerStatus;
     // END UI
     private BattleScreenController bcontroller;
     private InputMultiplexer multiplexer;
@@ -199,13 +199,10 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
         optionBox = new OptionBox2(game.getSkin());
         optionBox.setVisible(false);
 
-        /*selectionBox = new SelectionBox(game.getSkin());
-        selectionBox.setVisible(false);*/
-
         selectionBtnBox = new SelectionBtnBox(game.getSkin());
         selectionBtnBox.setVisible(false);
 
-        playerStatus = new PlayerStatusBox(game.getSkin());
+        playerStatus = new StatusBox(game.getSkin());
         playerStatus.setText(battle.getPlayer().getName());
 
         statusBox = new StatusBox(game.getSkin());
@@ -221,7 +218,6 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
                 .space(8f)
                 .row();
 
-        //selectionRoot.add(selectionBox).expand().align(Align.bottom).pad(5f);
         selectionRoot.add(selectionBtnBox).expand().align(Align.bottom).pad(5f);
         dialogRoot.add(dialogTable).expand().align(Align.top);
         statusBoxRoot.add(statusBox).expand().align(Align.topLeft).pad(10f);

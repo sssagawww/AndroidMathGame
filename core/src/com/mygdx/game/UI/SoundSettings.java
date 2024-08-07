@@ -1,12 +1,8 @@
 package com.mygdx.game.UI;
 
-import static com.mygdx.game.MyGdxGame.V_HEIGHT;
-import static com.mygdx.game.MyGdxGame.V_WIDTH;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -14,7 +10,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
 
 public class SoundSettings extends Table {
@@ -31,7 +26,7 @@ public class SoundSettings extends Table {
         super(skin);
         this.skin = skin;
         uiTable = new Table();
-        this.add(uiTable).width(V_WIDTH / 2.2f).height(V_HEIGHT / 2f);
+        this.add(uiTable).width(Gdx.graphics.getWidth() / 2.2f).height(Gdx.graphics.getHeight() / 2f);
         this.setBackground("menuBtn_up");
 
         BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
@@ -47,7 +42,7 @@ public class SoundSettings extends Table {
 
         sliderStyle = new Slider.SliderStyle();
         sliderStyle.knob = skin.getDrawable("sliderKnob");
-        sliderStyle.knob.setMinHeight(V_HEIGHT/12f);
+        sliderStyle.knob.setMinHeight(Gdx.graphics.getHeight() / 12f);
         sliderStyle.background = skin.getDrawable("sliderKnob");
 
         sliderBG = new Slider(0, 100, 1, false, sliderStyle);
@@ -81,9 +76,9 @@ public class SoundSettings extends Table {
 
         Table bottomTable = new Table();
         bottomTable.add(bgSoundsLbl).pad(15f);
-        bottomTable.add(sliderBG).width(V_WIDTH/6f).align(Align.topLeft).pad(15f).row();
+        bottomTable.add(sliderBG).width(Gdx.graphics.getWidth() / 6f).align(Align.topLeft).pad(15f).row();
         bottomTable.add(soundEffLbl).pad(15f);
-        bottomTable.add(sliderSoundEff).width(V_WIDTH/6f).pad(15f);
+        bottomTable.add(sliderSoundEff).width(Gdx.graphics.getWidth() / 6f).pad(15f);
         uiTable.add(bottomTable).expand().center();
     }
 

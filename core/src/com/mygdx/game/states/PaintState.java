@@ -32,14 +32,12 @@ import com.mygdx.game.Dialog.DialogController;
 import com.mygdx.game.Dialog.DialogNode;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.UI.DialogBox;
-import com.mygdx.game.UI.OptionBox;
 import com.mygdx.game.UI.OptionBox2;
 import com.mygdx.game.UI.PaintMenu;
 import com.mygdx.game.handlers.BoundedCamera;
 import com.mygdx.game.handlers.GameStateManager;
 import com.mygdx.game.multiplayer.MushroomsRequest;
 import com.mygdx.game.paint.DistanceCalc;
-import com.mygdx.game.paint.Figures.Figure;
 import com.mygdx.game.paint.Figures.FiguresDatabase;
 import com.mygdx.game.paint.PixelPoint;
 

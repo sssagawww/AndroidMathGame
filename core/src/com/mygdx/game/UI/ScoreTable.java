@@ -1,8 +1,5 @@
 package com.mygdx.game.UI;
 
-import static com.mygdx.game.MyGdxGame.V_HEIGHT;
-import static com.mygdx.game.MyGdxGame.V_WIDTH;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -50,8 +47,8 @@ public class ScoreTable extends Table {
 
         Table table = new Table();
         table.setName(playerName);
-        table.add(title).align(Align.left).width(V_WIDTH / 8f).height(V_HEIGHT / 12f).expand();
-        table.add(scoreLabel).align(Align.right).width(V_WIDTH / 10f).height(V_HEIGHT / 12f);
+        table.add(title).align(Align.left).width(Gdx.graphics.getWidth() / 8f).height(Gdx.graphics.getHeight() / 12f).expand();
+        table.add(scoreLabel).align(Align.right).width(Gdx.graphics.getWidth() / 10f).height(Gdx.graphics.getHeight() / 12f);
 
         uiTable.add(table).align(Align.right).row();
         players.put(playerName, Math.round(score));

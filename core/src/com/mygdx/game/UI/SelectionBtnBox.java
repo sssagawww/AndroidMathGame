@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Value;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 
@@ -21,11 +22,7 @@ public class SelectionBtnBox extends Table {
     public SelectionBtnBox(Skin skin) {
         super(skin);
         uiTable = new Table();
-        this.add(uiTable).pad(10f);
-
-        /*for (int i = 0; i < 4; i++) {
-            addBtn("---", i);
-        }*/
+        this.add(uiTable).pad(10f).width(Gdx.graphics.getWidth()/2f).height(Gdx.graphics.getHeight()/3f);
 
         buttons = new TextButton[4];
         buttons[0] = addBtn(0);
@@ -33,10 +30,10 @@ public class SelectionBtnBox extends Table {
         buttons[2] = addBtn(2);
         buttons[3] = addBtn(3);
 
-        uiTable.add(buttons[0]).space(25f).align(Align.left).width(300).height(80);
-        uiTable.add(buttons[1]).space(25f).align(Align.left).width(300).height(80).row();
-        uiTable.add(buttons[2]).space(25f).align(Align.left).width(300).height(80);
-        uiTable.add(buttons[3]).space(25f).align(Align.left).width(300).height(80);
+        uiTable.add(buttons[0]).space(25f).align(Align.center).width(Value.percentWidth(.5f, uiTable)).height(Value.percentHeight(.35f, uiTable));
+        uiTable.add(buttons[1]).space(25f).align(Align.center).width(Value.percentWidth(.5f, uiTable)).height(Value.percentHeight(.35f, uiTable)).row();
+        uiTable.add(buttons[2]).space(25f).align(Align.center).width(Value.percentWidth(.5f, uiTable)).height(Value.percentHeight(.35f, uiTable));
+        uiTable.add(buttons[3]).space(25f).align(Align.center).width(Value.percentWidth(.5f, uiTable)).height(Value.percentHeight(.35f, uiTable));
     }
 
     private TextButton addBtn(final int index) {

@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.Value;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Sort;
 import com.mygdx.game.MyGdxGame;
@@ -48,7 +49,7 @@ public class Inventory extends Table {
         super(skin);
         this.skin = skin;
         uiTable = new Table();
-        this.add(uiTable).width(V_WIDTH / 1.2f).height(V_HEIGHT / 1.2f);
+        this.add(uiTable).width(Gdx.graphics.getWidth() / 1.2f).height(Gdx.graphics.getHeight() / 1.2f);
         this.setBackground("menuBtn_up");
 
         BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
@@ -82,26 +83,25 @@ public class Inventory extends Table {
 
         Table rightTable = new Table(getSkin());
         uiTable.add(exitImage).align(Align.topLeft).width(exitImage.getWidth() * 5).height(exitImage.getHeight() * 5);
-        rightTable.add(playerImage).width(playerImage.getWidth() * 1.5f).height(playerImage.getHeight() * 1.5f).align(Align.center).padLeft(25f).row();
+        rightTable.add(playerImage).width(playerImage.getWidth() * 1.5f).height(playerImage.getHeight() * 1.5f).align(Align.center).padLeft(25f).expand().row();
 
         Table imagesTable = new Table();
         //???
         for (int i = 0; i < images.length; i++) {
             Table imageTable = new Table(getSkin());
             imageTable.setBackground("borders");
-            imageTable.add(images[i]).width(V_WIDTH / 10f).height(V_WIDTH / 10f);
+            imageTable.add(images[i]).width(Gdx.graphics.getWidth() / 10f).height(Gdx.graphics.getWidth() / 10f);
             imagesTable.add(imageTable).align(Align.bottom).expand().pad(15f);
             images[i].setVisible(false);
         }
-        rightTable.add(createItems()).row();
-        rightTable.add(imagesTable).padLeft(25f).row();
+        rightTable.add(createItems()).expand().row();
+        rightTable.add(imagesTable).padLeft(25f).expand().row();
 
         Label artifacts = new Label("\n", titleStyle);
         artifacts.setText("Артефакты");
-        rightTable.add(artifacts);
+        rightTable.add(artifacts).expand();
 
-        //uiTable.debug();
-        uiTable.add(rightTable).right();
+        uiTable.add(rightTable).right().height(Value.percentHeight(1F, uiTable));
         uiTable.add(createAchievements()).expand();
     }
 
@@ -261,10 +261,10 @@ public class Inventory extends Table {
             textLabel.setVisible(false);
 
             Table table = new Table();
-            table.add(title).align(Align.center).width(V_WIDTH / 5f).height(V_HEIGHT / 12f).row();
-            table.add(textLabel).align(Align.center).width(V_WIDTH / 5f).height(V_HEIGHT / 12f);
+            table.add(title).align(Align.center).width(Gdx.graphics.getWidth() / 5f).height(Gdx.graphics.getHeight() / 12f).row();
+            table.add(textLabel).align(Align.center).width(Gdx.graphics.getWidth() / 5f).height(Gdx.graphics.getHeight() / 12f);
 
-            add(image).align(Align.left).width(V_WIDTH / 12f).height(V_WIDTH / 12f);
+            add(image).align(Align.left).width(Gdx.graphics.getWidth() / 12f).height(Gdx.graphics.getWidth() / 12f);
             add(table).align(Align.right);
         }
 
@@ -307,8 +307,8 @@ public class Inventory extends Table {
             textLabel.setAlignment(Align.center);
             textLabel.setVisible(true);
 
-            add(image).align(Align.center).width(V_WIDTH / 24f).height(V_WIDTH / 24f).row();
-            add(textLabel).align(Align.center).width(V_WIDTH / 10f).height(V_HEIGHT / 24f);
+            add(image).align(Align.center).width(Gdx.graphics.getWidth() / 24f).height(Gdx.graphics.getWidth() / 24f).row();
+            add(textLabel).align(Align.center).width(Gdx.graphics.getWidth() / 10f).height(Gdx.graphics.getHeight() / 24f);
         }
 
         public void addItemCount() {
