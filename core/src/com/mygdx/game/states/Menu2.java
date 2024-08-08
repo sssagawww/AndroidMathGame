@@ -21,6 +21,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.UI.*;
+import com.mygdx.game.handlers.BoundedCamera;
 import com.mygdx.game.handlers.GameStateManager;
 import com.mygdx.game.multiplayer.MushroomsRequest;
 
@@ -41,6 +42,7 @@ public class Menu2 extends GameState {
     private Cell cell;
     private ConnectionMenu connectionMenu;
     private Sprite bg;
+    private BoundedCamera menuCam;
 
     public Menu2(GameStateManager gsm) {
         super(gsm);
@@ -52,7 +54,9 @@ public class Menu2 extends GameState {
         layout = new GlyphLayout(font, "Quenta");
 
         init();
-        cam.setBounds(0, Gdx.graphics.getWidth(), 0, Gdx.graphics.getHeight()); //? //4864 2688
+        menuCam = new BoundedCamera();
+        menuCam.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        menuCam.setBounds(0, Gdx.graphics.getWidth(), 0, Gdx.graphics.getHeight());
     }
 
 
@@ -71,14 +75,14 @@ public class Menu2 extends GameState {
     public void render() {
         Gdx.gl20.glClearColor(0, 0, 0, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        cam.setPosition(0, 0);
-        cam.update();
+        menuCam.setPosition(0, 0);
+        menuCam.update();
 
-        sb.setProjectionMatrix(cam.combined);
+        sb.setProjectionMatrix(menuCam.combined);
 
         sb.begin();
         sb.draw(bg, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        font.getData().setScale(Gdx.graphics.getHeight()/250f);
+        font.getData().setScale(Gdx.graphics.getHeight() / 250f);
         layout.setText(font, "Quenta");
         font.draw(sb, layout, Gdx.graphics.getWidth() / 2f - layout.width / 2, Gdx.graphics.getHeight() / 2f + layout.height);
         sb.end();

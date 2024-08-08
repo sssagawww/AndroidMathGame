@@ -18,8 +18,12 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.Value;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.mygdx.game.Dialog.*;
 import com.mygdx.game.Dialog.Dialog;
 import com.mygdx.game.MyGdxGame;
@@ -119,8 +123,9 @@ public class Play extends GameState implements Controllable {
         createMusic();
         storyNext();
 
+        cam.setToOrtho(false, Gdx.graphics.getWidth()/(Gdx.graphics.getHeight()/810f), 810); //устанавливается размер поля зрения
         cam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
-        b2dCam = new BoundedCamera(); //рисует дебаг коллизию?
+        b2dCam = new BoundedCamera(); //рисует дебаг коллизию
         b2dCam.setToOrtho(false, Gdx.graphics.getWidth() / PPM, Gdx.graphics.getHeight() / PPM); // /2?
         b2dCam.setBounds(0, (tileMapWidth * tileSize) / PPM, 0, (tileMapHeight * tileSize) / PPM);
         System.out.println("Gdx.graphics.getHeight: " + Gdx.graphics.getHeight() + " player: " + player.getPosition().x + " " + player.getPosition().y);
@@ -322,7 +327,7 @@ public class Play extends GameState implements Controllable {
         body.createFixture(fdef).setUserData("player");
         ps.dispose();
 
-        //create foot sensor - дополнительная коллизия внизу игрока
+        //foot sensor - дополнительная коллизия внизу игрока
         /*ps.setAsBox(10f / PPM, 10f / PPM, new Vector2(0, -50f/PPM), 0);
         fdef.shape = ps;
         fdef.filter.categoryBits = BIT_PLAYER;
@@ -419,6 +424,7 @@ public class Play extends GameState implements Controllable {
             }
         }
     }
+
     private void createNPC() {
         MapLayer mlayer = tiledMap.getLayers().get("npcLayer");
         if (mlayer == null) return;

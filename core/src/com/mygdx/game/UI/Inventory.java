@@ -49,7 +49,7 @@ public class Inventory extends Table {
         super(skin);
         this.skin = skin;
         uiTable = new Table();
-        this.add(uiTable).width(Gdx.graphics.getWidth() / 1.2f).height(Gdx.graphics.getHeight() / 1.2f);
+        this.add(uiTable).width(Gdx.graphics.getWidth() / 1.2f).height(Gdx.graphics.getHeight() / 1.1f);
         this.setBackground("menuBtn_up");
 
         BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
@@ -83,14 +83,22 @@ public class Inventory extends Table {
 
         Table rightTable = new Table(getSkin());
         uiTable.add(exitImage).align(Align.topLeft).width(exitImage.getWidth() * 5).height(exitImage.getHeight() * 5);
-        rightTable.add(playerImage).width(playerImage.getWidth() * 1.5f).height(playerImage.getHeight() * 1.5f).align(Align.center).padLeft(25f).expand().row();
+        rightTable.add(playerImage).width(Value.percentWidth(0.25f, rightTable)).height(Value.percentWidth(0.25f, rightTable)).align(Align.center).padLeft(25f).expand().row();
 
         Table imagesTable = new Table();
+        ArrayList<String> arts = new ArrayList<>(Arrays.asList("Кольцо\nМудрости", "Меч\nСилы", "Амулет\nВремени"));
         //???
         for (int i = 0; i < images.length; i++) {
             Table imageTable = new Table(getSkin());
+
+            Label name = new Label("\n", titleStyle);
+            name.setText(arts.get(i));
+            name.setAlignment(Align.center);
+
             imageTable.setBackground("borders");
-            imageTable.add(images[i]).width(Gdx.graphics.getWidth() / 10f).height(Gdx.graphics.getWidth() / 10f);
+            imageTable.add(images[i]).width(Gdx.graphics.getWidth() / 10f).height(Gdx.graphics.getWidth() / 10f).row();
+            imageTable.add(name);
+
             imagesTable.add(imageTable).align(Align.bottom).expand().pad(15f);
             images[i].setVisible(false);
         }
@@ -99,7 +107,7 @@ public class Inventory extends Table {
 
         Label artifacts = new Label("\n", titleStyle);
         artifacts.setText("Артефакты");
-        rightTable.add(artifacts).expand();
+        rightTable.add(artifacts).expand().top();
 
         uiTable.add(rightTable).right().height(Value.percentHeight(1F, uiTable));
         uiTable.add(createAchievements()).expand();

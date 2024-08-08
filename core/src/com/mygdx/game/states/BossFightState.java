@@ -132,7 +132,7 @@ public class BossFightState extends GameState implements Controllable {
         initFight();
 
         bossCam = new BoundedCamera();
-        bossCam.setToOrtho(false, (float) (Gdx.graphics.getWidth()), (float) (Gdx.graphics.getHeight()));
+        bossCam.setToOrtho(false, Gdx.graphics.getWidth()/(Gdx.graphics.getHeight()/810f), 810);
         bossCam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
         b2dCam = new BoundedCamera();
         b2dCam.setToOrtho(false, Gdx.graphics.getWidth() / PPM, Gdx.graphics.getHeight() / PPM);

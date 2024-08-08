@@ -129,7 +129,7 @@ public class Forest extends GameState implements Controllable {
         initFight();
 
         forCam = new BoundedCamera();
-        forCam.setToOrtho(false, (float) (Gdx.graphics.getWidth()), (float) (Gdx.graphics.getHeight()));
+        forCam.setToOrtho(false, Gdx.graphics.getWidth()/(Gdx.graphics.getHeight()/810f), 810);
         forCam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
         b2dCam = new BoundedCamera();
         b2dCam.setToOrtho(false, Gdx.graphics.getWidth() / PPM, Gdx.graphics.getHeight() / PPM);

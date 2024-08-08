@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.Value;
 import com.badlogic.gdx.utils.Align;
 
 public class DialogBox extends Table {
@@ -36,6 +37,7 @@ public class DialogBox extends Table {
         textTable = new Table(skin);
         textTable.setBackground("GUI_img");
 
+        //основной текст
         Label.LabelStyle lstyle = new Label.LabelStyle(getSkin().getFont("font"), Color.BLACK);
         textLabel = new Label("\n", lstyle);
         textLabel.addListener(new InputListener() {
