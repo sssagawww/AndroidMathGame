@@ -18,12 +18,8 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.Value;
 import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.viewport.ExtendViewport;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.mygdx.game.Dialog.*;
 import com.mygdx.game.Dialog.Dialog;
 import com.mygdx.game.MyGdxGame;
@@ -31,7 +27,7 @@ import com.mygdx.game.UI.Controller;
 import com.mygdx.game.UI.DialogBox;
 import com.mygdx.game.UI.JoyStick;
 import com.mygdx.game.UI.OptionBox2;
-import com.mygdx.game.entities.MovableNPC;
+import com.mygdx.game.entities.GameNPC;
 import com.mygdx.game.entities.PlayEntities;
 import com.mygdx.game.entities.Player2;
 import com.mygdx.game.handlers.BoundedCamera;
@@ -55,7 +51,7 @@ public class Play extends GameState implements Controllable {
     private MyContactListener cl;
     private Player2 player;
     private PlayEntities entities;
-    private HashMap<String, MovableNPC> movableNPCs;
+    private HashMap<String, GameNPC> movableNPCs;
     private TiledMap tiledMap;
     private OrthogonalTiledMapRenderer tmr;
     private float tileSize;
@@ -79,14 +75,10 @@ public class Play extends GameState implements Controllable {
     private float time = 0;
     public BodyDef bdef;
     public Body contactBody;
-    //private Stage controllerStage;
-    //private Controller controller;
-    // -------- JoyStick ----------
     private JoyStick joyStick;
     private ShapeRenderer shapeRenderer;
     private Vector3 mouse;
     private BoundedCamera joyCam;
-    // --------- END JoyStick ---------
     private boolean isStopped;
     private int nextState;
     private boolean contact;
@@ -143,7 +135,7 @@ public class Play extends GameState implements Controllable {
         //отрисовка игрока и нпс
         player.update(dt);
         entities.update(dt);
-        for (Map.Entry<String, MovableNPC> entry : movableNPCs.entrySet()) {
+        for (Map.Entry<String, GameNPC> entry : movableNPCs.entrySet()) {
             movableNPCs.get(entry.getKey()).update(dt);
             movableNPCs.get(entry.getKey()).updatePos();
         }
@@ -177,7 +169,7 @@ public class Play extends GameState implements Controllable {
             }
 
             player.getBody().setLinearVelocity(0, 0);
-            for (Map.Entry<String, MovableNPC> entry : movableNPCs.entrySet()) {
+            for (Map.Entry<String, GameNPC> entry : movableNPCs.entrySet()) {
                 movableNPCs.get(entry.getKey()).setDirection(0, 0, 20, 58, 58);
             }
             cam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
@@ -259,8 +251,8 @@ public class Play extends GameState implements Controllable {
 
         entities.render(sb, 1.5f, 1.5f);
 
-        for (Map.Entry<String, MovableNPC> entry : movableNPCs.entrySet()) {
-            MovableNPC npc = movableNPCs.get(entry.getKey());
+        for (Map.Entry<String, GameNPC> entry : movableNPCs.entrySet()) {
+            GameNPC npc = movableNPCs.get(entry.getKey());
             npc.render(sb, npc.getWidth() * 1.5f, npc.getHeight() * 1.5f);
         }
 
@@ -475,7 +467,7 @@ public class Play extends GameState implements Controllable {
             cshape.dispose();
 
             body.createFixture(cdef).setUserData(mo.getName());
-            MovableNPC npc = new MovableNPC(body, mo.getName());
+            GameNPC npc = new GameNPC(body, mo.getName());
             movableNPCs.put(mo.getName(), npc);
         }
     }
@@ -502,7 +494,7 @@ public class Play extends GameState implements Controllable {
             cshape.dispose();
 
             body.createFixture(cdef).setUserData(mo.getName());
-            MovableNPC npc = new MovableNPC(body, mo.getName());
+            GameNPC npc = new GameNPC(body, mo.getName());
             movableNPCs.put(mo.getName(), npc);
         }
     }

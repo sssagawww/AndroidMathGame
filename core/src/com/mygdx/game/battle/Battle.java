@@ -22,7 +22,17 @@ public class Battle implements BattleEventQueue {
         ;
     }
 
+    public enum ENEMY_STATE {
+        WAITING,
+        WIN,
+        LOSE,
+        ATTACK,
+        MISS,
+        HURT
+    }
+
     private STATE state;
+    private ENEMY_STATE enemyState;
     private BattleEventPlayer eventPlayer;
     private BattleEntity player;
     private BattleEntity enemy;
@@ -76,28 +86,34 @@ public class Battle implements BattleEventQueue {
 
         if (player.getStepBoolean(input + currentStepNum - randomNum) == STEP_BOOLEAN.RIGHT && battleUser == player) {
             if (mechanics.attemptHit(step, battleUser, battleTarget)) {
+                enemyState = ENEMY_STATE.HURT;
                 queueEvent(new B_TextEvent("Правильный ответ. Атака!", 0.5f));
                 step.useMove(mechanics, battleUser, battleTarget, entity, this);
             }
         } else if (player.getStepBoolean(input + currentStepNum - randomNum) == STEP_BOOLEAN.WRONG && battleUser == player) {
+            enemyState = ENEMY_STATE.WIN;
             queueEvent(new B_TextEvent("Неправильный ответ. Промах!", 0.5f));
         } else if (battleUser == enemy) {
             double p = Math.random();
             if (p <= 0.6) {
+                enemyState = ENEMY_STATE.ATTACK;
                 queueEvent(new B_TextEvent(battleUser.getName() + " атакует!", 0.5f));
                 if (mechanics.attemptHit(step, battleUser, battleTarget)) {
                     step.useMove(mechanics, battleUser, battleTarget, entity, this);
                 }
             } else {
+                enemyState = ENEMY_STATE.MISS;
                 queueEvent(new B_TextEvent(battleUser.getName() + " промахнулся!", 0.5f));
             }
             currentStepNum++;
         }
 
         if (player.isDefeated()) {
+            enemyState = ENEMY_STATE.WIN;
             queueEvent(new B_TextEvent("Проигрыш...", true));
             this.state = STATE.LOSE;
         } else if (enemy.isDefeated()) {
+            enemyState = ENEMY_STATE.LOSE;
             queueEvent(new B_TextEvent("Ура, победа!", true));
             this.state = STATE.WIN;
         }
@@ -161,6 +177,14 @@ public class Battle implements BattleEventQueue {
 
     public STATE getState() {
         return state;
+    }
+
+    public ENEMY_STATE getEnemyState() {
+        return enemyState;
+    }
+
+    public void setEnemyState(ENEMY_STATE enemyState) {
+        this.enemyState = enemyState;
     }
 
     public BattleEventPlayer getEventPlayer() {

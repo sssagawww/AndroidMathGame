@@ -2,21 +2,19 @@ package com.mygdx.game.entities;
 
 import static com.mygdx.game.handlers.B2DVars.PPM;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.mygdx.game.MyGdxGame;
 
-public class MovableNPC extends B2DSprite {
+public class GameNPC extends B2DSprite {
     private TextureRegion[] sprites;
     private Texture tex;
     private float time = 0;
     private float velx = 0;
     private float vely = 0;
 
-    public MovableNPC(Body body, String texName) {
+    public GameNPC(Body body, String texName) {
         super(body);
         tex = MyGdxGame.res.getTexture(texName);
         sprites = TextureRegion.split(tex, 58, 58)[0];

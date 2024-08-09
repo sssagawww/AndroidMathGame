@@ -161,6 +161,10 @@ public class DialogBox extends Table {
         return labelBtn;
     }
 
+    public String getTargetText() {
+        return targetText;
+    }
+
     public void addBtn() {
         textTable.add(labelBtn).width(labelBtn.getWidth() * 2f).height(labelBtn.getHeight() * 2f);
         this.add(skipBtn).align(Align.center).width(skipBtn.getWidth() * 4f).height(skipBtn.getHeight() * 4f).right().expand();

@@ -29,18 +29,12 @@ import com.mygdx.game.states.MazeState;
 public class MyGdxGame implements ApplicationListener {
     private static int width;
     private static int height;
-    public static int V_WIDTH = 1216; //1216
-    public static int V_HEIGHT = 672; //672
-    //public static final int SCALE = 2;
     private SpriteBatch sb;
     private AssetManager assetManager;
     private BoundedCamera cam;
     private Controller controller;
     private Stage controllerStage;
     private GameStateManager gsm;
-
-    //public static final float STEP = 1 / 60f;
-    //private float accum;
     public static Content res;
     private Skin skin;
     private StepDatabase stepDatabase;
@@ -71,14 +65,9 @@ public class MyGdxGame implements ApplicationListener {
     public void create() {
         //Gdx.input.setInputProcessor(new MyInputProcessor());
         if (Gdx.app.getType() == Application.ApplicationType.Android) {
-            V_WIDTH = width; //Gdx.graphics.getWidth();
-            V_HEIGHT = height; //Gdx.graphics.getHeight();
             if(dbWrapper.getProgress().size() != 0) gameTime = dbWrapper.getProgress().get(dbWrapper.getProgress().size()-1).getTime();
             Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
         }
-
-        //V_WIDTH = (int) ((Gdx.graphics.getWidth()/1216f)*1216);
-        //V_HEIGHT = (int) ((Gdx.graphics.getHeight()/672f)*672);
 
         res = new Content();
         res.loadTexture("entitySprites/gnomikStep.png", "gnomik");
@@ -86,7 +75,7 @@ public class MyGdxGame implements ApplicationListener {
         res.loadTexture("entitySprites/idleGnomik.png", "gnomikrow");
         res.loadTexture("entitySprites/slime.png", "slimeBoss");
         res.loadTexture("allBtn.png", "btn");
-        res.loadTexture("entitySprites/enemy2.png", "enemy");
+        res.loadTexture("entitySprites/enemySprite.png", "enemy");
         res.loadTexture("entitySprites/enemySlime.png", "enemy2");
         res.loadTexture("entitySprites/bombGuy.png", "npc");
         res.loadTexture("entitySprites/hooded2.png", "hooded");
