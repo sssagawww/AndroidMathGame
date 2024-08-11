@@ -111,90 +111,9 @@ public class Menu2 extends GameState {
 
         root.add(btnBox).align(Align.bottom).padBottom(Value.percentHeight(.1f, root)).expand();
         root.add(statistics).width(Gdx.graphics.getWidth() / 2f).right().padRight(25f);
-        createOnlineBtns();
 
         multiplexer.addProcessor(uiStage);
         Gdx.input.setInputProcessor(multiplexer);
-    }
-
-    private void createOnlineBtns() {
-        BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
-        TextButton.TextButtonStyle style = new TextButton.TextButtonStyle();
-        style.font = font;
-        style.fontColor = Color.BLACK;
-        style.downFontColor = Color.BLACK;
-
-        TextButton mushrooms = new TextButton("Сбор грибов", style);
-        style.up = game.getSkin().getDrawable("menuBtn_up");
-        style.down = game.getSkin().getDrawable("menuBtn_down");
-
-        mushrooms.addListener(new InputListener() {
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                return true;
-            }
-
-            @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                if (!connectionMenu.getIpText().equals("") && !connectionMenu.getIpText().equals("Введите IP!") && !MushroomsRequest.isUnableToConnect()) {
-                    gsm.setState(MUSHROOMS);
-                } else {
-                    connectionMenu.getIpField().setMessageText("Введите IP!");
-                }
-            }
-        });
-
-        TextButton drawings = new TextButton("Рисование", style);
-        style.up = game.getSkin().getDrawable("menuBtn_up");
-        style.down = game.getSkin().getDrawable("menuBtn_down");
-
-        drawings.addListener(new InputListener() {
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                return true;
-            }
-
-            @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                if (!connectionMenu.getIpText().equals("") && !connectionMenu.getIpText().equals("Введите IP!") && !MushroomsRequest.isUnableToConnect()) {
-                    PaintState.setOnline(true);
-                    gsm.setState(PAINT);
-                } else {
-                    connectionMenu.getIpField().setMessageText("Введите IP!");
-                }
-            }
-        });
-
-        Image exitImage = new Image(game.getSkin().getDrawable("wrong"));
-        exitImage.addListener(new InputListener() {
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                return true;
-            }
-
-            @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                onlineBtns.setVisible(false);
-            }
-        });
-
-        connectionMenu = new ConnectionMenu(game.getSkin(), gsm);
-
-        Label.LabelStyle lStyle = new Label.LabelStyle(font, Color.BLACK);
-        Label textLabel = new Label("Режимы рассчитаны на 2 игроков.\nВведите IP с портом и ник, затем\nнажмите на зеленую галочку,\nчтобы подтвердить ввод.\nЕсли IP правильный,\nто он останется в поле ввода.\nИначе - сотрется.", lStyle);
-        textLabel.setFontScale(0.8f);
-        textLabel.setAlignment(Align.center);
-
-        onlineBtns = new Table(game.getSkin());
-        onlineBtns.setVisible(false);
-        onlineBtns.setBackground("menuBtn_up");
-
-        onlineBtns.add(exitImage).align(Align.right).width(exitImage.getWidth() * 3).height(exitImage.getHeight() * 3).expand().row();
-        onlineBtns.add(connectionMenu).row();
-        onlineBtns.add(mushrooms).space(10f).row();
-        onlineBtns.add(drawings).row();
-        onlineBtns.add(textLabel).padBottom(exitImage.getHeight() * 3).padTop(exitImage.getHeight() * 3).row();
-        cell = root.getCell(statistics);
     }
 
     private void checkBtns() {
@@ -218,8 +137,7 @@ public class Menu2 extends GameState {
                 gsm.setState(MyGdxGame.getPrefs().getInteger(PREF_STATE, BLACK_SCREEN));
                 break;
             case ONLINE:
-                onlineBtns.setVisible(!onlineBtns.isVisible());
-                cell.setActor(onlineBtns);
+                gsm.setState(CONNECTION);
                 break;
             case SAVE:
                 gsm.setLastState(MyGdxGame.getPrefs().getInteger(PREF_STATE, BLACK_SCREEN));
@@ -227,7 +145,6 @@ public class Menu2 extends GameState {
                 break;
             case STATISTICS:
                 statistics.setVisible(!statistics.isVisible());
-                cell.setActor(statistics);
                 break;
         }
         btnBox.setState(NON);

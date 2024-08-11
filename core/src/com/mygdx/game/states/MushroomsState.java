@@ -1,6 +1,6 @@
 package com.mygdx.game.states;
 
-import static com.mygdx.game.MyGdxGame.PREF_ID;
+import static com.mygdx.game.MyGdxGame.*;
 import static com.mygdx.game.handlers.B2DVars.BIT_PLAYER;
 import static com.mygdx.game.handlers.B2DVars.BIT_TROPA;
 import static com.mygdx.game.handlers.B2DVars.PPM;
@@ -49,7 +49,7 @@ import com.mygdx.game.handlers.GameStateManager;
 import com.mygdx.game.handlers.MyContactListener;
 import com.mygdx.game.multiplayer.MushroomsRequest;
 
-import jdk.internal.access.JavaIOFileDescriptorAccess;
+import java.util.ArrayList;
 
 public class MushroomsState extends GameState implements Controllable {
     private Box2DDebugRenderer b2dr;
@@ -92,8 +92,8 @@ public class MushroomsState extends GameState implements Controllable {
     private int playerScore = 0;
     private int count = 0;
     private MushroomsRequest request;
-    public static final String MUSHROOMS_GAME = "mushroomsMiniGame";
     private final int id = MyGdxGame.getPrefs().getInteger(PREF_ID);
+    private int roomId;
     private boolean touchStarted = false;
     private Vector2 touchStartPos = new Vector2();
 
@@ -109,11 +109,11 @@ public class MushroomsState extends GameState implements Controllable {
         skin_this = game.getSkin();
         entities = new PlayEntities();
 
-        initFight();
+        initUI();
         request = gsm.game().getRequest();
-        request.leave(id);
-        request.join(id, MUSHROOMS_GAME, 10);
-        scoreTable.addPlayerScore(MushroomsRequest.getName(), playerScore);
+        request.leaveRoom(id, roomId);
+        roomId = request.getRoomId();
+        //scoreTable.addPlayerScore(MushroomsRequest.getName(), playerScore);
 
         initJoyStick();
         initController();
@@ -121,7 +121,7 @@ public class MushroomsState extends GameState implements Controllable {
         createTiles();
 
         pickCam = new BoundedCamera();
-        pickCam.setToOrtho(false, Gdx.graphics.getWidth()/(Gdx.graphics.getHeight()/810f), 810);
+        pickCam.setToOrtho(false, Gdx.graphics.getWidth() / (Gdx.graphics.getHeight() / 810f), 810);
         pickCam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
         b2dCam = new BoundedCamera();
         b2dCam.setToOrtho(false, Gdx.graphics.getWidth() / PPM, Gdx.graphics.getHeight() / PPM);
@@ -130,8 +130,8 @@ public class MushroomsState extends GameState implements Controllable {
 
     @Override
     public void update(float dt) {
-        if(!MyGdxGame.active){
-            request.leave(id);
+        if (!MyGdxGame.active) {
+            request.leaveRoom(id, roomId);
         }
 
         handleInput();
@@ -142,7 +142,7 @@ public class MushroomsState extends GameState implements Controllable {
         if (miniGameTime >= 30) {
             miniGameTime = 0;
             gameOver = true;
-            request.getWinner();
+            request.getWinner(roomId);
         }
 
         if (gameOver) {
@@ -156,16 +156,16 @@ public class MushroomsState extends GameState implements Controllable {
 
         if (requestTime >= dt * 10 && miniGameTime < 30 && request.isDone()) {
             requestTime = 0;
-            request.postInfo(id, playerScore);
-            if (opponent)
-                scoreTable.setPlayerScore(request.getOpponentName(), request.getOpponentScore());
+            request.postInfo(id, playerScore, roomId);
+            //if (opponent)
+            //scoreTable.setPlayerScore(request.getOpponentNames(), request.getOpponentScores());
         }
 
         //если оба игрока готовы, то начинается обмен инфой
-        if (request.isReady() && readyBtnClicked) {
+        if (readyBtnClicked && request.isEveryoneReady(roomId) && !gameOver) {
             mainLabel.setVisible(false);
             miniGameTime += dt;
-            scoreTable.setPlayerScore(MushroomsRequest.getName(), playerScore);
+            scoreTable.setPlayerScore(request.getOpponentNames(), request.getOpponentScores());
 
             //появление грибов
             spawnTime += dt;
@@ -364,7 +364,7 @@ public class MushroomsState extends GameState implements Controllable {
     public void dispose() {
         player.stopSounds();
         isStopped = true;
-        request.leave(id);
+        request.leaveRoom(id, roomId);
         scoreTable.clear();
     }
 
@@ -375,7 +375,7 @@ public class MushroomsState extends GameState implements Controllable {
         canDraw = false;
     }
 
-    private void initFight() {
+    private void initUI() {
         uiStage = new Stage(new ScreenViewport());
         uiStage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 
@@ -397,7 +397,7 @@ public class MushroomsState extends GameState implements Controllable {
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                request.playerIsReady(id);
+                request.playerIsReady(id, roomId);
                 readyBtn.setVisible(false);
             }
         });
@@ -408,7 +408,7 @@ public class MushroomsState extends GameState implements Controllable {
 
         Table topTable = new Table();
         topTable.setFillParent(true);
-        topTable.add(mainLabel).align(Align.top).expand(true, false).row();
+        topTable.add(mainLabel).align(Align.top).height(Gdx.graphics.getHeight() / 10f).expand(true, false).row();
         rightTable.add(scoreTable).right().row();
         rightTable.add(readyBtn).width(Gdx.graphics.getWidth() / 15f).height(Gdx.graphics.getWidth() / 15f).right();
         topTable.add(rightTable).right().expand();
@@ -433,12 +433,15 @@ public class MushroomsState extends GameState implements Controllable {
     }
 
     private void checkUsers() {
-        String s = request.getOpponentName();
-        if (s == null || s.equals("")) {
-            opponent = false;
-        } else if (!scoreTable.getPlayers().containsKey(s)) {
-            scoreTable.addPlayerScore(s, request.getOpponentScore());
-            opponent = true;
+        ArrayList<String> names = request.getOpponentNames();
+        ArrayList<Float> scores = request.getOpponentScores();
+        for (int i = 0; i < names.size(); i++) {
+            if (names.get(i).isEmpty()) {
+                opponent = false;
+            } else if (!scoreTable.getPlayers().containsKey(names.get(i)) && !names.get(i).equals(" ")) {
+                scoreTable.addPlayerScore(names.get(i), scores.get(i));
+                opponent = true;
+            }
         }
     }
 

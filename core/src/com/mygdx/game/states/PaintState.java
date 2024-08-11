@@ -2,9 +2,7 @@ package com.mygdx.game.states;
 
 import static com.mygdx.game.MyGdxGame.*;
 import static com.mygdx.game.UI.BtnBox.STATES.*;
-import static com.mygdx.game.handlers.GameStateManager.*;
 
-import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
@@ -69,7 +67,6 @@ public class PaintState extends GameState implements InputProcessor {
     private Label readyLabel;
     private float requestTime = 0;
     private final int id = MyGdxGame.getPrefs().getInteger(PREF_ID);
-    public static final String PAINT_GAME = "paintMiniGame";
     private static boolean online;
     private boolean btnClicked;
     private boolean ready = false;
@@ -78,6 +75,7 @@ public class PaintState extends GameState implements InputProcessor {
     private int count = 0;
     private int oppCount = 0;
     private float time = 0;
+    private int roomId;
 
     public PaintState(GameStateManager gsm) {
         super(gsm);
@@ -96,8 +94,9 @@ public class PaintState extends GameState implements InputProcessor {
 
         request = gsm.game().getRequest();
         if (online) {
-            request.leave(id);
-            request.join(id, PAINT_GAME, 0);
+            roomId = request.getRoomId();
+            request.leaveRoom(id, roomId);
+            request.joinRoom(id, roomId);
         }
 
         createSD();
@@ -125,7 +124,7 @@ public class PaintState extends GameState implements InputProcessor {
     @Override
     public void update(float dt) {
         if (!MyGdxGame.active && online) {
-            request.leave(id);
+            request.leaveRoom(id, roomId);
         }
         uiStage.act(dt);
         if (online) onlineStage.act(dt);
@@ -142,7 +141,7 @@ public class PaintState extends GameState implements InputProcessor {
         }
 
         if (ready && (paintMenu.getBtnBox().isClicked() || btnClicked)) {
-            request.setPlayerReady(id, false);
+            request.setPlayerReady(id, false, roomId);
         }
 
         if (btnClicked || !online) {
@@ -153,8 +152,8 @@ public class PaintState extends GameState implements InputProcessor {
             requestTime += dt;
             if (requestTime >= dt * 15) {
                 requestTime = 0;
-                request.postInfo(id, (float) distanceCalc.getAccuracy());
-                ready = request.isReady();
+                request.postInfo(id, (float) distanceCalc.getAccuracy(), roomId);
+                ready = request.isEveryoneReady(roomId);
             }
             oppScore = String.format("%.2f", 1 - request.getOpponentScore());
         }
@@ -169,9 +168,6 @@ public class PaintState extends GameState implements InputProcessor {
         paintCam.update();
         sb.setProjectionMatrix(paintCam.combined);
         batch.setProjectionMatrix(paintCam.combined);
-        //sd.update();
-
-        //shapeRenderer.setProjectionMatrix(cam.combined);
 
         //подсказки
         sb.begin();
@@ -216,7 +212,7 @@ public class PaintState extends GameState implements InputProcessor {
     @Override
     public void dispose() {
         if (online) {
-            request.leave(id);
+            request.leaveRoom(id, roomId);
         }
         PaintState.setOnline(false);
     }
@@ -271,7 +267,7 @@ public class PaintState extends GameState implements InputProcessor {
             readyLabel.addListener(new InputListener() {
                 @Override
                 public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                    request.playerIsReady(id);
+                    request.playerIsReady(id, roomId);
                     return true;
                 }
 
@@ -337,7 +333,7 @@ public class PaintState extends GameState implements InputProcessor {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 if (online) {
-                    request.setPlayerReady(id, true);
+                    request.setPlayerReady(id, true, roomId);
                 }
                 if (points.size() != 0) {
                     paintMenu.getBtnBox().setState(CHECK);
@@ -375,9 +371,9 @@ public class PaintState extends GameState implements InputProcessor {
             case OK:
                 node = new DialogNode("Получилось! Молодец!", 0);
                 if (online) {
-                    if (request.getOpponentScore() == 0) {
+                    /*if (request.getOpponentScore() == 0) {
                         request.setOpponentScore(1);
-                    }
+                    }*/
                     if ((1 - distanceCalc.getAccuracy()) > 1 - request.getOpponentScore()) {
                         count++;
                     } else {
@@ -391,9 +387,9 @@ public class PaintState extends GameState implements InputProcessor {
             case WRONG:
                 node = new DialogNode("Попробуй еще раз!", 0);
                 if (online) {
-                    if (request.getOpponentScore() == 0) {
+                    /*if (request.getOpponentScore() == 0) {
                         request.setOpponentScore(1);
-                    }
+                    }*/
                     if ((1 - distanceCalc.getAccuracy()) > 1 - request.getOpponentScore()) {
                         count++;
                     } else {
@@ -507,13 +503,7 @@ public class PaintState extends GameState implements InputProcessor {
     public boolean touchDragged(int screenX, int screenY, int pointer) {
         if (screenX < Gdx.graphics.getWidth() / 1.55f && screenY < Gdx.graphics.getHeight()) {
             points.add(new PixelPoint(screenX, Gdx.graphics.getHeight() - screenY));
-            //arr.add(new Vector2(points.get(points.size()-1).getX(), points.get(points.size()-1).getY()));
-            /*Vector2 newPoint = new Vector2(getPoints().get(points.size()-1).getX(), getPoints().get(points.size()-1).getY());
-            if(!arr.contains(newPoint,false)){
-                arr.add(newPoint);
-            }*/
         }
-        //System.out.println(points + " points");
         return false;
     }
 

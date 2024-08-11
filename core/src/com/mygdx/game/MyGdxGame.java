@@ -46,6 +46,8 @@ public class MyGdxGame implements ApplicationListener {
     public static float gameTime = 0;
     public static boolean active = true;
     private static Preferences prefs;
+    public static final String MUSHROOMS_GAME = "mushroomsMiniGame";
+    public static final String PAINT_GAME = "paintMiniGame";
     private static final String PREF_NAME = "position";
     public static final String PREF_ID = "userID";
     public static final String PREF_USERNAME = "userNAME";

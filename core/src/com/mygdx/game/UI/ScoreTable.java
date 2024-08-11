@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ScoreTable extends Table {
@@ -62,6 +63,18 @@ public class ScoreTable extends Table {
         return players.get(playerName);
     }
 
+    public void setPlayerScore(ArrayList<String> playersNames, ArrayList<Float> scores) {
+        System.out.println(players.toString());
+        for (int i = 0; i < players.size(); i++) {
+            players.replace(playersNames.get(i), Math.round(scores.get(i)));
+            if (playersNames.get(i) != null && !playersNames.get(i).equals("")) {
+                Table t = uiTable.findActor(playersNames.get(i));
+                Label l = t.findActor(playersNames.get(i) + "_label");
+                l.setText(Math.round(scores.get(i)));
+            }
+        }
+    }
+
     public void setPlayerScore(String playerName, float score) {
         players.replace(playerName, Math.round(score));
         if (playerName != null && !playerName.equals("")) {
@@ -69,9 +82,5 @@ public class ScoreTable extends Table {
             Label l = t.findActor(playerName + "_label");
             l.setText(Math.round(score));
         }
-    }
-
-    public void clear(){
-        players.clear();
     }
 }
