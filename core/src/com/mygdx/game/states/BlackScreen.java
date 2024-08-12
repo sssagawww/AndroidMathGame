@@ -1,14 +1,13 @@
 package com.mygdx.game.states;
 
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.*;
-import static com.mygdx.game.MyGdxGame.V_HEIGHT;
-import static com.mygdx.game.MyGdxGame.V_WIDTH;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.Value;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.github.tommyettinger.textra.Font;
@@ -97,7 +96,7 @@ public class BlackScreen extends GameState {
 
     public void initUI() {
         uiStage = new Stage(new ScreenViewport());
-        uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+        uiStage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 
         Table root = new Table();
         root.setFillParent(true);
@@ -107,7 +106,7 @@ public class BlackScreen extends GameState {
         label = new TypingLabel(phrases.get(curPhrase), font);
         label.addAction(sequence(alpha(0f), fadeIn(2f)));
         label.setAlignment(Align.center);
-        root.add(label);
+        root.add(label).center().padTop(Value.percentHeight(.03f, root));
 
         animatedTime = label.getTextSpeed() * phrases.get(curPhrase).length();
 

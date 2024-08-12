@@ -3,8 +3,6 @@ package com.mygdx.game.UI;
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.alpha;
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.fadeIn;
 import static com.badlogic.gdx.scenes.scene2d.actions.Actions.sequence;
-import static com.mygdx.game.MyGdxGame.V_HEIGHT;
-import static com.mygdx.game.MyGdxGame.V_WIDTH;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -49,7 +47,7 @@ public class BossLabel extends Table {
     public BossLabel(Skin skin) {
         super(skin);
         uiTable = new Table();
-        this.add(uiTable).width(V_WIDTH).height(V_HEIGHT);
+        this.add(uiTable).width(Gdx.graphics.getWidth()).height(Gdx.graphics.getHeight());
 
         BitmapFont labelFont = getSkin().getFont("font");
         Label.LabelStyle lstyle = new Label.LabelStyle(labelFont, Color.BLACK);
@@ -71,7 +69,7 @@ public class BossLabel extends Table {
 
         Table labelTable = new Table(skin);
         labelTable.setBackground("label");
-        labelTable.add(label).width(V_WIDTH / 2f).center().padTop(22f);
+        labelTable.add(label).width(Gdx.graphics.getWidth() / 2f).center().padTop(25f);
 
         Image timeImage = new Image(new Texture("UI/artefacts.png"));
         Label label = new Label("Воспользоваться артефактами\nи остановить тьму", lstyle);
@@ -80,15 +78,15 @@ public class BossLabel extends Table {
 
         timeTable = new Table(skin);
         timeTable.setBackground(skin.getDrawable("GUI_img"));
-        timeTable.add(timeImage).width(V_HEIGHT / 8f).height(V_HEIGHT / 8f).expand().padRight(15f).left();
-        timeTable.add(label).width(V_WIDTH / 2f).height(V_HEIGHT / 8f).expand().right();
+        timeTable.add(timeImage).width(Gdx.graphics.getHeight() / 8f).height(Gdx.graphics.getHeight() / 8f).expand().padRight(15f).left();
+        timeTable.add(label).width(Gdx.graphics.getWidth() / 2f).height(Gdx.graphics.getHeight() / 8f).expand().right();
         timeTable.setVisible(false);
 
-        hpTable.add(labelTable).height(V_HEIGHT / 10f).row();
+        hpTable.add(labelTable).height(Gdx.graphics.getHeight() / 10f).row();
         createBars();
         uiTable.add(hpTable).top().expand().row();
         createBtns();
-        uiTable.add(btnsTable).bottom().padBottom(V_HEIGHT / 10f).expand();
+        uiTable.add(btnsTable).bottom().padBottom(Gdx.graphics.getHeight() / 10f).expand();
         cell = uiTable.getCell(btnsTable);
     }
 
@@ -99,7 +97,7 @@ public class BossLabel extends Table {
         progressBarStyle.knobBefore.setMinHeight(20f);
         hpBar = new ProgressBar(0, 100, .1f, false, progressBarStyle);
         hpBar.setAnimateDuration(.15f);
-        hpTable.add(hpBar).width(V_WIDTH / 2f).height(50f).row();
+        hpTable.add(hpBar).width(Gdx.graphics.getWidth() / 2f).height(50f).row();
         hpBar.setValue(100f);
     }
 
@@ -108,9 +106,9 @@ public class BossLabel extends Table {
         paintBtn = addBtn("Провести\nпалочкой", ATTACK_STATES.PAINT_ATTACK);
         rhythmBtn = addBtn("Взмахнуть\nмечом", ATTACK_STATES.RHYTHM_ATTACK);
 
-        btnsTable.add(mathBtn).align(Align.bottom).width(V_WIDTH / 3.5f).height(120f).space(25f);
-        btnsTable.add(paintBtn).align(Align.bottom).width(V_WIDTH / 3.5f).height(120f).space(25f);
-        btnsTable.add(rhythmBtn).align(Align.bottom).width(V_WIDTH / 3.5f).height(120f).space(25f);
+        btnsTable.add(mathBtn).align(Align.bottom).width(Gdx.graphics.getWidth() / 3.5f).height(120f).space(25f);
+        btnsTable.add(paintBtn).align(Align.bottom).width(Gdx.graphics.getWidth() / 3.5f).height(120f).space(25f);
+        btnsTable.add(rhythmBtn).align(Align.bottom).width(Gdx.graphics.getWidth() / 3.5f).height(120f).space(25f);
     }
 
     private TextButton addBtn(String btnText, final ATTACK_STATES newState) {

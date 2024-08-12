@@ -5,16 +5,12 @@ import static com.mygdx.game.MyGdxGame.PREF_FOREST;
 import static com.mygdx.game.MyGdxGame.PREF_MAZE;
 import static com.mygdx.game.MyGdxGame.PREF_MAZE_HOODED;
 import static com.mygdx.game.MyGdxGame.PREF_STATE;
-import static com.mygdx.game.MyGdxGame.V_HEIGHT;
-import static com.mygdx.game.MyGdxGame.V_WIDTH;
 import static com.mygdx.game.handlers.B2DVars.BIT_PLAYER;
 import static com.mygdx.game.handlers.B2DVars.BIT_TROPA;
 import static com.mygdx.game.handlers.B2DVars.PPM;
 import static com.mygdx.game.handlers.GameStateManager.BATTLE;
 import static com.mygdx.game.handlers.GameStateManager.BLACK_SCREEN;
 import static com.mygdx.game.handlers.GameStateManager.BOSSFIGHT;
-import static com.mygdx.game.handlers.GameStateManager.FOREST;
-import static com.mygdx.game.handlers.GameStateManager.MAZE;
 import static com.mygdx.game.handlers.GameStateManager.MENU;
 import static com.mygdx.game.handlers.GameStateManager.NEW_GAME;
 import static com.mygdx.game.handlers.GameStateManager.PAINT;
@@ -136,10 +132,10 @@ public class BossFightState extends GameState implements Controllable {
         initFight();
 
         bossCam = new BoundedCamera();
-        bossCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
+        bossCam.setToOrtho(false, Gdx.graphics.getWidth()/(Gdx.graphics.getHeight()/810f), 810);
         bossCam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
         b2dCam = new BoundedCamera();
-        b2dCam.setToOrtho(false, V_WIDTH / PPM, V_HEIGHT / PPM);
+        b2dCam.setToOrtho(false, Gdx.graphics.getWidth() / PPM, Gdx.graphics.getHeight() / PPM);
         b2dCam.setBounds(0, (tileMapWidth * tileSize) / PPM, 0, (tileMapHeight * tileSize) / PPM);
     }
 
@@ -259,7 +255,7 @@ public class BossFightState extends GameState implements Controllable {
     public void render() {
         Gdx.gl20.glClearColor(0, 0, 0, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        bossCam.setPosition(player.getPosition().x * PPM + V_WIDTH / 35, player.getPosition().y * PPM + V_HEIGHT / 35);
+        bossCam.setPosition(player.getPosition().x * PPM, player.getPosition().y * PPM);
         bossCam.update();
 
         tmr.setView(bossCam);
@@ -405,7 +401,7 @@ public class BossFightState extends GameState implements Controllable {
     private void initFight() {
         skin_this = game.getSkin();
         uiStage = new Stage(new ScreenViewport());
-        uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+        uiStage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 
         dialogRoot = new Table();
         dialogRoot.setFillParent(true);
@@ -426,7 +422,7 @@ public class BossFightState extends GameState implements Controllable {
         dialogRoot.add(dialogTable).expand().align(Align.bottom).pad(15f);
 
         bossUiStage = new Stage(new ScreenViewport());
-        bossUiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+        bossUiStage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 
         Table root = new Table();
         root.setFillParent(true);
@@ -464,8 +460,8 @@ public class BossFightState extends GameState implements Controllable {
 
     private void initJoyStick() {
         joyCam = new BoundedCamera();
-        joyCam.setBounds(0, V_WIDTH, 0, V_HEIGHT);
-        joyCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
+        joyCam.setBounds(0, Gdx.graphics.getWidth(), 0, Gdx.graphics.getHeight());
+        joyCam.setToOrtho(false, (float) (Gdx.graphics.getWidth()), (float) (Gdx.graphics.getHeight()));
 
         joyStick = new JoyStick(200, 200, 200);
         shapeRenderer = new ShapeRenderer();

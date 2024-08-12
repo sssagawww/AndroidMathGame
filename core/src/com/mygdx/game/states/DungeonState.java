@@ -5,8 +5,6 @@ import static com.mygdx.game.MyGdxGame.PREF_FOREST;
 import static com.mygdx.game.MyGdxGame.PREF_MAZE;
 import static com.mygdx.game.MyGdxGame.PREF_MAZE_HOODED;
 import static com.mygdx.game.MyGdxGame.PREF_STATE;
-import static com.mygdx.game.MyGdxGame.V_HEIGHT;
-import static com.mygdx.game.MyGdxGame.V_WIDTH;
 import static com.mygdx.game.paint.Figures.FiguresDatabase.FIGURES_TYPES;
 import static com.mygdx.game.handlers.B2DVars.BIT_PLAYER;
 import static com.mygdx.game.handlers.B2DVars.BIT_TROPA;
@@ -134,10 +132,10 @@ public class DungeonState extends GameState implements Controllable {
         openingDoorSound = Gdx.audio.newSound(Gdx.files.internal("music/door_opening.mp3"));
 
         dunCam = new BoundedCamera();
-        dunCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
+        dunCam.setToOrtho(false, Gdx.graphics.getWidth()/(Gdx.graphics.getHeight()/810f), 810);
         dunCam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
         b2dCam = new BoundedCamera(); //рисует дебаг коллизию?
-        b2dCam.setToOrtho(false, V_WIDTH / PPM, V_HEIGHT / PPM); // /2?
+        b2dCam.setToOrtho(false, Gdx.graphics.getWidth() / PPM, Gdx.graphics.getHeight() / PPM); // /2?
         b2dCam.setBounds(0, (tileMapWidth * tileSize) / PPM, 0, (tileMapHeight * tileSize) / PPM);
     }
 
@@ -208,7 +206,7 @@ public class DungeonState extends GameState implements Controllable {
     public void render() {
         Gdx.gl20.glClearColor(0, 0, 0, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        dunCam.setPosition(player.getPosition().x * PPM + V_WIDTH / 35, player.getPosition().y * PPM + V_HEIGHT / 35);
+        dunCam.setPosition(player.getPosition().x * PPM, player.getPosition().y * PPM);
         dunCam.update();
 
         tmr.setView(dunCam);
@@ -357,8 +355,8 @@ public class DungeonState extends GameState implements Controllable {
 
     private void initJoyStick() {
         joyCam = new BoundedCamera();
-        joyCam.setBounds(0, V_WIDTH, 0, V_HEIGHT);
-        joyCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
+        joyCam.setBounds(0, Gdx.graphics.getWidth(), 0, Gdx.graphics.getHeight());
+        joyCam.setToOrtho(false, (float) (Gdx.graphics.getWidth()), (float) (Gdx.graphics.getHeight()));
 
         joyStick = new JoyStick(200, 200, 200);
         shapeRenderer = new ShapeRenderer();
@@ -369,7 +367,7 @@ public class DungeonState extends GameState implements Controllable {
     private void initFight() {
         skin_this = game.getSkin();
         uiStage = new Stage(new ScreenViewport());
-        uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+        uiStage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 
         dialogRoot = new Table();
         dialogRoot.setFillParent(true);

@@ -1,12 +1,9 @@
 package com.mygdx.game.UI;
 
-import static com.mygdx.game.MyGdxGame.V_HEIGHT;
-import static com.mygdx.game.MyGdxGame.V_WIDTH;
 import static com.mygdx.game.MyGdxGame.gameTime;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -31,7 +28,7 @@ public class Statistics extends Table {
         super(skin);
         this.skin = skin;
         uiTable = new Table();
-        this.add(uiTable).width(V_WIDTH / 2f).height(V_HEIGHT / 1.2f);
+        this.add(uiTable).width(Gdx.graphics.getWidth() / 2f).height(Gdx.graphics.getHeight() / 1.2f);
         this.setBackground("menuBtn_up");
 
         BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
@@ -57,7 +54,7 @@ public class Statistics extends Table {
             }
         });
         topTable.add(exitImage).align(Align.left).width(exitImage.getWidth() * 3).height(exitImage.getHeight() * 3);
-        uiTable.add(topTable).align(Align.top).width(V_WIDTH / 2f).height(exitImage.getHeight() * 3).row();
+        uiTable.add(topTable).align(Align.top).width(Gdx.graphics.getWidth() / 2f).height(exitImage.getHeight() * 3).row();
 
         String time = timeToString(gameTime);
         ArrayList<String> titles = new ArrayList<>(Arrays.asList("Время прохождения:", "Собрано грибов:"));
@@ -97,7 +94,7 @@ public class Statistics extends Table {
             super(skin);
             Table ui = new Table();
             ui.background(getSkin().getDrawable("menuBtn_up"));
-            add(ui).width(V_WIDTH / 2.5f).height(V_HEIGHT / 7f);
+            add(ui).width(Gdx.graphics.getWidth() / 2.5f).height(Gdx.graphics.getHeight() / 7f);
 
             tilteLabel = new Label("\n", lstyle);
             tilteLabel.setText(titleText);

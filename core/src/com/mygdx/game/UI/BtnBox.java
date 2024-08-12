@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Value;
 import com.badlogic.gdx.utils.Align;
 
 public class BtnBox extends Table {
@@ -68,7 +69,7 @@ public class BtnBox extends Table {
             }
         });
 
-        uiTable.add(btn).expand().align(Align.center).space(8f).padBottom(0f);
+        uiTable.add(btn).height(Value.percentWidth(.25F, uiTable)).expand().align(Align.center).space(8f).padBottom(0f);
         uiTable.row();
     }
 

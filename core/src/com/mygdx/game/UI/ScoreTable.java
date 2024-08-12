@@ -1,8 +1,5 @@
 package com.mygdx.game.UI;
 
-import static com.mygdx.game.MyGdxGame.V_HEIGHT;
-import static com.mygdx.game.MyGdxGame.V_WIDTH;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -11,12 +8,14 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ScoreTable extends Table {
     private Label.LabelStyle style;
     private Table uiTable;
-    private HashMap<String, Integer> players;
+    private HashMap<String, Float> players;
+    private Label idLabel;
 
     public ScoreTable(Skin skin) {
         super(skin);
@@ -27,13 +26,18 @@ public class ScoreTable extends Table {
         style = new Label.LabelStyle(font, Color.BLACK);
 
         Label title = new Label("\n", style);
-        title.setText("Рейтинг");
+        title.setText("Счет");
         title.setAlignment(Align.center);
+
+        idLabel = new Label("\n", style);
+        idLabel.setText("ID комнаты: ");
+        idLabel.setAlignment(Align.center);
 
         uiTable = new Table();
 
         players = new HashMap<>();
 
+        add(idLabel).center().pad(10f).row();
         add(title).center().row();
         add(uiTable).center();
     }
@@ -50,31 +54,38 @@ public class ScoreTable extends Table {
 
         Table table = new Table();
         table.setName(playerName);
-        table.add(title).align(Align.left).width(V_WIDTH / 8f).height(V_HEIGHT / 12f).expand();
-        table.add(scoreLabel).align(Align.right).width(V_WIDTH / 10f).height(V_HEIGHT / 12f);
+        table.add(title).align(Align.left).width(Gdx.graphics.getWidth() / 8f).height(Gdx.graphics.getHeight() / 12f).expand();
+        table.add(scoreLabel).align(Align.right).width(Gdx.graphics.getWidth() / 10f).height(Gdx.graphics.getHeight() / 12f);
 
         uiTable.add(table).align(Align.right).row();
-        players.put(playerName, Math.round(score));
+        players.put(playerName, score);
     }
 
-    public HashMap<String, Integer> getPlayers() {
+    public HashMap<String, Float> getPlayers() {
         return players;
     }
 
-    public int getPlayerScore(String playerName) {
-        return players.get(playerName);
-    }
-
-    public void setPlayerScore(String playerName, float score) {
-        players.replace(playerName, Math.round(score));
-        if (playerName != null && !playerName.equals("")) {
-            Table t = uiTable.findActor(playerName);
-            Label l = t.findActor(playerName + "_label");
-            l.setText(Math.round(score));
+    public void setPlayerScore(ArrayList<String> playersNames, ArrayList<Float> scores) {
+        for (int i = 0; i < playersNames.size(); i++) {
+            players.replace(playersNames.get(i), scores.get(i));
+            if (playersNames.get(i) != null && !playersNames.get(i).equals("")) {
+                Table t = uiTable.findActor(playersNames.get(i));
+                Label l = t.findActor(playersNames.get(i) + "_label");
+                l.setText(String.format("%.2f", scores.get(i)));
+            }
         }
     }
 
-    public void clear(){
-        players.clear();
+    public void setPlayerScore(String playerName, float score) {
+        players.replace(playerName, score);
+        if (playerName != null && !playerName.equals("")) {
+            Table t = uiTable.findActor(playerName);
+            Label l = t.findActor(playerName + "_label");
+            l.setText(String.format("%.2f", score));
+        }
+    }
+
+    public void setLabelId(int roomId) {
+        idLabel.setText("ID комнаты: " + roomId);
     }
 }

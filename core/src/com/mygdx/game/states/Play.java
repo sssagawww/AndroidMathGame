@@ -27,7 +27,7 @@ import com.mygdx.game.UI.Controller;
 import com.mygdx.game.UI.DialogBox;
 import com.mygdx.game.UI.JoyStick;
 import com.mygdx.game.UI.OptionBox2;
-import com.mygdx.game.entities.MovableNPC;
+import com.mygdx.game.entities.GameNPC;
 import com.mygdx.game.entities.PlayEntities;
 import com.mygdx.game.entities.Player2;
 import com.mygdx.game.handlers.BoundedCamera;
@@ -51,7 +51,7 @@ public class Play extends GameState implements Controllable {
     private MyContactListener cl;
     private Player2 player;
     private PlayEntities entities;
-    private HashMap<String, MovableNPC> movableNPCs;
+    private HashMap<String, GameNPC> movableNPCs;
     private TiledMap tiledMap;
     private OrthogonalTiledMapRenderer tmr;
     private float tileSize;
@@ -75,14 +75,10 @@ public class Play extends GameState implements Controllable {
     private float time = 0;
     public BodyDef bdef;
     public Body contactBody;
-    //private Stage controllerStage;
-    //private Controller controller;
-    // -------- JoyStick ----------
     private JoyStick joyStick;
     private ShapeRenderer shapeRenderer;
     private Vector3 mouse;
     private BoundedCamera joyCam;
-    // --------- END JoyStick ---------
     private boolean isStopped;
     private int nextState;
     private boolean contact;
@@ -119,11 +115,12 @@ public class Play extends GameState implements Controllable {
         createMusic();
         storyNext();
 
+        cam.setToOrtho(false, Gdx.graphics.getWidth()/(Gdx.graphics.getHeight()/810f), 810); //устанавливается размер поля зрения
         cam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
-        b2dCam = new BoundedCamera(); //рисует дебаг коллизию?
-        b2dCam.setToOrtho(false, V_WIDTH / PPM, V_HEIGHT / PPM); // /2?
+        b2dCam = new BoundedCamera(); //рисует дебаг коллизию
+        b2dCam.setToOrtho(false, Gdx.graphics.getWidth() / PPM, Gdx.graphics.getHeight() / PPM); // /2?
         b2dCam.setBounds(0, (tileMapWidth * tileSize) / PPM, 0, (tileMapHeight * tileSize) / PPM);
-        System.out.println("V_HEIGHT: " + MyGdxGame.V_HEIGHT + " player: " + player.getPosition().x + " " + player.getPosition().y);
+        System.out.println("Gdx.graphics.getHeight: " + Gdx.graphics.getHeight() + " player: " + player.getPosition().x + " " + player.getPosition().y);
     }
 
     @Override
@@ -134,17 +131,19 @@ public class Play extends GameState implements Controllable {
     public void update(float dt) {
         handleInput();
         world.step(dt, 6, 2);
+
+        //отрисовка игрока и нпс
         player.update(dt);
         entities.update(dt);
-        for (Map.Entry<String, MovableNPC> entry : movableNPCs.entrySet()) {
+        for (Map.Entry<String, GameNPC> entry : movableNPCs.entrySet()) {
             movableNPCs.get(entry.getKey()).update(dt);
             movableNPCs.get(entry.getKey()).updatePos();
         }
 
         movableNPCs.get("rabbit").randomDirection(30, dt);
-
         player.updatePL();
 
+        //изменение громкости
         if (controller.getSoundSettings().getSliderBg().isDragging()) {
             music.setVolume(getBgVolume());
         }
@@ -170,7 +169,7 @@ public class Play extends GameState implements Controllable {
             }
 
             player.getBody().setLinearVelocity(0, 0);
-            for (Map.Entry<String, MovableNPC> entry : movableNPCs.entrySet()) {
+            for (Map.Entry<String, GameNPC> entry : movableNPCs.entrySet()) {
                 movableNPCs.get(entry.getKey()).setDirection(0, 0, 20, 58, 58);
             }
             cam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
@@ -211,7 +210,7 @@ public class Play extends GameState implements Controllable {
             joyStick.setDefaultPos();
         }
 
-        //можно начать бой
+        //отрисовка UI, когда произошло взаимодействие
         if (canDraw) {
             uiStage.act(dt);
             dcontroller.update(dt);
@@ -235,45 +234,42 @@ public class Play extends GameState implements Controllable {
         controllerStage.act(dt);
     }
 
-    private float getBgVolume() {
-        return controller.getSoundSettings().getSliderBg().getPercent();
-    }
-
     @Override
     public void render() {
         Gdx.gl20.glClearColor(0, 0, 0, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        cam.setPosition(player.getPosition().x * PPM + V_WIDTH / 35, player.getPosition().y * PPM + V_HEIGHT / 35);
-        //cam.position.set(player.getPosition().x * PPM / 2, player.getPosition().y * PPM / 2, 0);
+        cam.setPosition(player.getPosition().x * PPM, player.getPosition().y * PPM);
         cam.update();
 
-        //рисует карту из Tiled
+        //отрисовка верхних слоев карты из Tiled
         tmr.setView(cam);
         tmr.render(backgroundLayers);
 
-        //рисует игрока и нпс
+        //отрисовка игрока и нпс
         sb.setProjectionMatrix(cam.combined); //https://stackoverflow.com/questions/33703663/understanding-the-libgdx-projection-matrix - объяснение
         player.render(sb, 80f, 86.6f);
 
         entities.render(sb, 1.5f, 1.5f);
 
-        for (Map.Entry<String, MovableNPC> entry : movableNPCs.entrySet()) {
-            MovableNPC npc = movableNPCs.get(entry.getKey());
+        for (Map.Entry<String, GameNPC> entry : movableNPCs.entrySet()) {
+            GameNPC npc = movableNPCs.get(entry.getKey());
             npc.render(sb, npc.getWidth() * 1.5f, npc.getHeight() * 1.5f);
         }
 
+        //отрисовка нижних слоев карты из Tiled
         tmr.render(foregroundLayers);
 
-        //рисует коллизию
+        //отрисовка коллизии в дебаг режиме
         if (debug) {
             b2dCam.position.set(player.getPosition().x, player.getPosition().y, 0);
             b2dCam.update();
             b2dr.render(world, b2dCam.combined);
         }
 
+        //отрисовка джойстика
         joyStick.render(shapeRenderer);
 
-        //рисует UI, когда произошло взаимодействие
+        //отрисовка UI, когда произошло взаимодействие
         if (canDraw) {
             uiStage.draw();
             if (contactBody != null) {
@@ -286,6 +282,7 @@ public class Play extends GameState implements Controllable {
             }
         }
 
+        //отрисовка кнопок контроллера
         controllerStage.draw();
     }
 
@@ -322,7 +319,7 @@ public class Play extends GameState implements Controllable {
         body.createFixture(fdef).setUserData("player");
         ps.dispose();
 
-        //create foot sensor - дополнительная коллизия внизу игрока
+        //foot sensor - дополнительная коллизия внизу игрока
         /*ps.setAsBox(10f / PPM, 10f / PPM, new Vector2(0, -50f/PPM), 0);
         fdef.shape = ps;
         fdef.filter.categoryBits = BIT_PLAYER;
@@ -470,7 +467,7 @@ public class Play extends GameState implements Controllable {
             cshape.dispose();
 
             body.createFixture(cdef).setUserData(mo.getName());
-            MovableNPC npc = new MovableNPC(body, mo.getName());
+            GameNPC npc = new GameNPC(body, mo.getName());
             movableNPCs.put(mo.getName(), npc);
         }
     }
@@ -497,7 +494,7 @@ public class Play extends GameState implements Controllable {
             cshape.dispose();
 
             body.createFixture(cdef).setUserData(mo.getName());
-            MovableNPC npc = new MovableNPC(body, mo.getName());
+            GameNPC npc = new GameNPC(body, mo.getName());
             movableNPCs.put(mo.getName(), npc);
         }
     }
@@ -511,7 +508,7 @@ public class Play extends GameState implements Controllable {
     private void initUI() {
         skin_this = game.getSkin();
         uiStage = new Stage(new ScreenViewport());
-        uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+        uiStage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 
         dialogRoot = new Table();
         dialogRoot.setFillParent(true);
@@ -527,7 +524,7 @@ public class Play extends GameState implements Controllable {
         Table dialogTable = new Table();
         dialogTable.add(optionBox)
                 .expand().align(Align.right)
-                .padRight((V_WIDTH / 1.05f) / 5f)
+                .padRight((Gdx.graphics.getWidth() / 1.05f) / 5f)
                 .space(8f)
                 .row();
         dialogTable.add(dialogBox)
@@ -546,17 +543,6 @@ public class Play extends GameState implements Controllable {
     }
 
     private void initController() {
-        /*controllerStage = new Stage(new ScreenViewport());
-        controllerStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
-
-        //controller = new Controller(skin_this);
-        controller.setVisible(true);
-
-        Table controllerRoot = new Table();
-        controllerRoot.setFillParent(true);
-        controllerRoot.add(controller).expand().align(Align.bottomLeft);
-        controllerStage.addActor(controllerRoot);*/
-
         System.out.println(game.getDbWrapper().getProgress() + " saved progress");
         multiplexer.addProcessor(controllerStage);
         Gdx.input.setInputProcessor(multiplexer);
@@ -564,8 +550,8 @@ public class Play extends GameState implements Controllable {
 
     private void initJoyStick() {
         joyCam = new BoundedCamera();
-        joyCam.setBounds(0, V_WIDTH, 0, V_HEIGHT);
-        joyCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
+        joyCam.setBounds(0, Gdx.graphics.getWidth(), 0, Gdx.graphics.getHeight());
+        joyCam.setToOrtho(false, (float) (Gdx.graphics.getWidth()), (float) (Gdx.graphics.getHeight()));
 
         joyStick = new JoyStick(200, 200, 200);
         shapeRenderer = new ShapeRenderer();
@@ -793,6 +779,10 @@ public class Play extends GameState implements Controllable {
         canDraw = false;
     }
 
+    private float getBgVolume() {
+        return controller.getSoundSettings().getSliderBg().getPercent();
+    }
+
     public Player2 getPlayer() {
         return player;
     }
@@ -803,9 +793,5 @@ public class Play extends GameState implements Controllable {
 
     public JoyStick getJoyStick() {
         return joyStick;
-    }
-
-    public Preferences getPrefs() {
-        return prefs;
     }
 }

@@ -66,6 +66,8 @@ public class MazeState extends GameState implements Controllable {
     private int tileSize;
     private int tileMapWidth;
     private int tileMapHeight;
+    private int[] backgroundLayers = {0, 1, 2, 3, 4, 5, 6};
+    private int[] foregroundLayers = {7, 8};
     private World world;
     private BodyDef bdef;
     private Player2 player;
@@ -112,10 +114,10 @@ public class MazeState extends GameState implements Controllable {
         initFight();
 
         mazeCam = new BoundedCamera();
-        mazeCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
+        mazeCam.setToOrtho(false, Gdx.graphics.getWidth() / (Gdx.graphics.getHeight() / 810f), 810);
         mazeCam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
         b2dCam = new BoundedCamera();
-        b2dCam.setToOrtho(false, V_WIDTH / PPM, V_HEIGHT / PPM);
+        b2dCam.setToOrtho(false, Gdx.graphics.getWidth() / PPM, Gdx.graphics.getHeight() / PPM);
         b2dCam.setBounds(0, (tileMapWidth * tileSize) / PPM, 0, (tileMapHeight * tileSize) / PPM);
     }
 
@@ -193,15 +195,17 @@ public class MazeState extends GameState implements Controllable {
     public void render() {
         Gdx.gl20.glClearColor(0, 0, 0, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        mazeCam.setPosition(player.getPosition().x * PPM + V_WIDTH / 35, player.getPosition().y * PPM + V_HEIGHT / 35);
+        mazeCam.setPosition(player.getPosition().x * PPM, player.getPosition().y * PPM);
         mazeCam.update();
 
         tmr.setView(mazeCam);
-        tmr.render();
+        tmr.render(backgroundLayers);
 
         sb.setProjectionMatrix(mazeCam.combined);
-        player.render(sb, 80f, 86.6f);
         entities.render(sb, 1.5f, 1.5f);
+        player.render(sb, 80f, 86.6f);
+
+        tmr.render(foregroundLayers);
 
         if (debug) {
             b2dCam.position.set(player.getPosition().x, player.getPosition().y, 0);
@@ -261,7 +265,7 @@ public class MazeState extends GameState implements Controllable {
         PolygonShape ps = new PolygonShape();
         FixtureDef fdef = new FixtureDef();
 
-        if(game.getPrefs().getInteger(PREF_STATE, NEW_GAME) == MAZE){
+        if (game.getPrefs().getInteger(PREF_STATE, NEW_GAME) == MAZE) {
             bdef.position.x = game.getPrefs().getFloat(PREF_X, 607f / PPM);
             bdef.position.y = game.getPrefs().getFloat(PREF_Y, 337f / PPM);
         } else if (gsm.getLastState() == FOREST) {
@@ -278,7 +282,7 @@ public class MazeState extends GameState implements Controllable {
         bdef.type = BodyDef.BodyType.DynamicBody;
         Body body = world.createBody(bdef);
 
-        ps.setAsBox(40f / PPM, 40f / PPM, new Vector2(-5.4f, -4.0f), 0);
+        ps.setAsBox(30f / PPM, 30f / PPM, new Vector2(-2f, -3.5f), 0);
         fdef.shape = ps;
         fdef.filter.categoryBits = BIT_PLAYER;
         fdef.filter.maskBits = BIT_TROPA;
@@ -299,7 +303,7 @@ public class MazeState extends GameState implements Controllable {
         tileMapHeight = (int) tiledMap.getProperties().get("height");
 
         TiledMapTileLayer borders = (TiledMapTileLayer) tiledMap.getLayers().get("borders"); //слой с границами карты
-        TiledMapTileLayer walls = (TiledMapTileLayer) tiledMap.getLayers().get("walls");
+        TiledMapTileLayer walls = (TiledMapTileLayer) tiledMap.getLayers().get("wallsMaze");
         TiledMapTileLayer next = (TiledMapTileLayer) tiledMap.getLayers().get("next");
         TiledMapTileLayer decor = (TiledMapTileLayer) tiledMap.getLayers().get("decor");
 
@@ -325,14 +329,14 @@ public class MazeState extends GameState implements Controllable {
 
                 bdef.type = BodyDef.BodyType.StaticBody;
                 bdef.position.set(
-                        (col + 0.2f) * tileSize / 2.5f,
+                        (col + 0.45f) * tileSize / 2.5f,
                         (row + 0.4f) * tileSize / 2.5f);
                 ChainShape cs = new ChainShape();
                 Vector2[] v = new Vector2[4];
-                v[0] = new Vector2(-tileSize / 6, -tileSize / 6);
-                v[1] = new Vector2(-tileSize / 6, tileSize / 6);
-                v[2] = new Vector2(tileSize / 6, tileSize / 6);
-                v[3] = new Vector2(tileSize / 6, -tileSize / 6);
+                v[0] = new Vector2(-tileSize / 6f, -tileSize / 6f);
+                v[1] = new Vector2(-tileSize / 6f, tileSize / 4.4f);
+                v[2] = new Vector2(tileSize / 4.8f, tileSize / 4.4f);
+                v[3] = new Vector2(tileSize / 4.8f, -tileSize / 6f);
                 cs.createChain(v);
                 fdef.friction = 0;
                 fdef.shape = cs;
@@ -352,8 +356,8 @@ public class MazeState extends GameState implements Controllable {
 
     private void initJoyStick() {
         joyCam = new BoundedCamera();
-        joyCam.setBounds(0, V_WIDTH, 0, V_HEIGHT);
-        joyCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT)); //не хватало этой строчки
+        joyCam.setBounds(0, Gdx.graphics.getWidth(), 0, Gdx.graphics.getHeight());
+        joyCam.setToOrtho(false, (float) (Gdx.graphics.getWidth()), (float) (Gdx.graphics.getHeight())); //не хватало этой строчки
 
         joyStick = new JoyStick(200, 200, 200);
         shapeRenderer = new ShapeRenderer();
@@ -367,14 +371,14 @@ public class MazeState extends GameState implements Controllable {
         root.setFillParent(true);
         root.add(image).center();
         darkStage = new Stage(new ScreenViewport());
-        darkStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+        darkStage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
         darkStage.addActor(root);
     }
 
     private void initFight() {
         skin_this = game.getSkin();
         uiStage = new Stage(new ScreenViewport());
-        uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+        uiStage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 
         dialogRoot = new Table();
         dialogRoot.setFillParent(true);

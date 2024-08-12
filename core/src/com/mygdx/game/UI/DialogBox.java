@@ -1,17 +1,15 @@
 package com.mygdx.game.UI;
 
-import static com.mygdx.game.MyGdxGame.V_WIDTH;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.Value;
 import com.badlogic.gdx.utils.Align;
 
 public class DialogBox extends Table {
@@ -39,6 +37,7 @@ public class DialogBox extends Table {
         textTable = new Table(skin);
         textTable.setBackground("GUI_img");
 
+        //основной текст
         Label.LabelStyle lstyle = new Label.LabelStyle(getSkin().getFont("font"), Color.BLACK);
         textLabel = new Label("\n", lstyle);
         textLabel.addListener(new InputListener() {
@@ -88,7 +87,7 @@ public class DialogBox extends Table {
 
         textTable.add(textLabel).expand().align(Align.left).padTop(20f).padLeft(15f).padRight(15f).padBottom(-10f);
         uiTable.add(textTable).center();
-        this.add(uiTable).width(V_WIDTH/1.05f);
+        this.add(uiTable).width(Gdx.graphics.getWidth() / 1.05f);
     }
 
     public void animateText(String text) {
@@ -162,7 +161,11 @@ public class DialogBox extends Table {
         return labelBtn;
     }
 
-    public void addBtn(){
+    public String getTargetText() {
+        return targetText;
+    }
+
+    public void addBtn() {
         textTable.add(labelBtn).width(labelBtn.getWidth() * 2f).height(labelBtn.getHeight() * 2f);
         this.add(skipBtn).align(Align.center).width(skipBtn.getWidth() * 4f).height(skipBtn.getHeight() * 4f).right().expand();
     }

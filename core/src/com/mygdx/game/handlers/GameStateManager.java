@@ -30,6 +30,7 @@ public class GameStateManager {
     public static final int DUNGEON = 9;
     public static final int BOSSFIGHT = 10;
     public static final int MUSHROOMS = 11;
+    public static final int CONNECTION = 12;
 
     public GameStateManager(MyGdxGame game) {
         this.game = game;
@@ -82,6 +83,8 @@ public class GameStateManager {
             return bossFightState;
         } else if (state == MUSHROOMS) {
             return new MushroomsState(this);
+        } else if (state == CONNECTION) {
+            return new ConnectionState(this);
         }
         return null;
     }

@@ -3,12 +3,9 @@ package com.mygdx.game.states;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
@@ -17,7 +14,6 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
@@ -29,23 +25,15 @@ import com.mygdx.game.battle.ENTITY_LIST;
 import com.mygdx.game.battle.events.BattleEvent;
 import com.mygdx.game.battle.events.BattleEventPlayer;
 import com.mygdx.game.battle.render_controller.BattleScreenController;
-import com.mygdx.game.entities.B2DSprite;
 import com.mygdx.game.entities.BattleEntity;
-import com.mygdx.game.entities.SlimeBoss;
-import com.mygdx.game.entities.StaticNPC;
+import com.mygdx.game.entities.GameNPC;
 import com.mygdx.game.handlers.BoundedCamera;
 import com.mygdx.game.handlers.GameStateManager;
-import com.mygdx.game.handlers.MyContactListener;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
 
-import static com.mygdx.game.MyGdxGame.V_HEIGHT;
-import static com.mygdx.game.MyGdxGame.V_WIDTH;
 import static com.mygdx.game.handlers.B2DVars.*;
-import static com.mygdx.game.handlers.GameStateManager.FOREST;
-import static com.mygdx.game.handlers.GameStateManager.MAZE;
-import static com.mygdx.game.handlers.GameStateManager.MENU;
 
 public class BattleState2 extends GameState implements BattleEventPlayer {
     private MyGdxGame game;
@@ -55,7 +43,6 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
     private float tileSize;
     private int tileMapWidth;
     private int tileMapHeight;
-    // UI
     private Stage uiStage;
     private Stage controllerStage;
     private Table dialogRoot;
@@ -65,14 +52,15 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
     private Table statusBoxRoot;
     private SelectionBtnBox selectionBtnBox;
     private StatusBox statusBox;
-    private PlayerStatusBox playerStatus;
-    // END UI
+    private StatusBox playerStatus;
     private BattleScreenController bcontroller;
     private InputMultiplexer multiplexer;
     private BattleEvent currentEvent;
     private Queue<BattleEvent> queue = new ArrayDeque<BattleEvent>();
     private Battle battle;
-    private B2DSprite boss;
+    private GameNPC boss;
+    private Battle.ENEMY_STATE enemyState;
+    private String prevText;
     private Music music;
     private static boolean done;
     private static boolean bossFight;
@@ -93,7 +81,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
         game.getStepDatabase().initializeAllSteps();
 
         fightCam = new BoundedCamera();
-        fightCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
+        fightCam.setToOrtho(false, (float) (Gdx.graphics.getWidth()), (float) (Gdx.graphics.getHeight()));
         fightCam.setBounds(0, 4864, 0, 2688);
 
         battle = new Battle(BattleEntity.generateEntity("Игрок", game.getStepDatabase(), game.getExampleDatabase()),
@@ -122,10 +110,8 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
 
     @Override
     public void update(float dt) {
-        //System.out.println(bcontroller.getState() + " " + currentEvent);
         world.step(dt, 6, 2);
         //dcontroller.update(dt);
-        //bcontroller.update(dt); <----- only selectionBox
         while (currentEvent == null || currentEvent.finished()) {
             if (queue.peek() == null) {
                 currentEvent = null;
@@ -153,6 +139,18 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
             currentEvent.update(dt);
         }
 
+        if(selectionBtnBox.isVisible()){
+            battle.setEnemyState(Battle.ENEMY_STATE.WAITING);
+        }
+        //prevText = dialogBox.getTargetText();
+        //System.out.println(prevText + " " + dialogBox.getTargetText());
+        if(!selectionBtnBox.isVisible() && enemyState != battle.getEnemyState() && !prevText.equals(dialogBox.getTargetText())){
+            prevText = dialogBox.getTargetText();
+            checkEnemyAnim(battle.getEnemyState());
+        } else if(enemyState != battle.getEnemyState()){
+            checkEnemyAnim(battle.getEnemyState());
+        }
+
         uiStage.act(dt);
         boss.update(dt);
         bcontroller.update(dt);
@@ -160,22 +158,22 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
     }
 
     @Override
-    public void render() { // update cam needs to be fixed (F11)
-        //Gdx.input.setInputProcessor(bcontroller);
+    public void render() {
         Gdx.gl20.glClearColor(0, 0, 0, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        fightCam.setPosition(V_WIDTH / 2f, V_HEIGHT / 2f);
+        fightCam.setPosition(Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 2f);
         fightCam.update();
 
-        //draw map
+        //отрисовка карты
         tmr.setView(fightCam);
         tmr.render();
-        //draw enemy
-        boss.render(sb, 200, 200);
 
-        /*sb.begin();
-        battleRenderer.render(sb);
-        sb.end();*/
+        //отрисовка врага
+        if (!enemy2) {
+            boss.render(sb, 400, 400);
+        } else {
+            boss.render(sb, 200, 200);
+        }
 
         sb.setProjectionMatrix(fightCam.combined);
 
@@ -185,7 +183,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
 
     private void initUI() {
         uiStage = new Stage(new ScreenViewport());
-        uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+        uiStage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 
         dialogRoot = new Table();
         dialogRoot.setFillParent(true);
@@ -205,13 +203,10 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
         optionBox = new OptionBox2(game.getSkin());
         optionBox.setVisible(false);
 
-        /*selectionBox = new SelectionBox(game.getSkin());
-        selectionBox.setVisible(false);*/
-
         selectionBtnBox = new SelectionBtnBox(game.getSkin());
         selectionBtnBox.setVisible(false);
 
-        playerStatus = new PlayerStatusBox(game.getSkin());
+        playerStatus = new StatusBox(game.getSkin());
         playerStatus.setText(battle.getPlayer().getName());
 
         statusBox = new StatusBox(game.getSkin());
@@ -227,7 +222,6 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
                 .space(8f)
                 .row();
 
-        //selectionRoot.add(selectionBox).expand().align(Align.bottom).pad(5f);
         selectionRoot.add(selectionBtnBox).expand().align(Align.bottom).pad(5f);
         dialogRoot.add(dialogTable).expand().align(Align.top);
         statusBoxRoot.add(statusBox).expand().align(Align.topLeft).pad(10f);
@@ -238,7 +232,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
 
     private void createLayers() {
         tiledMap = new TmxMapLoader().load("sprites/mystic_woods_free_2.1/fightmap2.tmx");
-        tmr = new OrthogonalTiledMapRenderer(tiledMap, 4); // !!!
+        tmr = new OrthogonalTiledMapRenderer(tiledMap, 5);
         tileSize = (int) tiledMap.getProperties().get("tilewidth");
 
         tileMapWidth = (int) tiledMap.getProperties().get("width");
@@ -249,28 +243,30 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
         BodyDef bdef = new BodyDef();
 
         bdef.type = BodyDef.BodyType.StaticBody;
-        bdef.position.set((V_WIDTH / 2f) / PPM - 5, (V_HEIGHT / 2f) / PPM);
+        bdef.position.set((Gdx.graphics.getWidth() / 2f) / PPM, (Gdx.graphics.getHeight() / 2f) / PPM);
         Body body = world.createBody(bdef);
 
-        boss = new StaticNPC(body, "enemy", 5f);
+        boss = new GameNPC(body, "enemy");
+        boss.setNewAnimation(0, 100, 100);
         if (bossFight) {
-            boss = new SlimeBoss(body);
+            boss = new GameNPC(body, "slimeBoss");
+            boss.setNewAnimation(0, 32, 32);
         } else if (enemy2) {
-            boss = new StaticNPC(body, "enemy2", 5f);
+            boss = new GameNPC(body, "enemy2");
         }
         body.setUserData(boss);
     }
 
     private void initController() {
         controllerStage = new Stage(new ScreenViewport());
-        controllerStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+        controllerStage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 
         BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
         Label.LabelStyle lstyle = new Label.LabelStyle(font, Color.DARK_GRAY);
         lstyle.background = game.getSkin().getDrawable("GUI_img");
         lstyle.background.setMinHeight(60f);
 
-        Label runLabel = new Label("Убежать",lstyle);
+        Label runLabel = new Label("Убежать", lstyle);
         runLabel.addListener(new InputListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
@@ -298,6 +294,24 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
         music.setVolume(0.9f);
         music.setLooping(true);
         music.play();
+    }
+
+    private void checkEnemyAnim(Battle.ENEMY_STATE state) {
+        if (state == Battle.ENEMY_STATE.WIN) {
+            boss.setNewAnimation(6, 100, 100);
+        } else if (state == Battle.ENEMY_STATE.HURT) {
+            boss.setNewAnimation(1, 100, 100);
+        } else if (state == Battle.ENEMY_STATE.LOSE) {
+            boss.setNewAnimation(8, 100, 100);
+        } else if (state == Battle.ENEMY_STATE.WAITING) {
+            boss.setNewAnimation(0, 100, 100);
+        } else if (state == Battle.ENEMY_STATE.ATTACK) {
+            boss.setNewAnimation(2, 100, 100);
+        } else if (state == Battle.ENEMY_STATE.MISS) {
+            boss.setNewAnimation(4, 100, 100);
+        }
+
+        enemyState = state;
     }
 
     public static boolean isDone() {

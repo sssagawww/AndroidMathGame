@@ -4,7 +4,6 @@ import static com.mygdx.game.handlers.B2DVars.BIT_PLAYER;
 import static com.mygdx.game.handlers.B2DVars.BIT_TROPA;
 import static com.mygdx.game.handlers.B2DVars.PPM;
 import static com.mygdx.game.handlers.GameStateManager.BATTLE;
-import static com.mygdx.game.handlers.GameStateManager.DUNGEON;
 import static com.mygdx.game.handlers.GameStateManager.FOREST;
 import static com.mygdx.game.handlers.GameStateManager.MAZE;
 import static com.mygdx.game.handlers.GameStateManager.MENU;
@@ -52,7 +51,7 @@ import com.mygdx.game.UI.Controller;
 import com.mygdx.game.UI.DialogBox;
 import com.mygdx.game.UI.JoyStick;
 import com.mygdx.game.UI.OptionBox2;
-import com.mygdx.game.entities.MovableNPC;
+import com.mygdx.game.entities.GameNPC;
 import com.mygdx.game.entities.PlayEntities;
 import com.mygdx.game.entities.Player2;
 import com.mygdx.game.handlers.BoundedCamera;
@@ -72,7 +71,7 @@ public class Forest extends GameState implements Controllable {
     private MyContactListener cl;
     private Player2 player;
     private PlayEntities entities;
-    private HashMap<String, MovableNPC> movableNPCs;
+    private HashMap<String, GameNPC> movableNPCs;
     private Body removedBody;
     private TiledMap tiledMap;
     private OrthogonalTiledMapRenderer tmr;
@@ -90,8 +89,6 @@ public class Forest extends GameState implements Controllable {
     private DialogController dcontroller;
     public boolean canDraw;
     private float time = 0;
-    //private Stage controllerStage;
-    //private Controller controller;
     private JoyStick joyStick;
     private ShapeRenderer shapeRenderer;
     private Vector3 mouse;
@@ -100,9 +97,9 @@ public class Forest extends GameState implements Controllable {
     private boolean isStopped;
     private int nextState;
     private int[] backgroundLayers = {0, 1, 2, 3};
-    private int[] foregroundLayers = {4, 5, 6, 7, 8, 9};
+    private int[] foregroundLayers = {4, 5, 6, 7, 8, 9, 10};
     private int mushrooms = 0;
-    private MovableNPC npc;
+    private GameNPC npc;
     private Sound mushroomSound;
     public static boolean progress;
     private boolean touchStarted = false;
@@ -129,10 +126,10 @@ public class Forest extends GameState implements Controllable {
         initFight();
 
         forCam = new BoundedCamera();
-        forCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
+        forCam.setToOrtho(false, Gdx.graphics.getWidth() / (Gdx.graphics.getHeight() / 810f), 810);
         forCam.setBounds(0, tileMapWidth * tileSize * 4, 0, tileMapHeight * tileSize * 4);
         b2dCam = new BoundedCamera();
-        b2dCam.setToOrtho(false, V_WIDTH / PPM, V_HEIGHT / PPM);
+        b2dCam.setToOrtho(false, Gdx.graphics.getWidth() / PPM, Gdx.graphics.getHeight() / PPM);
         b2dCam.setBounds(0, (tileMapWidth * tileSize) / PPM, 0, (tileMapHeight * tileSize) / PPM);
     }
 
@@ -147,7 +144,7 @@ public class Forest extends GameState implements Controllable {
         world.step(dt, 6, 2);
         player.update(dt);
         entities.update(dt);
-        for (Map.Entry<String, MovableNPC> entry : movableNPCs.entrySet()) {
+        for (Map.Entry<String, GameNPC> entry : movableNPCs.entrySet()) {
             movableNPCs.get(entry.getKey()).update(dt);
             movableNPCs.get(entry.getKey()).updatePos();
         }
@@ -160,7 +157,7 @@ public class Forest extends GameState implements Controllable {
             } else if (gsm.getLastState() == MAZE) {
                 player.getBody().setTransform(1107f / PPM, 167f / PPM, 0);
             }
-            for (Map.Entry<String, MovableNPC> entry : movableNPCs.entrySet()) {
+            for (Map.Entry<String, GameNPC> entry : movableNPCs.entrySet()) {
                 movableNPCs.get(entry.getKey()).setDirection(0, 0, 20, 64, 64);
             }
             multiplexer.addProcessor(controllerStage);
@@ -229,7 +226,7 @@ public class Forest extends GameState implements Controllable {
     public void render() {
         Gdx.gl20.glClearColor(0, 0, 0, 1);
         Gdx.gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        forCam.setPosition(player.getPosition().x * PPM + V_WIDTH / 35, player.getPosition().y * PPM + V_HEIGHT / 35);
+        forCam.setPosition(player.getPosition().x * PPM, player.getPosition().y * PPM);
         forCam.update();
 
         tmr.setView(forCam);
@@ -238,8 +235,8 @@ public class Forest extends GameState implements Controllable {
         sb.setProjectionMatrix(forCam.combined);
         player.render(sb, 80f, 86.6f);
         entities.render(sb, 1.5f, 1.5f);
-        for (Map.Entry<String, MovableNPC> entry : movableNPCs.entrySet()) {
-            MovableNPC npc = movableNPCs.get(entry.getKey());
+        for (Map.Entry<String, GameNPC> entry : movableNPCs.entrySet()) {
+            GameNPC npc = movableNPCs.get(entry.getKey());
             npc.render(sb, npc.getWidth() * 1.5f, npc.getHeight() * 1.5f);
         }
 
@@ -281,7 +278,7 @@ public class Forest extends GameState implements Controllable {
         PolygonShape ps = new PolygonShape();
         FixtureDef fdef = new FixtureDef();
 
-        if(game.getPrefs().getInteger(PREF_STATE, NEW_GAME) == FOREST){
+        if (game.getPrefs().getInteger(PREF_STATE, NEW_GAME) == FOREST) {
             bdef.position.x = game.getPrefs().getFloat(PREF_X, 207f / PPM);
             bdef.position.y = game.getPrefs().getFloat(PREF_Y, 737f / PPM);
         } else if (gsm.getLastState() == MAZE) {
@@ -298,7 +295,7 @@ public class Forest extends GameState implements Controllable {
         bdef.type = BodyDef.BodyType.DynamicBody;
         Body body = world.createBody(bdef);
 
-        ps.setAsBox(40f / PPM, 50f / PPM, new Vector2(-5.4f, -3.6f), 0);
+        ps.setAsBox(30f / PPM, 30f / PPM, new Vector2(-2f, -1.5f), 0);
         fdef.shape = ps;
         fdef.filter.categoryBits = BIT_PLAYER;
         fdef.filter.maskBits = BIT_TROPA;
@@ -321,10 +318,12 @@ public class Forest extends GameState implements Controllable {
         TiledMapTileLayer trees = (TiledMapTileLayer) tiledMap.getLayers().get("treescollision");
         TiledMapTileLayer next = (TiledMapTileLayer) tiledMap.getLayers().get("next");
         TiledMapTileLayer sign = (TiledMapTileLayer) tiledMap.getLayers().get("sign");
+        TiledMapTileLayer decor = (TiledMapTileLayer) tiledMap.getLayers().get("decor2");
         TiledMapTileLayer npcCollision = (TiledMapTileLayer) tiledMap.getLayers().get("npcCol");
         createLayer(trees, BIT_TROPA, BIT_PLAYER, true);
         createLayer(next, BIT_TROPA, BIT_PLAYER, true);
         createLayer(sign, BIT_TROPA, BIT_PLAYER, true);
+        createLayer(decor, BIT_TROPA, BIT_PLAYER, true);
         createLayer(npcCollision, BIT_PLAYER, BIT_TROPA, false);
     }
 
@@ -344,14 +343,14 @@ public class Forest extends GameState implements Controllable {
 
                 bdef.type = BodyDef.BodyType.StaticBody;
                 bdef.position.set(
-                        (col + 0.1f) * tileSize / 2.5f,
-                        (row + 0.2f) * tileSize / 2.5f);
+                        (col + 0.45f) * tileSize / 2.5f,
+                        (row + 0.4f) * tileSize / 2.5f);
                 ChainShape cs = new ChainShape();
                 Vector2[] v = new Vector2[4];
-                v[0] = new Vector2(-tileSize / 6, -tileSize / 10);
-                v[1] = new Vector2(-tileSize / 6, tileSize / 10);
-                v[2] = new Vector2(tileSize / 6, tileSize / 10);
-                v[3] = new Vector2(tileSize / 6, -tileSize / 6);
+                v[0] = new Vector2(-tileSize / 6f, -tileSize / 6f);
+                v[1] = new Vector2(-tileSize / 6f, tileSize / 12f);
+                v[2] = new Vector2(tileSize / 4.8f, tileSize / 12f);
+                v[3] = new Vector2(tileSize / 4.8f, -tileSize / 6f);
                 cs.createChain(v);
                 fdef.friction = 0;
                 fdef.shape = cs;
@@ -388,7 +387,7 @@ public class Forest extends GameState implements Controllable {
             Body body = world.createBody(bdef);
             FixtureDef cdef = new FixtureDef();
             CircleShape cshape = new CircleShape();
-            cshape.setRadius(50f / PPM);
+            cshape.setRadius(30f / PPM);
             cdef.shape = cshape;
             cdef.isSensor = true;
             cdef.filter.categoryBits = BIT_TROPA;
@@ -423,7 +422,7 @@ public class Forest extends GameState implements Controllable {
             cshape.dispose();
 
             body.createFixture(cdef).setUserData(mo.getName());
-            MovableNPC npc = new MovableNPC(body, mo.getName());
+            GameNPC npc = new GameNPC(body, mo.getName());
             movableNPCs.put(mo.getName(), npc);
         }
         movableNPCs.get("npcForest").setNewAnimation(0, 64, 64);
@@ -433,7 +432,7 @@ public class Forest extends GameState implements Controllable {
     private void initFight() {
         skin_this = game.getSkin();
         uiStage = new Stage(new ScreenViewport());
-        uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+        uiStage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 
         dialogRoot = new Table();
         dialogRoot.setFillParent(true);
@@ -449,7 +448,7 @@ public class Forest extends GameState implements Controllable {
         Table dialogTable = new Table();
         dialogTable.add(optionBox)
                 .expand().align(Align.right)
-                .padRight((V_WIDTH / 1.05f) / 5f)
+                .padRight((Gdx.graphics.getWidth() / 1.05f) / 5f)
                 .space(8f)
                 .row();
         dialogTable.add(dialogBox)
@@ -474,8 +473,8 @@ public class Forest extends GameState implements Controllable {
 
     private void initJoyStick() {
         joyCam = new BoundedCamera();
-        joyCam.setBounds(0, V_WIDTH, 0, V_HEIGHT);
-        joyCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
+        joyCam.setBounds(0, Gdx.graphics.getWidth(), 0, Gdx.graphics.getHeight());
+        joyCam.setToOrtho(false, (float) (Gdx.graphics.getWidth()), (float) (Gdx.graphics.getHeight()));
 
         joyStick = new JoyStick(200, 200, 200);
         shapeRenderer = new ShapeRenderer();
@@ -489,7 +488,7 @@ public class Forest extends GameState implements Controllable {
         root.setFillParent(true);
         root.add(image).center();
         darkStage = new Stage(new ScreenViewport());
-        darkStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+        darkStage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
         darkStage.addActor(root);
     }
 

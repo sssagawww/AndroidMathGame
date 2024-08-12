@@ -1,11 +1,19 @@
 package com.mygdx.game.multiplayer;
 
+import static com.mygdx.game.MyGdxGame.MUSHROOMS_GAME;
+import static com.mygdx.game.MyGdxGame.PAINT_GAME;
+import static com.mygdx.game.handlers.GameStateManager.MUSHROOMS;
+import static com.mygdx.game.handlers.GameStateManager.PAINT;
+
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
+import com.mygdx.game.states.PaintState;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import okhttp3.Call;
@@ -18,21 +26,24 @@ import okhttp3.Response;
 import okhttp3.MediaType;
 
 public class MushroomsRequest {
-    private OkHttpClient client;
-    private int opponentId;
-    private float opponentScore;
-    private boolean done = false;
-    private String opponentName = "";
-    private String winner = "";
-    private boolean everyoneReady;
-    private JsonReader json;
+    private final OkHttpClient client;
+    private final JsonReader json;
+    private final MediaType JSON = MediaType.get("application/json; charset=utf-8");
     private static String ip = "";
     private static String url = "http://" + ip + "/multiplayer/";
     private static String name = "name";
-    private final MediaType JSON = MediaType.get("application/json; charset=utf-8");
+    private int roomId;
+    private boolean joined;
+    private boolean created;
+    private String miniGame;
     private static boolean unableToConnect = true;
+    private String winnerMessage = "";
+    private HashMap<String, Float> opponents = new HashMap<>();
+    private boolean done = false;
+    private boolean everyoneReady;
 
     public MushroomsRequest() {
+        //создаём клиент, где все запросы будут с нужным заголовком
         client = new OkHttpClient().newBuilder().addInterceptor(new Interceptor() {
             @NotNull
             @Override
@@ -45,91 +56,29 @@ public class MushroomsRequest {
         json = new JsonReader();
     }
 
-    public void postInfo(int id, float number) {
-        String jsonRequest = "{\"userId\":" + id + ", \"userName\": \"" + name + "\", \"number\":" + number + "}";
+    public void createRoom(int id, String miniGame) {
+        //создаём тело запроса
+        String jsonRequest = "{\"userId\":" + id + ", \"userName\": \"" + name + "\", \"miniGame\": \"" + miniGame + "\"}";
         RequestBody body = RequestBody.create(jsonRequest, JSON);
 
-        Request request = new Request.Builder().url(url + "info").post(body).build();
+        //создаём сам запрос
+        Request request = new Request.Builder().url(url + "createroom").post(body).build();
 
+        //отправляем запрос
         client.newCall(request).enqueue(new Callback() {
             @Override
-            public void onFailure(Call call, IOException e) {
-                System.out.println("Unable to connect! postInfo");
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                System.out.println("Unable to connect! createRoom()");
             }
 
             @Override
-            public void onResponse(Call call, Response response) {
+            public void onResponse(@NotNull Call call, @NotNull Response response) {
                 try {
-                    Thread.sleep(10);
+                    //получаем id созданной комнаты
                     JsonValue jObject = json.parse(response.body().string());
-                    opponentName = jObject.getString("userName");
-                    opponentScore = jObject.getFloat("number");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        });
-    }
-
-    public void playerIsReady(int id) {
-        String jsonRequest = "{\"userId\":" + id + ", \"userName\": \"" + name + "\"}";
-        RequestBody body = RequestBody.create(jsonRequest, JSON);
-        Request request = new Request.Builder().url(url + "playerisready").post(body).build();
-
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                System.out.println("Unable to connect! playerIsReady");
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                try {
-                    System.out.println(response.body().string());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
-
-    public void setPlayerReady(int id, boolean ready) {
-        String jsonRequest = "{\"userId\":" + id + ", \"ready\": \"" + ready + "\"}";
-        RequestBody body = RequestBody.create(jsonRequest, JSON);
-        Request request = new Request.Builder().url(url + "setplayerready").post(body).build();
-
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                System.out.println("Unable to connect! setPlayerReady");
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                System.out.println("setPlayerReady called");
-            }
-        });
-    }
-
-    public void join(int id, String miniGame, float number) {
-        String jsonRequest = "{\"userId\":" + id + ", \"userName\": \"" + name + "\", \"miniGame\": \"" + miniGame + "\", \"number\":" + number + "}";
-        RequestBody body = RequestBody.create(jsonRequest, JSON);
-
-        Request request = new Request.Builder().url(url + "join").post(body).build();
-
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                unableToConnect = true;
-                System.out.println("Unable to connect! join");
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) {
-                try {
-                    System.out.println(response.body().string());
+                    response.body().close();
+                    roomId = Integer.parseInt(jObject.getString("string"));
+                    created = true;
                     done = true;
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -138,22 +87,35 @@ public class MushroomsRequest {
         });
     }
 
-    public void leave(int id) {
-        String jsonRequest = "{\"userId\":" + id + "}";
+    public void joinRoom(int userId, int roomId) {
+        //создаём тело запроса
+        String jsonRequest = "{\"roomId\":" + roomId + ", \"userName\": \"" + name + "\", \"userId\": " + userId + "}";
         RequestBody body = RequestBody.create(jsonRequest, JSON);
 
-        Request request = new Request.Builder().url(url + "leave").post(body).build();
+        //создаём сам запрос
+        Request request = new Request.Builder().url(url + "joinroom").post(body).build();
 
+        //отправляем запрос
         client.newCall(request).enqueue(new Callback() {
             @Override
-            public void onFailure(Call call, IOException e) {
-                System.out.println("Unable to connect! leave");
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                System.out.println("Unable to connect! joinRoom()");
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
+            public void onResponse(@NotNull Call call, @NotNull Response response) {
                 try {
-                    System.out.println(response.body().string());
+                    //проверяем, получилось ли зайти
+                    JsonValue jObject = json.parse(response.body().string());
+                    response.body().close();
+                    if (jObject.getString("string").equals("can't join")) {
+                        joined = false;
+                    } else {
+                        //если да, то смотрим, какая мини-игра в комнате
+                        joined = true;
+                        miniGame = jObject.getString("string");
+                    }
+                    done = true;
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -161,20 +123,105 @@ public class MushroomsRequest {
         });
     }
 
-    public boolean isReady() {
-        Request request = new Request.Builder().url(url + "readyornot").get().build();
+    public void leaveRoom(int userId, int roomId) {
+        //создаём тело запроса
+        String jsonRequest = "{\"roomId\":" + roomId + ", \"userId\": " + userId + "}";
+        RequestBody body = RequestBody.create(jsonRequest, JSON);
 
+        //создаём сам запрос
+        Request request = new Request.Builder().url(url + "leaveroom").post(body).build();
+
+        //отправляем запрос
         client.newCall(request).enqueue(new Callback() {
             @Override
-            public void onFailure(Call call, IOException e) {
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                System.out.println("Unable to connect! leaveRoom()");
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) {
+                try {
+                    System.out.println(response.body().string());
+                    response.body().close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    //устанавливаем, что игрок готов
+    public void playerIsReady(int userId, int roomId) {
+        //создаём тело запроса
+        String jsonRequest = "{\"userId\":" + userId + ", \"userName\": \"" + name + "\", \"roomId\":" + roomId + "}";
+        RequestBody body = RequestBody.create(jsonRequest, JSON);
+
+        //создаём сам запрос
+        Request request = new Request.Builder().url(url + "playerisreadyroom").post(body).build();
+
+        //отправляем запрос
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                System.out.println("Unable to connect! playerIsReady()");
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) {
+                try {
+                    System.out.println(response.body().string());
+                    response.body().close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    public void setPlayerReady(int id, boolean ready, int roomId) {
+        //создаём тело запроса
+        String jsonRequest = "{\"userId\":" + id + ", \"ready\": \"" + ready + "\", \"roomId\":" + roomId + "}";
+        RequestBody body = RequestBody.create(jsonRequest, JSON);
+
+        //создаём сам запрос
+        Request request = new Request.Builder().url(url + "setplayerreadyroom").post(body).build();
+
+        //отправляем запрос
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                System.out.println("Unable to connect! setPlayerReady");
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) {
+                System.out.println("setPlayerReady called");
+            }
+        });
+    }
+
+    public boolean isEveryoneReady(int roomId) {
+        //создаём тело запроса
+        String jsonRequest = "{\"roomId\":" + roomId + "}";
+        RequestBody body = RequestBody.create(jsonRequest, JSON);
+
+        //создаём сам запрос
+        Request request = new Request.Builder().url(url + "readyornotroom").post(body).build();
+
+        //отправляем запрос
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 System.out.println("Unable to connect! isReady");
                 call.cancel();
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
+            public void onResponse(@NotNull Call call, @NotNull Response response) {
                 try {
+                    //проверяем, все ли игроки готовы
                     everyoneReady = Boolean.parseBoolean(response.body().string());
+                    response.body().close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -184,20 +231,60 @@ public class MushroomsRequest {
         return everyoneReady;
     }
 
-    public void getWinner() {
-        Request request = new Request.Builder().url(url + "getwinner").get().build();
+    public void getWinner(int roomId) {
+        //создаём тело запроса
+        String jsonRequest = "{\"roomId\":" + roomId + "}";
+        RequestBody body = RequestBody.create(jsonRequest, JSON);
 
+        //создаём сам запрос
+        Request request = new Request.Builder().url(url + "getwinnerroom").post(body).build();
+
+        //отправляем запрос
         client.newCall(request).enqueue(new Callback() {
             @Override
-            public void onFailure(Call call, IOException e) {
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 System.out.println("Unable to connect! getWinner");
             }
 
             @Override
-            public void onResponse(Call call, Response response) {
+            public void onResponse(@NotNull Call call, @NotNull Response response) {
                 try {
                     JsonValue jObject = json.parse(response.body().string());
-                    winner = jObject.getString("joined");
+                    response.body().close();
+                    winnerMessage = jObject.getString("string");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    public void postInfo(int id, float number, int roomId) {
+        String jsonRequest = "{\"userId\":" + id + ", \"userName\": \"" + name + "\", \"number\":" + number + ", \"roomId\":" + roomId + "}";
+        RequestBody body = RequestBody.create(jsonRequest, JSON);
+
+        Request request = new Request.Builder().url(url + "info").post(body).build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                System.out.println("Unable to connect! postInfo");
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) {
+                try {
+                    JsonValue jObject = json.parse(response.body().string());
+                    response.body().close();
+
+                    String[] names = jObject.getString("userNames").replaceAll("\\[|]|\"", "").split(",");
+                    String[] nums = jObject.getString("numbers").replaceAll("\\[|]|\"", "").split(",");
+
+                    for (int i = 0; i < names.length; i++) {
+                        if (!names[i].equals("") && !names[i].equals(" ")) {
+                            opponents.put(names[i], Float.valueOf(nums[i]));
+                        }
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -206,53 +293,42 @@ public class MushroomsRequest {
     }
 
     public void ping() {
+        //проверяем, доступен ли сервер
         Request request = new Request.Builder().url(url).get().build();
 
         client.newCall(request).enqueue(new Callback() {
             @Override
-            public void onFailure(Call call, IOException e) {
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 unableToConnect = true;
-                System.out.println("Unable to connect! join");
+                System.out.println("Unable to connect! ping");
             }
 
             @Override
-            public void onResponse(Call call, Response response) {
+            public void onResponse(@NotNull Call call, @NotNull Response response) {
                 unableToConnect = false;
-                try {
-                    System.out.println(response.body().string());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                System.out.println("server is active");
             }
         });
     }
 
-    public int getOpponentId() {
-        return opponentId;
+    public HashMap<String, Float> getOpponents() {
+        return opponents;
     }
 
-    public float getOpponentScore() {
-        return opponentScore;
+    public ArrayList<String> getOpponentNames() {
+        return new ArrayList<>(opponents.keySet());
     }
 
-    public void setOpponentScore(float opponentScore) {
-        this.opponentScore = opponentScore;
-    }
-
-    public String getOpponentName() {
-        return opponentName;
+    public ArrayList<Float> getOpponentScores() {
+        return new ArrayList<>(opponents.values());
     }
 
     public boolean isDone() {
         return done;
     }
 
-    public void setDone(boolean done) {
-        this.done = done;
-    }
-
     public String getWinnerName() {
-        return winner;
+        return winnerMessage;
     }
 
     public static boolean isUnableToConnect() {
@@ -261,10 +337,6 @@ public class MushroomsRequest {
 
     public static void setUnableToConnect(boolean b) {
         unableToConnect = b;
-    }
-
-    public static String getIp() {
-        return ip;
     }
 
     public static void setIp(String ip) {
@@ -278,5 +350,39 @@ public class MushroomsRequest {
 
     public static void setName(String name) {
         MushroomsRequest.name = name;
+    }
+
+    public int getRoomId() {
+        return roomId;
+    }
+
+    public void setRoomId(int roomId) {
+        this.roomId = roomId;
+    }
+
+    public boolean isJoined() {
+        return joined;
+    }
+
+    public void setJoined(boolean joined) {
+        this.joined = joined;
+    }
+
+    public boolean isCreated() {
+        return created;
+    }
+
+    public void setCreated(boolean created) {
+        this.created = created;
+    }
+
+    public int getMiniGame() {
+        if (miniGame.equals(MUSHROOMS_GAME)) {
+            return MUSHROOMS;
+        } else if (miniGame.equals(PAINT_GAME)) {
+            PaintState.setOnline(true);
+            return PAINT;
+        }
+        return 0;
     }
 }

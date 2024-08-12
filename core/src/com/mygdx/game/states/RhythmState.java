@@ -1,41 +1,22 @@
 package com.mygdx.game.states;
 
-import static com.mygdx.game.MyGdxGame.V_HEIGHT;
-import static com.mygdx.game.MyGdxGame.V_WIDTH;
-import static com.mygdx.game.handlers.GameStateManager.FOREST;
-import static com.mygdx.game.handlers.GameStateManager.PLAY;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.mygdx.game.Dialog.Dialog;
-import com.mygdx.game.Dialog.DialogController;
-import com.mygdx.game.Dialog.DialogNode;
-import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.UI.DialogBox;
-import com.mygdx.game.UI.OptionBox;
-import com.mygdx.game.UI.PaintMenu;
 import com.mygdx.game.UI.RhythmMenu;
 import com.mygdx.game.handlers.BoundedCamera;
 import com.mygdx.game.handlers.GameStateManager;
-
-import java.util.ArrayList;
 
 public class RhythmState extends GameState {
     private InputMultiplexer multiplexer;
@@ -62,8 +43,8 @@ public class RhythmState extends GameState {
         initUI();
 
         rhCam = new BoundedCamera();
-        rhCam.setToOrtho(false, (float) (V_WIDTH), (float) (V_HEIGHT));
-        rhCam.setBounds(0, V_WIDTH, 0, V_HEIGHT);
+        rhCam.setToOrtho(false, (float) (Gdx.graphics.getWidth()), (float) (Gdx.graphics.getHeight()));
+        rhCam.setBounds(0, Gdx.graphics.getWidth(), 0, Gdx.graphics.getHeight());
 
         Gdx.input.setInputProcessor(multiplexer);
     }
@@ -99,7 +80,7 @@ public class RhythmState extends GameState {
         sb.setProjectionMatrix(rhCam.combined);
 
         sb.begin();
-        sb.draw(bg, -V_WIDTH / 4f, 0);
+        sb.draw(bg, Gdx.graphics.getWidth() / 2f - (Gdx.graphics.getWidth() * 1.2f) / 2f, 0, Gdx.graphics.getWidth() * 1.2f, Gdx.graphics.getHeight() * 1.2f);
         sb.end();
 
         uiStage.draw();
@@ -112,7 +93,7 @@ public class RhythmState extends GameState {
 
     public void initUI() {
         uiStage = new Stage(new ScreenViewport());
-        uiStage.getViewport().update(V_WIDTH, V_HEIGHT, true);
+        uiStage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 
         Table root = new Table();
         //root.setBackground(game.getSkin().getDrawable("bg"));
@@ -138,7 +119,7 @@ public class RhythmState extends GameState {
 
         Table table = new Table();
         root.add(menuImg).expand().align(Align.topLeft).padTop(65f);
-        root.add(rhythmMenu).align(Align.center).width(V_HEIGHT / 1.5f).height(V_HEIGHT / 1.5f);
+        root.add(rhythmMenu).align(Align.center).width(Gdx.graphics.getHeight() / 1.5f).height(Gdx.graphics.getHeight() / 1.5f);
         root.add(table).expand().align(Align.center);
 
         Table dialogRoot = new Table();
