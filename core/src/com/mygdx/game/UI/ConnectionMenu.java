@@ -22,6 +22,7 @@ import com.badlogic.gdx.utils.Align;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.handlers.GameStateManager;
 import com.mygdx.game.multiplayer.MushroomsRequest;
+import com.mygdx.game.states.PaintState;
 
 public class ConnectionMenu extends Table {
     private Table uiTable;
@@ -74,7 +75,7 @@ public class ConnectionMenu extends Table {
 
         //поле ввода ip сервера
         ipField = new TextField("", tStyle);
-        ipField.setText("192.168.1.42:8080");
+        ipField.setText("quenta.rru");
         ipField.setMessageText("IP сервера");
         ipField.setPosition(0, 0);
         ipField.setSize(Gdx.graphics.getWidth() / 3f, Gdx.graphics.getHeight() / 4f);
@@ -238,11 +239,13 @@ public class ConnectionMenu extends Table {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 if (!roomIdField.getText().isEmpty()) {
-                    request.joinRoom(id, Integer.parseInt(roomIdField.getText()));
                     try {
+                        request.joinRoom(id, Integer.parseInt(roomIdField.getText()));
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
+                    } catch (NumberFormatException e){
+                        roomLabel.setText("Комната: не найдена");
                     }
                     if (!request.isJoined()) {
                         roomLabel.setText("Комната: не найдена");
@@ -273,6 +276,7 @@ public class ConnectionMenu extends Table {
         if (miniGame.equals(MUSHROOMS_GAME)) {
             return MUSHROOMS;
         } else if (miniGame.equals(PAINT_GAME)) {
+            PaintState.setOnline(true);
             return PAINT;
         }
         return 0;

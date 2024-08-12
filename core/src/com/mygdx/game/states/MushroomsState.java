@@ -113,6 +113,7 @@ public class MushroomsState extends GameState implements Controllable {
         request = gsm.game().getRequest();
         //request.leaveRoom(id, roomId);
         roomId = request.getRoomId();
+        request.getOpponents().clear();
         scoreTable.addPlayerScore(MushroomsRequest.getName(), playerScore);
         scoreTable.setLabelId(roomId);
 
@@ -155,7 +156,7 @@ public class MushroomsState extends GameState implements Controllable {
         checkUsers();
         requestTime += dt;
 
-        if (requestTime >= dt * 10 && miniGameTime < 30 && request.isDone()) {
+        if (requestTime >= dt * 10 && miniGameTime < 30 && request.isDone() && !gameOver) {
             requestTime = 0;
             request.postInfo(id, playerScore, roomId);
             if (opponent)
@@ -363,6 +364,8 @@ public class MushroomsState extends GameState implements Controllable {
 
     @Override
     public void dispose() {
+        game.getRequest().setJoined(false);
+        game.getRequest().setCreated(false);
         player.stopSounds();
         isStopped = true;
         request.leaveRoom(id, roomId);

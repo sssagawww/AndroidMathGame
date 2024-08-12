@@ -87,7 +87,7 @@ public class ConnectionState extends GameState {
 
         connectionMenu = new ConnectionMenu(game.getSkin(), gsm);
 
-        root.add(menuImg).align(Align.topLeft).width(menuImg.getWidth() * 5.8f).height(menuImg.getHeight() * 5.8f).align(Align.topLeft);
+        root.add(menuImg).align(Align.topLeft).width(menuImg.getWidth() * 5.8f).height(menuImg.getHeight() * 5.8f);
         root.add(connectionMenu).expand().align(Align.center);
 
         multiplexer.addProcessor(uiStage);

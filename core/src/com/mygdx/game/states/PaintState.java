@@ -18,6 +18,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -32,6 +33,7 @@ import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.UI.DialogBox;
 import com.mygdx.game.UI.OptionBox2;
 import com.mygdx.game.UI.PaintMenu;
+import com.mygdx.game.UI.ScoreTable;
 import com.mygdx.game.handlers.BoundedCamera;
 import com.mygdx.game.handlers.GameStateManager;
 import com.mygdx.game.multiplayer.MushroomsRequest;
@@ -41,39 +43,43 @@ import com.mygdx.game.paint.PixelPoint;
 
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import space.earlygrey.shapedrawer.JoinType;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 public class PaintState extends GameState implements InputProcessor {
-    private ShapeRenderer shapeRenderer;
+    private final ShapeRenderer shapeRenderer;
     private ShapeDrawer sd;
-    private int rectWidth, rectHeight;
+    private final int rectWidth;
+    private final int rectHeight;
     private ArrayList<PixelPoint> points;
     private ArrayList<Integer> skippedPoints = new ArrayList<>();
     private FiguresDatabase figuresDatabase;
     private Stage uiStage;
     private Stage onlineStage;
     private PaintMenu paintMenu;
+    private ScoreTable scoreTable;
     private InputMultiplexer multiplexer;
     private Dialog dialog;
     private DialogController dcontroller;
     private DialogNode node;
-    private DistanceCalc distanceCalc;
+    private final DistanceCalc distanceCalc;
     private Array<Vector2> arr = new Array<>();
     private PolygonSpriteBatch batch;
-    private BoundedCamera paintCam;
-    private MushroomsRequest request;
+    private final BoundedCamera paintCam;
+    private final MushroomsRequest request;
     private Label readyLabel;
     private float requestTime = 0;
     private final int id = MyGdxGame.getPrefs().getInteger(PREF_ID);
     private static boolean online;
     private boolean btnClicked;
     private boolean ready = false;
-    private String oppScore;
+    private float playerSum = 0;
+    private boolean okBtnClicked;
     private static boolean done;
-    private int count = 0;
-    private int oppCount = 0;
     private float time = 0;
     private int roomId;
 
@@ -95,8 +101,8 @@ public class PaintState extends GameState implements InputProcessor {
         request = gsm.game().getRequest();
         if (online) {
             roomId = request.getRoomId();
-            request.leaveRoom(id, roomId);
-            request.joinRoom(id, roomId);
+            //request.leaveRoom(id, roomId);
+            request.getOpponents().clear();
         }
 
         createSD();
@@ -114,6 +120,10 @@ public class PaintState extends GameState implements InputProcessor {
             figuresDatabase.loadFigures(figuresTypes);
         }
         initUI();
+        if (online) {
+            scoreTable.addPlayerScore(MushroomsRequest.getName(), 0);
+            scoreTable.setLabelId(roomId);
+        }
     }
 
     @Override
@@ -131,31 +141,36 @@ public class PaintState extends GameState implements InputProcessor {
         checkBtns();
         dcontroller.update(dt);
 
+        //конец игры
         if (done && online) {
             time += dt;
-            if (time >= 2) {
+            if (time >= 5) {
                 time = 0;
                 done = false;
                 gsm.setState(gsm.getLastState());
             }
         }
 
-        if (ready && (paintMenu.getBtnBox().isClicked() || btnClicked)) {
+        //если все готовы и нажата кнопка готово - обнуляем готовность игрока
+        if (ready && (okBtnClicked || btnClicked)) {
             request.setPlayerReady(id, false, roomId);
         }
 
+        //обновление счетчика (в оффлайн - постоянно, онлайн - после того, как все зашли и готовы)
         if (btnClicked || !online) {
             paintMenu.checkProgress(dt);
         }
 
         if (online && request.isDone()) {
             requestTime += dt;
+            checkUsers();
             if (requestTime >= dt * 15) {
                 requestTime = 0;
-                request.postInfo(id, (float) distanceCalc.getAccuracy(), roomId);
+                request.postInfo(id, playerSum, roomId);
+                scoreTable.setPlayerScore(request.getOpponentNames(), request.getOpponentScores());
+                scoreTable.setPlayerScore(MushroomsRequest.getName(), playerSum);
                 ready = request.isEveryoneReady(roomId);
             }
-            oppScore = String.format("%.2f", 1 - request.getOpponentScore());
         }
         checkProgress();
     }
@@ -213,6 +228,9 @@ public class PaintState extends GameState implements InputProcessor {
     public void dispose() {
         if (online) {
             request.leaveRoom(id, roomId);
+            scoreTable.clear();
+            game.getRequest().setJoined(false);
+            game.getRequest().setCreated(false);
         }
         PaintState.setOnline(false);
     }
@@ -241,9 +259,8 @@ public class PaintState extends GameState implements InputProcessor {
 
         paintMenu = new PaintMenu(game.getSkin(), game);
 
-        //временная кнопка выхода обратно
+        //кнопка выхода обратно
         Image menuImg = new Image(new Texture("controller/menuBtn.png"));
-        menuImg.setScale(5, 5);
         menuImg.addListener(new InputListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
@@ -258,10 +275,14 @@ public class PaintState extends GameState implements InputProcessor {
 
         onlineStage = new Stage(new ScreenViewport());
         onlineStage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
+
+        //если мп, то добавляются доп. элементы ui
         if (online) {
             BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
             Label.LabelStyle lstyle = new Label.LabelStyle(font, Color.BLACK);
             lstyle.background = game.getSkin().getDrawable("menuBtn_down");
+
+            //надпись с ожиданием игрока
             readyLabel = new Label("Нажмите, если готовы", lstyle);
             readyLabel.setAlignment(Align.center);
             readyLabel.addListener(new InputListener() {
@@ -278,16 +299,25 @@ public class PaintState extends GameState implements InputProcessor {
                 }
             });
 
+            //рейтинговая таблица
+            scoreTable = new ScoreTable(game.getSkin());
+
             Table onlineRoot = new Table();
             onlineRoot.setFillParent(true);
+
+            Table readyRoot = new Table();
+            readyRoot.setFillParent(true);
+
             onlineStage.addActor(onlineRoot);
-            onlineRoot.add(readyLabel).width(Gdx.graphics.getWidth()).height(Gdx.graphics.getHeight() / 4f).expand(true, false);
+            onlineStage.addActor(readyRoot);
+            onlineRoot.add(scoreTable).align(Align.topLeft).padTop(menuImg.getWidth() * 5.8f).padBottom(menuImg.getWidth()).expand().row();
+            readyRoot.add(readyLabel).width(Gdx.graphics.getWidth()).height(Gdx.graphics.getHeight() / 4f).expand().center();
         }
 
         Table table = new Table();
         table.add(initBtn()).expand().align(Align.bottomRight).width(100f).height(100f).pad(15f);
         table.add(paintMenu).expand().align(Align.right);
-        root.add(menuImg).expand().align(Align.topLeft).padTop(75f);
+        root.add(menuImg).align(Align.topLeft).width(menuImg.getWidth() * 5.8f).height(menuImg.getHeight() * 5.8f).padTop(10f).expand();
         root.add(table).expand().align(Align.bottomRight).padBottom(10f);
 
         Table dialogRoot = new Table();
@@ -311,11 +341,13 @@ public class PaintState extends GameState implements InputProcessor {
     }
 
     private Table initBtn() {
+        //стиль для заднего фона галочки
         ImageButton.ImageButtonStyle tableStyle = new ImageButton.ImageButtonStyle();
         ImageButton table = new ImageButton(tableStyle);
         tableStyle.up = game.getSkin().getDrawable("menuBtn_up");
         tableStyle.down = game.getSkin().getDrawable("menuBtn_down");
 
+        //кнопка-галочка
         ImageButton.ImageButtonStyle style = new ImageButton.ImageButtonStyle();
         ImageButton btn = new ImageButton(style);
         style.up = game.getSkin().getDrawable("ok");
@@ -324,9 +356,6 @@ public class PaintState extends GameState implements InputProcessor {
         btn.addListener(new InputListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                /*if(online){
-                    request.postInfo(id, playerName, (float) distanceCalc.getAccuracy());
-                }*/
                 return true;
             }
 
@@ -335,9 +364,10 @@ public class PaintState extends GameState implements InputProcessor {
                 if (online) {
                     request.setPlayerReady(id, true, roomId);
                 }
-                if (points.size() != 0) {
+                if (!points.isEmpty()) {
                     paintMenu.getBtnBox().setState(CHECK);
-                    paintMenu.getBtnBox().setClicked(true);
+                    okBtnClicked = true;
+                    btnClicked = true;
                 }
             }
         });
@@ -355,6 +385,8 @@ public class PaintState extends GameState implements InputProcessor {
 
             if (online && !ready) {
                 paintMenu.getBtnBox().setState(CHECK);
+            } else {
+                playerSum += (float) (1f - distanceCalc.getAccuracy());
             }
             paintMenu.setAccuracy(distanceCalc.getAccuracy());
         }
@@ -371,32 +403,14 @@ public class PaintState extends GameState implements InputProcessor {
             case OK:
                 node = new DialogNode("Получилось! Молодец!", 0);
                 if (online) {
-                    /*if (request.getOpponentScore() == 0) {
-                        request.setOpponentScore(1);
-                    }*/
-                    if ((1 - distanceCalc.getAccuracy()) > 1 - request.getOpponentScore()) {
-                        count++;
-                    } else {
-                        oppCount++;
-                    }
-                    oppScore = String.format("%.2f", 1 - request.getOpponentScore());
-                    node = new DialogNode(String.format("%.2f", 1 - distanceCalc.getAccuracy()) + " : " + oppScore, 0);
+                    node = new DialogNode("Очки зачислены!", 0);
                 }
                 startDialogController();
                 break;
             case WRONG:
                 node = new DialogNode("Попробуй еще раз!", 0);
                 if (online) {
-                    /*if (request.getOpponentScore() == 0) {
-                        request.setOpponentScore(1);
-                    }*/
-                    if ((1 - distanceCalc.getAccuracy()) > 1 - request.getOpponentScore()) {
-                        count++;
-                    } else {
-                        oppCount++;
-                    }
-                    oppScore = String.format("%.2f", 1 - request.getOpponentScore());
-                    node = new DialogNode(String.format("%.2f", 1 - distanceCalc.getAccuracy()) + " : " + oppScore, 0);
+                    node = new DialogNode("Очки зачислены!", 0);
                 }
                 startDialogController();
                 break;
@@ -404,11 +418,12 @@ public class PaintState extends GameState implements InputProcessor {
                 paintMenu.getBtnBox().setState(FINISH);
                 done = true;
                 if (online) {
-                    if (count > oppCount) {
-                        node = new DialogNode("Вы победили!", 0);
-                    } else {
-                        node = new DialogNode("Вы проиграли!", 0);
-                    }
+                    //расчет победителя
+                    HashMap<String, Float> players = new HashMap<>(request.getOpponents());
+                    players.put(MushroomsRequest.getName(), playerSum);
+
+                    String winner = Collections.max(players.entrySet(), Map.Entry.comparingByValue()).getKey();
+                    node = new DialogNode(winner + " победил!", 0);
                 } else {
                     gsm.setState(gsm.getLastState());
                 }
@@ -419,16 +434,26 @@ public class PaintState extends GameState implements InputProcessor {
     }
 
     private void checkProgress() {
-        if (paintMenu.getBtnBox().isClicked() && !ready && online) {
-            readyLabel.setText("Ожидание игрока...");
+        if (okBtnClicked && !ready && online) {
+            readyLabel.setText("Ожидание игроков...");
             readyLabel.setVisible(true);
         } else if (ready) {
             readyLabel.setVisible(false);
         }
     }
 
+    private void checkUsers() {
+        ArrayList<String> names = request.getOpponentNames();
+        ArrayList<Float> scores = request.getOpponentScores();
+        for (int i = 0; i < names.size(); i++) {
+            if (!scoreTable.getPlayers().containsKey(names.get(i)) && !names.get(i).equals(" ")) {
+                scoreTable.addPlayerScore(names.get(i), scores.get(i));
+            }
+        }
+    }
+
     private void startDialogController() {
-        if (paintMenu.getBtnBox().isClicked()) {
+        if (okBtnClicked) {
             dialog.addNode(node);
             dcontroller.startDialog(dialog);
         }
@@ -436,6 +461,7 @@ public class PaintState extends GameState implements InputProcessor {
         points.clear();
         paintMenu.setResultImage();
         paintMenu.getBtnBox().setClicked(false);
+        okBtnClicked = false;
     }
 
     public ArrayList<PixelPoint> getPoints() {

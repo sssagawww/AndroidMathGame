@@ -8,14 +8,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Cell;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Value;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -23,26 +17,21 @@ import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.UI.*;
 import com.mygdx.game.handlers.BoundedCamera;
 import com.mygdx.game.handlers.GameStateManager;
-import com.mygdx.game.multiplayer.MushroomsRequest;
 
 import static com.mygdx.game.UI.BtnBox.STATES.*;
 import static com.mygdx.game.handlers.GameStateManager.*;
 import static com.mygdx.game.MyGdxGame.*;
 
 public class Menu2 extends GameState {
-    private MyGdxGame game;
-    private InputMultiplexer multiplexer;
-    private Table root;
+    private final MyGdxGame game;
+    private final InputMultiplexer multiplexer;
     private Stage uiStage;
     private Statistics statistics;
-    private BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
-    private GlyphLayout layout;
+    private final BitmapFont font = new BitmapFont(Gdx.files.internal("mcRus.fnt"));
+    private final GlyphLayout layout;
     private BtnBox btnBox;
-    private Table onlineBtns;
-    private Cell cell;
-    private ConnectionMenu connectionMenu;
-    private Sprite bg;
-    private BoundedCamera menuCam;
+    private final Sprite bg;
+    private final BoundedCamera menuCam;
 
     public Menu2(GameStateManager gsm) {
         super(gsm);
@@ -94,7 +83,7 @@ public class Menu2 extends GameState {
         uiStage = new Stage(new ScreenViewport());
         uiStage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 
-        root = new Table();
+        Table root = new Table();
         root.setFillParent(true);
         uiStage.addActor(root);
 
@@ -132,11 +121,12 @@ public class Menu2 extends GameState {
                 break;
             case SAVE_GAME:
                 game.save = true;
-                if (game.getDbWrapper().getProgress().size() != 0)
+                if (!game.getDbWrapper().getProgress().isEmpty())
                     controller.getInventory().reload(game.getDbWrapper());
                 gsm.setState(MyGdxGame.getPrefs().getInteger(PREF_STATE, BLACK_SCREEN));
                 break;
             case ONLINE:
+                gsm.setLastState(MENU);
                 gsm.setState(CONNECTION);
                 break;
             case SAVE:

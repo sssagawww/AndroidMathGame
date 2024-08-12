@@ -14,7 +14,7 @@ import java.util.HashMap;
 public class ScoreTable extends Table {
     private Label.LabelStyle style;
     private Table uiTable;
-    private HashMap<String, Integer> players;
+    private HashMap<String, Float> players;
     private Label idLabel;
 
     public ScoreTable(Skin skin) {
@@ -26,7 +26,7 @@ public class ScoreTable extends Table {
         style = new Label.LabelStyle(font, Color.BLACK);
 
         Label title = new Label("\n", style);
-        title.setText("Рейтинг");
+        title.setText("Счет");
         title.setAlignment(Align.center);
 
         idLabel = new Label("\n", style);
@@ -48,7 +48,7 @@ public class ScoreTable extends Table {
         title.setAlignment(Align.center);
 
         Label scoreLabel = new Label("\n", style);
-        scoreLabel.setText("" + Math.round(score));
+        scoreLabel.setText("" + score);
         scoreLabel.setAlignment(Align.center);
         scoreLabel.setName(playerName + "_label");
 
@@ -58,30 +58,30 @@ public class ScoreTable extends Table {
         table.add(scoreLabel).align(Align.right).width(Gdx.graphics.getWidth() / 10f).height(Gdx.graphics.getHeight() / 12f);
 
         uiTable.add(table).align(Align.right).row();
-        players.put(playerName, Math.round(score));
+        players.put(playerName, score);
     }
 
-    public HashMap<String, Integer> getPlayers() {
+    public HashMap<String, Float> getPlayers() {
         return players;
     }
 
     public void setPlayerScore(ArrayList<String> playersNames, ArrayList<Float> scores) {
         for (int i = 0; i < playersNames.size(); i++) {
-            players.replace(playersNames.get(i), Math.round(scores.get(i)));
+            players.replace(playersNames.get(i), scores.get(i));
             if (playersNames.get(i) != null && !playersNames.get(i).equals("")) {
                 Table t = uiTable.findActor(playersNames.get(i));
                 Label l = t.findActor(playersNames.get(i) + "_label");
-                l.setText(Math.round(scores.get(i)));
+                l.setText(String.format("%.2f", scores.get(i)));
             }
         }
     }
 
     public void setPlayerScore(String playerName, float score) {
-        players.replace(playerName, Math.round(score));
+        players.replace(playerName, score);
         if (playerName != null && !playerName.equals("")) {
             Table t = uiTable.findActor(playerName);
             Label l = t.findActor(playerName + "_label");
-            l.setText(Math.round(score));
+            l.setText(String.format("%.2f", score));
         }
     }
 

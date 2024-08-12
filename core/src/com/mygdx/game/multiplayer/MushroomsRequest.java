@@ -7,6 +7,7 @@ import static com.mygdx.game.handlers.GameStateManager.PAINT;
 
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
+import com.mygdx.game.states.PaintState;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -279,8 +280,6 @@ public class MushroomsRequest {
                     String[] names = jObject.getString("userNames").replaceAll("\\[|]|\"", "").split(",");
                     String[] nums = jObject.getString("numbers").replaceAll("\\[|]|\"", "").split(",");
 
-                    System.out.println(Arrays.toString(names) + " " + Arrays.toString(nums));
-
                     for (int i = 0; i < names.length; i++) {
                         if (!names[i].equals("") && !names[i].equals(" ")) {
                             opponents.put(names[i], Float.valueOf(nums[i]));
@@ -312,16 +311,16 @@ public class MushroomsRequest {
         });
     }
 
+    public HashMap<String, Float> getOpponents() {
+        return opponents;
+    }
+
     public ArrayList<String> getOpponentNames() {
         return new ArrayList<>(opponents.keySet());
     }
 
     public ArrayList<Float> getOpponentScores() {
         return new ArrayList<>(opponents.values());
-    }
-
-    public float getOpponentScore() {
-        return 0;
     }
 
     public boolean isDone() {
@@ -381,6 +380,7 @@ public class MushroomsRequest {
         if (miniGame.equals(MUSHROOMS_GAME)) {
             return MUSHROOMS;
         } else if (miniGame.equals(PAINT_GAME)) {
+            PaintState.setOnline(true);
             return PAINT;
         }
         return 0;
