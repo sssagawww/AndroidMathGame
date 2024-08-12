@@ -4,6 +4,8 @@ import static com.mygdx.game.MyGdxGame.MUSHROOMS_GAME;
 import static com.mygdx.game.MyGdxGame.PAINT_GAME;
 import static com.mygdx.game.MyGdxGame.PREF_ID;
 import static com.mygdx.game.MyGdxGame.PREF_USERNAME;
+import static com.mygdx.game.handlers.GameStateManager.MUSHROOMS;
+import static com.mygdx.game.handlers.GameStateManager.PAINT;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -28,6 +30,7 @@ public class ConnectionMenu extends Table {
     private TextField nameField;
     private TextField roomIdField;
     private Label statusLabel;
+    private ImageButton okBtn;
     private TextButton.TextButtonStyle textBtnStyle;
     private TextField.TextFieldStyle tStyle;
     private Label.LabelStyle lStyle;
@@ -89,7 +92,7 @@ public class ConnectionMenu extends Table {
         statusLabel.setAlignment(Align.center);
 
         //галочка
-        ImageButton okBtn = new ImageButton(style);
+        okBtn = new ImageButton(style);
         okBtn.addListener(new InputListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
@@ -137,7 +140,7 @@ public class ConnectionMenu extends Table {
         });
 
         //инструкция
-        Label textLabel = new Label("Режимы рассчитаны на 2 игроков.\nВведите IP с портом и ник, затем\nнажмите на зеленую галочку,\nчтобы подтвердить ввод.\nСтатус подключения\nотображается сверху.", lStyle);
+        Label textLabel = new Label("Режимы рассчитаны на 2 игроков.\nВведите IP с портом и ник\nи подтвердите ввод.\nСтатус подключения\nотображается сверху.", lStyle);
         textLabel.setFontScale(0.8f);
         textLabel.setAlignment(Align.center);
 
@@ -146,7 +149,7 @@ public class ConnectionMenu extends Table {
         leftTable.add(ipField).width(Gdx.graphics.getWidth() / 3f).height(Gdx.graphics.getHeight() / 8f).pad(10f);
         leftTable.add(okBtn).align(Align.right).width(70f).height(70f).row();
         leftTable.add(nameField).width(Gdx.graphics.getWidth() / 3f).height(Gdx.graphics.getHeight() / 8f).pad(10f).row();
-        leftTable.add(textLabel).padBottom(okBtn.getHeight() * 3).padTop(okBtn.getHeight() * 3).row();
+        leftTable.add(textLabel).padTop(okBtn.getHeight() * 3).row();
 
         createRightTable();
 
@@ -241,7 +244,7 @@ public class ConnectionMenu extends Table {
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
-                    if(!request.isJoined()){
+                    if (!request.isJoined()) {
                         roomLabel.setText("Комната: не найдена");
                     } else {
                         request.setRoomId(Integer.parseInt(roomIdField.getText()));
@@ -259,22 +262,19 @@ public class ConnectionMenu extends Table {
         rightTable.add(roomLabel).pad(10f).row();
         rightTable.add(roomIdField).width(Gdx.graphics.getWidth() / 3f).height(Gdx.graphics.getHeight() / 8f).pad(10f).row();
         rightTable.add(createRoomBtn).row();
-        rightTable.add(joinRoomBtn).row();
-    }
-
-    public String getIpText() {
-        return ipField.getText();
-    }
-
-    public void setIpText(String text) {
-        ipField.setText(text);
+        rightTable.add(joinRoomBtn).pad(10f).row();
     }
 
     public TextField getIpField() {
         return ipField;
     }
 
-    public TextField getNameField() {
-        return nameField;
+    public int getGSMMiniGame() {
+        if (miniGame.equals(MUSHROOMS_GAME)) {
+            return MUSHROOMS;
+        } else if (miniGame.equals(PAINT_GAME)) {
+            return PAINT;
+        }
+        return 0;
     }
 }

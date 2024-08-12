@@ -15,6 +15,7 @@ public class ScoreTable extends Table {
     private Label.LabelStyle style;
     private Table uiTable;
     private HashMap<String, Integer> players;
+    private Label idLabel;
 
     public ScoreTable(Skin skin) {
         super(skin);
@@ -28,10 +29,15 @@ public class ScoreTable extends Table {
         title.setText("Рейтинг");
         title.setAlignment(Align.center);
 
+        idLabel = new Label("\n", style);
+        idLabel.setText("ID комнаты: ");
+        idLabel.setAlignment(Align.center);
+
         uiTable = new Table();
 
         players = new HashMap<>();
 
+        add(idLabel).center().pad(10f).row();
         add(title).center().row();
         add(uiTable).center();
     }
@@ -42,7 +48,7 @@ public class ScoreTable extends Table {
         title.setAlignment(Align.center);
 
         Label scoreLabel = new Label("\n", style);
-        scoreLabel.setText("" + score);
+        scoreLabel.setText("" + Math.round(score));
         scoreLabel.setAlignment(Align.center);
         scoreLabel.setName(playerName + "_label");
 
@@ -59,13 +65,8 @@ public class ScoreTable extends Table {
         return players;
     }
 
-    public int getPlayerScore(String playerName) {
-        return players.get(playerName);
-    }
-
     public void setPlayerScore(ArrayList<String> playersNames, ArrayList<Float> scores) {
-        System.out.println(players.toString());
-        for (int i = 0; i < players.size(); i++) {
+        for (int i = 0; i < playersNames.size(); i++) {
             players.replace(playersNames.get(i), Math.round(scores.get(i)));
             if (playersNames.get(i) != null && !playersNames.get(i).equals("")) {
                 Table t = uiTable.findActor(playersNames.get(i));
@@ -82,5 +83,9 @@ public class ScoreTable extends Table {
             Label l = t.findActor(playerName + "_label");
             l.setText(Math.round(score));
         }
+    }
+
+    public void setLabelId(int roomId) {
+        idLabel.setText("ID комнаты: " + roomId);
     }
 }

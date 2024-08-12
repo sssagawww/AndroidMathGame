@@ -12,6 +12,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -31,11 +33,11 @@ public class MushroomsRequest {
     private static String name = "name";
     private int roomId;
     private boolean joined;
+    private boolean created;
     private String miniGame;
     private static boolean unableToConnect = true;
     private String winnerMessage = "";
-    private ArrayList<String> opponentNames = new ArrayList<>();
-    private ArrayList<Float> opponentScores = new ArrayList<>();
+    private HashMap<String, Float> opponents = new HashMap<>();
     private boolean done = false;
     private boolean everyoneReady;
 
@@ -73,7 +75,10 @@ public class MushroomsRequest {
                 try {
                     //получаем id созданной комнаты
                     JsonValue jObject = json.parse(response.body().string());
+                    response.body().close();
                     roomId = Integer.parseInt(jObject.getString("string"));
+                    created = true;
+                    done = true;
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -101,6 +106,7 @@ public class MushroomsRequest {
                 try {
                     //проверяем, получилось ли зайти
                     JsonValue jObject = json.parse(response.body().string());
+                    response.body().close();
                     if (jObject.getString("string").equals("can't join")) {
                         joined = false;
                     } else {
@@ -135,6 +141,7 @@ public class MushroomsRequest {
             public void onResponse(@NotNull Call call, @NotNull Response response) {
                 try {
                     System.out.println(response.body().string());
+                    response.body().close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -162,6 +169,7 @@ public class MushroomsRequest {
             public void onResponse(@NotNull Call call, @NotNull Response response) {
                 try {
                     System.out.println(response.body().string());
+                    response.body().close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -212,6 +220,7 @@ public class MushroomsRequest {
                 try {
                     //проверяем, все ли игроки готовы
                     everyoneReady = Boolean.parseBoolean(response.body().string());
+                    response.body().close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -240,6 +249,7 @@ public class MushroomsRequest {
             public void onResponse(@NotNull Call call, @NotNull Response response) {
                 try {
                     JsonValue jObject = json.parse(response.body().string());
+                    response.body().close();
                     winnerMessage = jObject.getString("string");
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -263,27 +273,21 @@ public class MushroomsRequest {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) {
                 try {
-                    Thread.sleep(10);
                     JsonValue jObject = json.parse(response.body().string());
+                    response.body().close();
 
-                    String[] names = jObject.getString("userNames").split("\\[|]|\"|,");
+                    String[] names = jObject.getString("userNames").replaceAll("\\[|]|\"", "").split(",");
+                    String[] nums = jObject.getString("numbers").replaceAll("\\[|]|\"", "").split(",");
+
+                    System.out.println(Arrays.toString(names) + " " + Arrays.toString(nums));
+
                     for (int i = 0; i < names.length; i++) {
-                        if(!names[i].equals("") && !names[i].equals(" ") && !opponentNames.contains(names[i])){
-                            opponentNames.add(names[i]);
-                        }
-                    }
-
-                    opponentScores.clear();
-                    String[] nums = jObject.getString("numbers").split("\\[|]|\"|,");
-                    for (int i = 0; i < nums.length; i++) {
-                        if(!nums[i].equals("") && !nums[i].equals(" ")){
-                            opponentScores.add(Float.valueOf(nums[i]));
+                        if (!names[i].equals("") && !names[i].equals(" ")) {
+                            opponents.put(names[i], Float.valueOf(nums[i]));
                         }
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
                 }
             }
         });
@@ -308,20 +312,16 @@ public class MushroomsRequest {
         });
     }
 
+    public ArrayList<String> getOpponentNames() {
+        return new ArrayList<>(opponents.keySet());
+    }
+
     public ArrayList<Float> getOpponentScores() {
-        return opponentScores;
+        return new ArrayList<>(opponents.values());
     }
 
     public float getOpponentScore() {
         return 0;
-    }
-
-    /*public void setOpponentScore(float opponentScore) {
-        this.opponentScore = opponentScore;
-    }*/
-
-    public ArrayList<String> getOpponentNames() {
-        return opponentNames;
     }
 
     public boolean isDone() {
@@ -369,8 +369,15 @@ public class MushroomsRequest {
         this.joined = joined;
     }
 
+    public boolean isCreated() {
+        return created;
+    }
+
+    public void setCreated(boolean created) {
+        this.created = created;
+    }
+
     public int getMiniGame() {
-        System.out.println(miniGame);
         if (miniGame.equals(MUSHROOMS_GAME)) {
             return MUSHROOMS;
         } else if (miniGame.equals(PAINT_GAME)) {

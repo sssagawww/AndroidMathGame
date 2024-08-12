@@ -111,9 +111,10 @@ public class MushroomsState extends GameState implements Controllable {
 
         initUI();
         request = gsm.game().getRequest();
-        request.leaveRoom(id, roomId);
+        //request.leaveRoom(id, roomId);
         roomId = request.getRoomId();
-        //scoreTable.addPlayerScore(MushroomsRequest.getName(), playerScore);
+        scoreTable.addPlayerScore(MushroomsRequest.getName(), playerScore);
+        scoreTable.setLabelId(roomId);
 
         initJoyStick();
         initController();
@@ -157,15 +158,15 @@ public class MushroomsState extends GameState implements Controllable {
         if (requestTime >= dt * 10 && miniGameTime < 30 && request.isDone()) {
             requestTime = 0;
             request.postInfo(id, playerScore, roomId);
-            //if (opponent)
-            //scoreTable.setPlayerScore(request.getOpponentNames(), request.getOpponentScores());
+            if (opponent)
+                scoreTable.setPlayerScore(request.getOpponentNames(), request.getOpponentScores());
         }
 
-        //если оба игрока готовы, то начинается обмен инфой
+        //если оба игрока готовы, то начинается игра и обновление рейтинга
         if (readyBtnClicked && request.isEveryoneReady(roomId) && !gameOver) {
             mainLabel.setVisible(false);
             miniGameTime += dt;
-            scoreTable.setPlayerScore(request.getOpponentNames(), request.getOpponentScores());
+            scoreTable.setPlayerScore(MushroomsRequest.getName(), playerScore);
 
             //появление грибов
             spawnTime += dt;
