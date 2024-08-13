@@ -27,8 +27,6 @@ import com.mygdx.game.states.Forest;
 import com.mygdx.game.states.MazeState;
 
 public class MyGdxGame implements ApplicationListener {
-    private static int width;
-    private static int height;
     private SpriteBatch sb;
     private AssetManager assetManager;
     private BoundedCamera cam;
@@ -50,6 +48,7 @@ public class MyGdxGame implements ApplicationListener {
     public static final String PAINT_GAME = "paintMiniGame";
     private static final String PREF_NAME = "position";
     public static final String PREF_ID = "userID";
+    public static final String PREF_IP = "serverIP";
     public static final String PREF_USERNAME = "userNAME";
     public static final String PREF_MAZE = "mazeProgress";
     public static final String PREF_MAZE_HOODED = "mazeHoodedRun";
@@ -77,7 +76,8 @@ public class MyGdxGame implements ApplicationListener {
         res.loadTexture("entitySprites/idleGnomik.png", "gnomikrow");
         res.loadTexture("entitySprites/slime.png", "slimeBoss");
         res.loadTexture("allBtn.png", "btn");
-        res.loadTexture("entitySprites/enemySprite.png", "enemy");
+        res.loadTexture("entitySprites/enemySprite.png", "enemyBattle");
+        res.loadTexture("entitySprites/enemy2.png", "enemy");
         res.loadTexture("entitySprites/enemySlime.png", "enemy2");
         res.loadTexture("entitySprites/bombGuy.png", "npc");
         res.loadTexture("entitySprites/hooded2.png", "hooded");
@@ -132,6 +132,7 @@ public class MyGdxGame implements ApplicationListener {
         prefs = Gdx.app.getPreferences(PREF_NAME);
         if(prefs.getInteger(PREF_ID)==0){
             prefs.putInteger(PREF_ID, (int) (Math.random() * 10000)).flush();
+            prefs.putString(PREF_IP, "000").flush();
             prefs.putString(PREF_USERNAME, "name").flush();
         }
         gsm = new GameStateManager(this);
@@ -155,14 +156,6 @@ public class MyGdxGame implements ApplicationListener {
         gameTime += Gdx.graphics.getDeltaTime();
         gsm.update(Gdx.graphics.getDeltaTime()); // ???
         gsm.render();
-    }
-
-    public static void setWidth(int width) {
-        MyGdxGame.width = width;
-    }
-
-    public static void setHeight(int height) {
-        MyGdxGame.height = height;
     }
 
     public void update() {

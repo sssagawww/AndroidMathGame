@@ -1,9 +1,6 @@
 package com.mygdx.game.UI;
 
-import static com.mygdx.game.MyGdxGame.MUSHROOMS_GAME;
-import static com.mygdx.game.MyGdxGame.PAINT_GAME;
-import static com.mygdx.game.MyGdxGame.PREF_ID;
-import static com.mygdx.game.MyGdxGame.PREF_USERNAME;
+import static com.mygdx.game.MyGdxGame.*;
 import static com.mygdx.game.handlers.GameStateManager.MUSHROOMS;
 import static com.mygdx.game.handlers.GameStateManager.PAINT;
 
@@ -75,7 +72,9 @@ public class ConnectionMenu extends Table {
 
         //поле ввода ip сервера
         ipField = new TextField("", tStyle);
-        ipField.setText("quenta.rru");
+        if (!MyGdxGame.getPrefs().getString(PREF_IP).equals("000")) {
+            ipField.setText(MyGdxGame.getPrefs().getString(PREF_IP));
+        }
         ipField.setMessageText("IP сервера");
         ipField.setPosition(0, 0);
         ipField.setSize(Gdx.graphics.getWidth() / 3f, Gdx.graphics.getHeight() / 4f);
@@ -107,6 +106,7 @@ public class ConnectionMenu extends Table {
                         if (!nameField.getText().equals("")) {
                             MushroomsRequest.setName(nameField.getText());
                             MyGdxGame.getPrefs().putString(PREF_USERNAME, nameField.getText()).flush();
+                            MyGdxGame.getPrefs().putString(PREF_IP, ipField.getText()).flush();
                         } else {
                             nameField.setText(MyGdxGame.getPrefs().getString(PREF_USERNAME));
                             MushroomsRequest.setName(nameField.getText());
@@ -141,7 +141,7 @@ public class ConnectionMenu extends Table {
         });
 
         //инструкция
-        Label textLabel = new Label("Режимы рассчитаны на 2 игроков.\nВведите IP с портом и ник\nи подтвердите ввод.\nСтатус подключения\nотображается сверху.", lStyle);
+        Label textLabel = new Label("Режимы рассчитаны на 2 игроков.\n\nВведите IP с портом и ник\n\nи подтвердите ввод.\nСтатус подключения\nотображается сверху.", lStyle);
         textLabel.setFontScale(0.8f);
         textLabel.setAlignment(Align.center);
 

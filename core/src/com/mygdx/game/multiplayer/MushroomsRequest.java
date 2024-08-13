@@ -35,6 +35,7 @@ public class MushroomsRequest {
     private int roomId;
     private boolean joined;
     private boolean created;
+    private boolean failed;
     private String miniGame;
     private static boolean unableToConnect = true;
     private String winnerMessage = "";
@@ -277,13 +278,17 @@ public class MushroomsRequest {
                     JsonValue jObject = json.parse(response.body().string());
                     response.body().close();
 
-                    String[] names = jObject.getString("userNames").replaceAll("\\[|]|\"", "").split(",");
-                    String[] nums = jObject.getString("numbers").replaceAll("\\[|]|\"", "").split(",");
-
-                    for (int i = 0; i < names.length; i++) {
-                        if (!names[i].equals("") && !names[i].equals(" ")) {
-                            opponents.put(names[i], Float.valueOf(nums[i]));
+                    if(jObject != null){
+                        String[] names = jObject.getString("userNames").replaceAll("\\[|]|\"", "").split(",");
+                        String[] nums = jObject.getString("numbers").replaceAll("\\[|]|\"", "").split(",");
+                        for (int i = 0; i < names.length; i++) {
+                            if (!names[i].equals("") && !names[i].equals(" ")) {
+                                opponents.put(names[i], Float.valueOf(nums[i]));
+                            }
                         }
+                    } else {
+                        failed = true;
+                        opponents.put("Ошибка!", 0f);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -374,6 +379,14 @@ public class MushroomsRequest {
 
     public void setCreated(boolean created) {
         this.created = created;
+    }
+
+    public boolean isFailed() {
+        return failed;
+    }
+
+    public void setFailed(boolean failed) {
+        this.failed = failed;
     }
 
     public int getMiniGame() {

@@ -503,7 +503,7 @@ public class BossFightState extends GameState implements Controllable {
             case "collision":
                 if (fight) break;
                 contactBody.getFixtureList().get(0).setUserData("collided");
-                node1 = new DialogNode("Наконец-то ты добрался сюда.", 0);
+                node1 = new DialogNode("Наконец-то ты добрался досюда.", 0);
                 DialogNode node2 = new DialogNode("Ты прошел через многие испытания на пути...", 1);
                 DialogNode node3 = new DialogNode("Но поглощение этого мира неизбежно.", 2);
                 DialogNode node4 = new DialogNode("Теперь же ты тоже станешь частью моей тьмы!", 3);

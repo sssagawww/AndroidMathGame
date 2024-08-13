@@ -432,6 +432,7 @@ public class MazeState extends GameState implements Controllable {
     public void loadStage(String s, Body contactBody) {
         DialogNode node1;
         gsm.setLastState(MAZE);
+        BattleState2.setEnemy2(false);
         switch (s) {
             case "enemy2":
                 node1 = new DialogNode("Мрачный Мицелий атакует!", 0);
