@@ -275,7 +275,9 @@ public class MushroomsRequest {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) {
                 try {
-                    JsonValue jObject = json.parse(response.body().string());
+                    String s = response.body().string();
+                    //System.out.println(s); //почему-то иногда не получается распарсить json
+                    JsonValue jObject = json.parse(s);
                     response.body().close();
 
                     if(jObject != null){

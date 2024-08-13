@@ -164,7 +164,7 @@ public class PaintState extends GameState implements InputProcessor {
         if (online && request.isDone()) {
             requestTime += dt;
             checkUsers();
-            if (requestTime >= dt * 15) {
+            if (requestTime >= dt * 10) {
                 requestTime = 0;
                 request.postInfo(id, playerSum, roomId);
                 scoreTable.setPlayerScore(request.getOpponentNames(), request.getOpponentScores());
