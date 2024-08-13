@@ -12,7 +12,7 @@ Quenta: Путь ученика - это развивающая игра с пи
 
  **❗ Презентация, видео, apk и zip сервера для игры - https://drive.google.com/drive/folders/1xST1huc1EGWZABCZ1745TT4jrjqefwHe ❗**
 
-Сервер также в репозитории - https://github.com/sssagawww/amg_server (все мини-игры рассчитаны на 2 игроков, поэтому к серверу должно подключиться не более 2 человек, доп. информацию см. ниже)
+Сервер также в репозитории - https://github.com/sssagawww/amg_server (доп. информацию см. ниже)
 
 ## <a id="onlineTitle">Как играть по сети</a>
 
