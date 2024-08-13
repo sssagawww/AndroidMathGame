@@ -12,17 +12,18 @@ import com.mygdx.game.battle.steps.StepsDetails;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 public class BattleEntity {
-    private String name;
-    private int level;
-    private Map<STAT, Integer> stats;
-    private HashMap<String, String> map;
+    private final String name;
+    private final int level;
+    private final Map<STAT, Integer> stats;
+    private final HashMap<String, String> map;
     private int currentHP;
-    private ArrayList<Step> steps = new ArrayList<>();
-    private ArrayList<Example> examples = new ArrayList<>();
-    private int count = 8;
+    private final ArrayList<Step> steps = new ArrayList<>();
+    private final ArrayList<Example> examples = new ArrayList<>();
+    private final int count = 14;
 
     public BattleEntity(String name) {
         this.name = name;
@@ -40,28 +41,28 @@ public class BattleEntity {
     public static BattleEntity generateEntity(String name, StepDatabase stepDatabase, ExampleDatabase exampleDatabase) {
         BattleEntity entity = new BattleEntity(name);
 
+        HashSet<Integer> exampleNums = new HashSet<>();
         for (int i = 0; i < entity.count; i++) {
             int r = (int) Math.floor(Math.random() * exampleDatabase.getExamples().size());
-            if (entity.getExamples().contains(exampleDatabase.getExample(r))) {
-                r = (int) Math.floor(Math.random() * exampleDatabase.getExamples().size());
+            if (exampleNums.contains(r)) {
+                while (exampleNums.contains(r)) {
+                    r = (int) Math.floor(Math.random() * exampleDatabase.getExamples().size());
+                }
+                exampleNums.add(r);
+            } else {
+                exampleNums.add(r);
             }
             entity.addExample(exampleDatabase.getExample(r));
             entity.addStep(stepDatabase.getStep(r));
         }
 
-        for (int i = 0; i < stepDatabase.getSteps().size() - entity.count; i++) {
-            if (!entity.getSteps().contains(stepDatabase.getStep(i))) {
+        for (int i = entity.count; i < stepDatabase.getSteps().size(); i++) {
+            if (!entity.getStepsNames().contains(stepDatabase.getStep(i).getName())) {
                 entity.addStep(stepDatabase.getStep(i));
             }
         }
 
         entity.createMap(stepDatabase, exampleDatabase);
-
-        /*entity.setExamples(1, exampleDatabase.getExample(0)); //setExamples начинается с 1, а должен с 0
-        entity.setExamples(2, exampleDatabase.getExample(1));
-        entity.setExamples(3, exampleDatabase.getExample(2));
-        entity.setExamples(4, exampleDatabase.getExample(3));
-        entity.setExamples(5, exampleDatabase.getExample(4));*/
 
         return entity;
     }
@@ -99,16 +100,8 @@ public class BattleEntity {
         return stats.get(stat);
     }
 
-    public void setStats(STAT stat, int value) {
-        stats.put(stat, value);
-    }
-
     public int getCurrentHitpoints() {
         return currentHP;
-    }
-
-    public void setCurrentHitpoints(int currentHitpoints) {
-        this.currentHP = currentHitpoints;
     }
 
     public Step getStep(int index) {
@@ -146,8 +139,12 @@ public class BattleEntity {
         return steps;
     }
 
-    public ArrayList<Example> getExamples() {
-        return examples;
+    public ArrayList<String> getStepsNames() {
+        ArrayList<String> arr = new ArrayList<>();
+        for (int i = 0; i < steps.size(); i++) {
+            arr.add(steps.get(i).getName());
+        }
+        return arr;
     }
 
     public HashMap<String, String> getMap() {

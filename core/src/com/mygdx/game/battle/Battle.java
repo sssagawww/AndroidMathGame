@@ -119,34 +119,39 @@ public class Battle implements BattleEventQueue {
         }
     }
 
-    public void playAnswers(StepsDetails steps, SelectionBtnBox selectionBox) {
+    public void playAnswers(SelectionBtnBox selectionBox) {
         ArrayList<Integer> prevNums = new ArrayList<>();
         int randomStepNum = -1;
         System.out.println(currentAnswer + " currentAnswer");
-        randomNum = (int) (Math.random() * 4);
+        randomNum = (int) (Math.random() * 4); //позиция в кнопках, на которой ответ будет стоять
         for (int i = 0; i <= 3; i++) {
             prevNums.add(randomStepNum);
-            randomStepNum = (int) Math.floor(Math.random() * player.getSteps().size());
-            if (prevNums.contains(randomStepNum) || randomStepNum == currentIndex - 1 || randomStepNum == -1)
-                randomStepNum = (int) Math.floor(Math.random() * player.getSteps().size() - 1);
+            randomStepNum = (int) Math.floor(Math.random() * player.getSteps().size()); //номер другого неправильного ответа
 
-            if(randomStepNum == -1)
-                randomStepNum = 0;
+            if(randomStepNum == currentIndex - 1)
+                prevNums.add(randomStepNum);
+
+            if (prevNums.contains(randomStepNum) || randomStepNum == -1)
+                while (prevNums.contains(randomStepNum)){
+                    randomStepNum = (int) Math.floor(Math.random() * player.getSteps().size() - 1);
+                }
 
             String label = "---";
-            steps = player.getDetails(randomStepNum);
-            if (steps != null) {
-                label = steps.getName();
+            StepsDetails step = player.getDetails(randomStepNum);
+            if (step != null) {
+                label = step.getName();
             }
+
+            //если i-ая позиция кнопки не равна той, где верный ответ, ставим туда рандомный ответ
             if (i != randomNum) {
                 selectionBox.setLabel(i, label);
             } else {
-                steps = player.getDetails(currentIndex - 1);
+                step = player.getDetails(currentIndex - 1);
 
-                label = steps.getName();
+                label = step.getName();
                 selectionBox.setLabel(i, label);
             }
-            System.out.println(steps.getStepBoolean());
+            System.out.println(step.getStepBoolean());
         }
         prevNums.clear();
         currentAnswer++;

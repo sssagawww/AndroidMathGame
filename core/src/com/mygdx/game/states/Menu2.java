@@ -18,6 +18,7 @@ import com.mygdx.game.UI.*;
 import com.mygdx.game.handlers.BoundedCamera;
 import com.mygdx.game.handlers.GameStateManager;
 
+import static com.mygdx.game.MyGdxGame.getPrefs;
 import static com.mygdx.game.UI.BtnBox.STATES.*;
 import static com.mygdx.game.handlers.GameStateManager.*;
 import static com.mygdx.game.MyGdxGame.*;
@@ -109,7 +110,17 @@ public class Menu2 extends GameState {
         switch (btnBox.getState()) {
             case MENU_TO_PLAY:
                 BlackScreen.setFinalTitles(false);
+
+                int id = getPrefs().getInteger(PREF_ID);
+                String ip = getPrefs().getString(PREF_IP);
+                String name = getPrefs().getString(PREF_USERNAME);
+
                 MyGdxGame.getPrefs().clear();
+
+                getPrefs().putInteger(PREF_ID, id).flush();
+                getPrefs().putString(PREF_IP, ip).flush();
+                getPrefs().putString(PREF_USERNAME, name).flush();
+
                 controller.resetInventory();
                 gameTime = 0;
                 game.getDbWrapper().clearAll();

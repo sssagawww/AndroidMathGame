@@ -136,12 +136,18 @@ public class MushroomsState extends GameState implements Controllable {
             request.leaveRoom(id, roomId);
         }
 
+        if(request.isFailed()){
+            request.setFailed(false);
+            mainLabel.setVisible(true);
+            mainLabel.setText("Ошибка! Перезайдите на сервер!");
+        }
+
         handleInput();
         world.step(dt, 6, 2);
         player.update(dt);
 
         //окончание игры
-        if (miniGameTime >= 30) {
+        if (miniGameTime >= 30 && !request.isFailed()) {
             miniGameTime = 0;
             gameOver = true;
             request.getWinner(roomId);
@@ -156,7 +162,7 @@ public class MushroomsState extends GameState implements Controllable {
         checkUsers();
         requestTime += dt;
 
-        if (requestTime >= dt * 10 && miniGameTime < 30 && request.isDone() && !gameOver) {
+        if (requestTime >= dt * 10 && miniGameTime < 30 && request.isDone() && !gameOver&& !request.isFailed()) {
             requestTime = 0;
             request.postInfo(id, playerScore, roomId);
             if (opponent)
@@ -164,7 +170,7 @@ public class MushroomsState extends GameState implements Controllable {
         }
 
         //если оба игрока готовы, то начинается игра и обновление рейтинга
-        if (readyBtnClicked && request.isEveryoneReady(roomId) && !gameOver) {
+        if (readyBtnClicked && request.isEveryoneReady(roomId) && !gameOver && !request.isFailed()) {
             mainLabel.setVisible(false);
             miniGameTime += dt;
             scoreTable.setPlayerScore(MushroomsRequest.getName(), playerScore);

@@ -24,9 +24,6 @@ public class AndroidLauncher extends AndroidApplication {
 		config.useImmersiveMode = true; //fullScreen
 		game = new MyGdxGame(new SugarDb());
 		initialize(game, config);
-
-		MyGdxGame.setWidth(displaymetrics.widthPixels);
-		MyGdxGame.setHeight(displaymetrics.heightPixels);
 	}
 
 	@Override

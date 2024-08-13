@@ -1,43 +1,12 @@
 package com.mygdx.game.battle.examples;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class ExampleDatabase {
-    private List<Example> examples = new ArrayList<Example>();
-    private Example currentExample;
+    private List<Example> examples = new ArrayList<>();
 
-    public ExampleDatabase() {
-        initializeExamples();
-    }
-
-    public void initializeExamples() {
-        examples.clear();
-        addExample(new TrueExample(new ExampleDetails(EXAMPLE_NUM.EXAMPLE_1, "     59-36=       ")));
-        addExample(new TrueExample(new ExampleDetails(EXAMPLE_NUM.EXAMPLE_2, "     236:4=       ")));
-        addExample(new TrueExample(new ExampleDetails(EXAMPLE_NUM.EXAMPLE_3, "     23*3=        ")));
-        addExample(new TrueExample(new ExampleDetails(EXAMPLE_NUM.EXAMPLE_4, "     75+46=       ")));
-        addExample(new TrueExample(new ExampleDetails(EXAMPLE_NUM.EXAMPLE_5, "     32*3-7=      ")));
-    }
-
-    public void initializeExamples2() {
-        examples.clear();
-        addExample(new TrueExample(new ExampleDetails(EXAMPLE_NUM.EXAMPLE_1, "     360:9=       ")));
-        addExample(new TrueExample(new ExampleDetails(EXAMPLE_NUM.EXAMPLE_2, "     6*6=         ")));
-        addExample(new TrueExample(new ExampleDetails(EXAMPLE_NUM.EXAMPLE_3, "     180:(6*5)=   ")));
-        addExample(new TrueExample(new ExampleDetails(EXAMPLE_NUM.EXAMPLE_4, "     81-46=       ")));
-        addExample(new TrueExample(new ExampleDetails(EXAMPLE_NUM.EXAMPLE_5, "     2*3*4=       ")));
-    }
-
-    public void initializeExamples3() {
-        examples.clear();
-        addExample(new TrueExample(new ExampleDetails(EXAMPLE_NUM.EXAMPLE_1, "     42+18=       ")));
-        addExample(new TrueExample(new ExampleDetails(EXAMPLE_NUM.EXAMPLE_2, "     75-36+24=    ")));
-        addExample(new TrueExample(new ExampleDetails(EXAMPLE_NUM.EXAMPLE_3, "     45*3-18=     ")));
-        addExample(new TrueExample(new ExampleDetails(EXAMPLE_NUM.EXAMPLE_4, "     14*3=        ")));
-        addExample(new TrueExample(new ExampleDetails(EXAMPLE_NUM.EXAMPLE_5, "     256:4=       ")));
-    }
+    public ExampleDatabase() {}
 
     public void initializeAllExamples() {
         examples.clear();

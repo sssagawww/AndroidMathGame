@@ -36,36 +36,31 @@ import java.util.Queue;
 import static com.mygdx.game.handlers.B2DVars.*;
 
 public class BattleState2 extends GameState implements BattleEventPlayer {
-    private MyGdxGame game;
-    private World world;
-    private TiledMap tiledMap;
+    private final MyGdxGame game;
+    private final World world;
     private OrthogonalTiledMapRenderer tmr;
     private float tileSize;
     private int tileMapWidth;
     private int tileMapHeight;
     private Stage uiStage;
     private Stage controllerStage;
-    private Table dialogRoot;
     private DialogBox dialogBox;
     private OptionBox2 optionBox;
-    private Table selectionRoot;
-    private Table statusBoxRoot;
     private SelectionBtnBox selectionBtnBox;
     private StatusBox statusBox;
     private StatusBox playerStatus;
     private BattleScreenController bcontroller;
     private InputMultiplexer multiplexer;
     private BattleEvent currentEvent;
-    private Queue<BattleEvent> queue = new ArrayDeque<BattleEvent>();
+    private Queue<BattleEvent> queue = new ArrayDeque<>();
     private Battle battle;
     private GameNPC boss;
     private Battle.ENEMY_STATE enemyState;
-    private String prevText;
     private Music music;
     private static boolean done;
-    private static boolean bossFight;
+    private static boolean bossFight = false;
     private static boolean enemy2;
-    private BoundedCamera fightCam;
+    private final BoundedCamera fightCam;
 
     public BattleState2(GameStateManager gsm) {
         super(gsm);
@@ -139,15 +134,13 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
             currentEvent.update(dt);
         }
 
-        if(selectionBtnBox.isVisible()){
+        if (selectionBtnBox.isVisible()) {
             battle.setEnemyState(Battle.ENEMY_STATE.WAITING);
         }
-        //prevText = dialogBox.getTargetText();
-        //System.out.println(prevText + " " + dialogBox.getTargetText());
-        if(!selectionBtnBox.isVisible() && enemyState != battle.getEnemyState() && !prevText.equals(dialogBox.getTargetText())){
-            prevText = dialogBox.getTargetText();
+
+        if (!selectionBtnBox.isVisible() && enemyState != battle.getEnemyState() && !enemy2) {
             checkEnemyAnim(battle.getEnemyState());
-        } else if(enemyState != battle.getEnemyState()){
+        } else if (enemyState != battle.getEnemyState() && !enemy2) {
             checkEnemyAnim(battle.getEnemyState());
         }
 
@@ -185,15 +178,15 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
         uiStage = new Stage(new ScreenViewport());
         uiStage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 
-        dialogRoot = new Table();
+        Table dialogRoot = new Table();
         dialogRoot.setFillParent(true);
         uiStage.addActor(dialogRoot);
 
-        selectionRoot = new Table();
+        Table selectionRoot = new Table();
         selectionRoot.setFillParent(true);
         uiStage.addActor(selectionRoot);
 
-        statusBoxRoot = new Table();
+        Table statusBoxRoot = new Table();
         statusBoxRoot.setFillParent(true);
         uiStage.addActor(statusBoxRoot);
 
@@ -231,7 +224,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
     }
 
     private void createLayers() {
-        tiledMap = new TmxMapLoader().load("sprites/mystic_woods_free_2.1/fightmap2.tmx");
+        TiledMap tiledMap = new TmxMapLoader().load("sprites/mystic_woods_free_2.1/fightmap2.tmx");
         tmr = new OrthogonalTiledMapRenderer(tiledMap, 5);
         tileSize = (int) tiledMap.getProperties().get("tilewidth");
 
@@ -246,7 +239,7 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
         bdef.position.set((Gdx.graphics.getWidth() / 2f) / PPM, (Gdx.graphics.getHeight() / 2f) / PPM);
         Body body = world.createBody(bdef);
 
-        boss = new GameNPC(body, "enemy");
+        boss = new GameNPC(body, "enemyBattle");
         boss.setNewAnimation(0, 100, 100);
         if (bossFight) {
             boss = new GameNPC(body, "slimeBoss");
@@ -297,18 +290,34 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
     }
 
     private void checkEnemyAnim(Battle.ENEMY_STATE state) {
-        if (state == Battle.ENEMY_STATE.WIN) {
-            boss.setNewAnimation(6, 100, 100);
-        } else if (state == Battle.ENEMY_STATE.HURT) {
-            boss.setNewAnimation(1, 100, 100);
-        } else if (state == Battle.ENEMY_STATE.LOSE) {
-            boss.setNewAnimation(8, 100, 100);
-        } else if (state == Battle.ENEMY_STATE.WAITING) {
-            boss.setNewAnimation(0, 100, 100);
-        } else if (state == Battle.ENEMY_STATE.ATTACK) {
-            boss.setNewAnimation(2, 100, 100);
-        } else if (state == Battle.ENEMY_STATE.MISS) {
-            boss.setNewAnimation(4, 100, 100);
+        if(bossFight){
+            if (state == Battle.ENEMY_STATE.WIN) {
+                boss.setNewAnimation(2, 32, 32);
+            } else if (state == Battle.ENEMY_STATE.HURT) {
+                boss.setNewAnimation(3, 32, 32);
+            } else if (state == Battle.ENEMY_STATE.LOSE) {
+                boss.setNewAnimation(4, 32, 32);
+            } else if (state == Battle.ENEMY_STATE.WAITING) {
+                boss.setNewAnimation(0, 32, 32);
+            } else if (state == Battle.ENEMY_STATE.ATTACK) {
+                boss.setNewAnimation(1, 32, 32);
+            } else if (state == Battle.ENEMY_STATE.MISS) {
+                boss.setNewAnimation(3, 32, 32);
+            }
+        } else if(!enemy2){
+            if (state == Battle.ENEMY_STATE.WIN) {
+                boss.setNewAnimation(6, 100, 100);
+            } else if (state == Battle.ENEMY_STATE.HURT) {
+                boss.setNewAnimation(1, 100, 100);
+            } else if (state == Battle.ENEMY_STATE.LOSE) {
+                boss.setNewAnimation(8, 100, 100);
+            } else if (state == Battle.ENEMY_STATE.WAITING) {
+                boss.setNewAnimation(0, 100, 100);
+            } else if (state == Battle.ENEMY_STATE.ATTACK) {
+                boss.setNewAnimation(2, 100, 100);
+            } else if (state == Battle.ENEMY_STATE.MISS) {
+                boss.setNewAnimation(4, 100, 100);
+            }
         }
 
         enemyState = state;
@@ -325,7 +334,6 @@ public class BattleState2 extends GameState implements BattleEventPlayer {
     @Override
     public void dispose() {
         music.stop();
-        enemy2 = false;
         bossFight = false;
     }
 

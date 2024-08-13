@@ -301,7 +301,16 @@ public class Play extends GameState implements Controllable {
             game.save = false;
             savePlay = false;
         } else {
+            int id = getPrefs().getInteger(PREF_ID);
+            String ip = getPrefs().getString(PREF_IP);
+            String name = getPrefs().getString(PREF_USERNAME);
+
             prefs.clear();
+
+            getPrefs().putInteger(PREF_ID, id).flush();
+            getPrefs().putString(PREF_IP, ip).flush();
+            getPrefs().putString(PREF_USERNAME, name).flush();
+
             MazeState.progress = false;
             MazeState.hoodedRun = false;
             Forest.progress = false;
