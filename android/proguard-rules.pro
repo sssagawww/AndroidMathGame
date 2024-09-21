@@ -40,6 +40,6 @@
   public protected *;
 }
 -keep class com.orm.** { *; }
--keep class com.mygdx.game.** { *; }
+-keep class com.quenta.mobileGame.** { *; }
 -keep class com.google.gson.** { *; }
 -keep public class com.badlogic.gdx.** { *; }
